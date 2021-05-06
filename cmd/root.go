@@ -22,6 +22,8 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 
+	helpers "pluralith/helpers"
+
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 )
@@ -50,10 +52,9 @@ var rootCmd = &cobra.Command{
 	Use:   "pluralith",
 	Short: "An application for Terraform state visualisation",
 	Long:  longText,
-
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+	Run: func(cmd *cobra.Command, args []string) {
+		helpers.LaunchPluralith()
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
