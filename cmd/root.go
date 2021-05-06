@@ -22,7 +22,8 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 
-	helpers "pluralith/helpers"
+	"pluralith/helpers"
+	"pluralith/ux"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
@@ -53,6 +54,7 @@ var rootCmd = &cobra.Command{
 	Short: "An application for Terraform state visualisation",
 	Long:  longText,
 	Run: func(cmd *cobra.Command, args []string) {
+		ux.PrintHead()
 		helpers.LaunchPluralith()
 	},
 }
