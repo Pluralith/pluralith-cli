@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -27,16 +28,29 @@ import (
 
 var cfgFile string
 
+// Defining custom "Long" message with colored output
+var blueColor = color.New(color.FgBlue).SprintFunc()
+var longText = fmt.Sprintf(`%s
+
+Welcome to %s, a tool to visualize your Terraform state.
+It hooks directly into your Terraform installation and draws up a realtime infrastructure diagram for you.
+	
+We are currently in early private alpha.
+Give the project a closer look at:
+%s`,
+	blueColor(` _
+|_)|    _ _ |._|_|_
+|  ||_|| (_||| | | |`),
+	blueColor("Pluralith"),
+	blueColor("https://www.pluralith.com"),
+)
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "pluralith",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
+	Short: "An application for Terraform state visualisation",
+	Long:  longText,
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },

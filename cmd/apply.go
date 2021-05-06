@@ -24,7 +24,7 @@ import (
 // applyCmd represents the apply command
 var applyCmd = &cobra.Command{
 	Use:   "apply",
-	Short: "A brief description of your command",
+	Short: "Run terraform apply and draw diagram",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 

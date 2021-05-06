@@ -24,7 +24,7 @@ import (
 // planCmd represents the plan command
 var planCmd = &cobra.Command{
 	Use:   "plan",
-	Short: "A brief description of your command",
+	Short: "Run terraform plan and draw diagram",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 

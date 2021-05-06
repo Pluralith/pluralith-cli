@@ -24,7 +24,7 @@ import (
 // stripCmd represents the strip command
 var stripCmd = &cobra.Command{
 	Use:   "strip",
-	Short: "A brief description of your command",
+	Short: "Strip a given state file of secrets according to config",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
