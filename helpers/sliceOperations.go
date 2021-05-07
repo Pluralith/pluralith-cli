@@ -3,8 +3,8 @@ package helpers
 // - - - Collection of functions for common slice operations - - -
 
 // Function to check if a given input appears in a slice
-func ElementInSlice(element interface{}, slice []interface{}) bool {
-	for _, value := range slice {
+func ElementInSlice(element interface{}, slice interface{}) bool {
+	for _, value := range slice.([]interface{}) {
 		if value == element {
 			return true
 		}
@@ -13,8 +13,8 @@ func ElementInSlice(element interface{}, slice []interface{}) bool {
 }
 
 // Function to get index of a given element in slice
-func IndexInSlice(element interface{}, slice []interface{}) int {
-	for key, value := range slice {
+func IndexInSlice(element interface{}, slice interface{}) int {
+	for key, value := range slice.([]interface{}) {
 		if value == element {
 			return key
 		}
