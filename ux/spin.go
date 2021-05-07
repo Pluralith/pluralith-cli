@@ -42,17 +42,31 @@ func (s spin) Start() {
 }
 
 // Method to update spinner state on successful completion
-func (s spin) Success() {
+func (s spin) Success(customMessage ...string) {
+	// Handling custom message if given
+	var message string
+	if len(customMessage) > 0 {
+		message = customMessage[0]
+	} else {
+		message = s.successMsg
+	}
 	// Stopping base spinner
 	s.instance.Stop()
 	// Printing custom success message
-	fmt.Printf("%s %s\n", printBlue("✔"), s.successMsg)
+	fmt.Printf("%s %s\n", printBlue("✔"), message)
 }
 
 // Method to update spinner state on failure
-func (s spin) Fail() {
+func (s spin) Fail(customMessage ...string) {
+	// Handling custom message if given
+	var message string
+	if len(customMessage) > 0 {
+		message = customMessage[0]
+	} else {
+		message = s.failMsg
+	}
 	// Stopping base spinner
 	s.instance.Stop()
 	// Printing custom failure message
-	fmt.Printf("%s %s\n", printRed("✔"), s.failMsg)
+	fmt.Printf("%s %s\n", printRed("✖️"), message)
 }
