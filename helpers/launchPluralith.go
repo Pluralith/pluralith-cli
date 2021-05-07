@@ -8,6 +8,8 @@ import (
 	"pluralith/ux"
 )
 
+// - - - Code to launch Pluralith UI cross-platform - - -
+
 // Function to run OS specific launch command
 func runOsCommand(command []string) {
 	// Instantiating new custom spinner
