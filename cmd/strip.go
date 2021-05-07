@@ -17,6 +17,8 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
+	"pluralith/helpers"
 
 	"github.com/spf13/cobra"
 )
@@ -32,7 +34,15 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("strip called")
+		// Specifying sensitive keys (will later be done via external config)
+		sensitiveKeys := []string{"tags", "owner_id"}
+
+		stateFiles := helpers.FetchFiles(".tfstate")
+		strippedFiles := helpers.StripSecrets(stateFiles, sensitiveKeys, "gatewatch")
+
+		for fileName, fileContent := range strippedFiles {
+			ioutil.WriteFile(fmt.Sprintf("%s.plstate", fileName), []byte(fileContent), 0644)
+		}
 	},
 }
 
