@@ -1,14 +1,17 @@
 package helpers
 
-import "strings"
+import (
+	"strings"
+)
 
 // - - - Code to manually parse flags - - -
 // (Need to do it manually because cobra won't allow for unknown flags to pass throught to terraform commands)
 
 // Function to parse flags
-func ParseArgs(args []string) ([]string, map[string]string) {
+func ParseArgs(args []string, pluralithArgs []string) ([]string, map[string]string) {
 	// Instantiating clean slice to collect args
 	var parsedArgs []string
+	var cleanArgs []string
 	parsedArgMap := make(map[string]string)
 
 	// Cleaning up potential '=' in args
@@ -31,9 +34,10 @@ func ParseArgs(args []string) ([]string, map[string]string) {
 			currentArg := arg[1:]
 
 			// Checking if this is the last argument of the slice, to avoid error
-			if argLength >= index+1 {
+			if argLength >= index+2 {
 				// If there is a value beyond the current one -> Assign it to next arg
 				nextArg = parsedArgs[index+1]
+				// fmt.Println(arg, index, index+1)
 			} else {
 				// Otherwise assign "true" to mark the current argument as present
 				nextArg = "true"
@@ -48,11 +52,20 @@ func ParseArgs(args []string) ([]string, map[string]string) {
 				value = "true"
 			}
 
+			// Checking if current arg is among pluralith args, removing it from args to be passed to Terraform
+			if !ElementInSlice(arg, pluralithArgs) {
+				if value == "true" {
+					cleanArgs = append(cleanArgs, arg)
+				} else {
+					cleanArgs = append(cleanArgs, arg, nextArg)
+				}
+			}
+
 			// Storing results from above in previously initialized map
 			parsedArgMap[currentArg] = value
 		}
 	}
 
 	// Returning slice of all args aswell as arg map
-	return parsedArgs, parsedArgMap
+	return cleanArgs, parsedArgMap
 }
