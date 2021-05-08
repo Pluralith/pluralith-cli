@@ -16,8 +16,9 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
+	"pluralith/helpers"
 
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -31,8 +32,14 @@ and usage of using your command. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
+	DisableFlagParsing: true,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("plan called")
+		printBlue := color.New(color.FgBlue, color.Bold).PrintfFunc()
+
+		if _, code := helpers.ExecuteTerraform("plan", args, false, false); code == 0 {
+			// helpers.ExecuteTerraform("show", []string{"-json"}, false, false)
+			printBlue("\n✔ All Done!\n")
+		}
 	},
 }
 

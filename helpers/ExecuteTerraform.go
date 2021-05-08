@@ -6,16 +6,19 @@ import (
 	"os"
 	"os/exec"
 	"pluralith/ux"
+	"strings"
 )
 
 // - - - Code to execute terraform commands - - -
 
 func ExecuteTerraform(command string, args []string, stdOut bool, silent bool) (string, int) {
+	// Capitalizing command string for UX
+	titledCommand := strings.Title(command)
 	// Instantiating new spinner
-	terraformSpinner := ux.NewSpinner("Running "+command, command+" Done", command+" Failed")
+	terraformSpinner := ux.NewSpinner("Running "+titledCommand, titledCommand+" done", titledCommand+" failed")
 	terraformSpinner.Start()
 	// Constructing command to execute
-	cmd := exec.Command(command, args...)
+	cmd := exec.Command("terraform", append([]string{command}, args...)...)
 
 	// Defining sinks for std data
 	var outputSink bytes.Buffer
@@ -29,12 +32,12 @@ func ExecuteTerraform(command string, args []string, stdOut bool, silent bool) (
 	// Running terraform command
 	if err := cmd.Run(); err != nil {
 		// Getting error code
-		if err, ok := err.(*exec.ExitError); ok {
+		if exit, ok := err.(*exec.ExitError); ok {
 			// Stopping spinner and printing stderror to console
 			terraformSpinner.Fail()
 			fmt.Println(errorSink.String())
 			// Returning stdout as string aswell as whatever error code the command yielded
-			return outputSink.String(), err.ExitCode()
+			return outputSink.String(), exit.ExitCode()
 		}
 	}
 
