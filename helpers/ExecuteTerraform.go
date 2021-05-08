@@ -41,8 +41,10 @@ func ExecuteTerraform(command string, args []string, stdOut bool, silent bool) (
 		}
 	}
 
+	terraformSpinner.Success()
+
 	// If command is not set to silent -> Print stdout
-	if !silent {
+	if stdOut {
 		fmt.Println(outputSink.String())
 	}
 

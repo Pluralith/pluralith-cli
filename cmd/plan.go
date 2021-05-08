@@ -22,6 +22,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var pluralithArgs = []string{"-show-output", "-s"}
+
 // planCmd represents the plan command
 var planCmd = &cobra.Command{
 	Use:   "plan",
@@ -34,10 +36,24 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	DisableFlagParsing: true,
 	Run: func(cmd *cobra.Command, args []string) {
+		// Defining blue print function
 		printBlue := color.New(color.FgBlue, color.Bold).PrintfFunc()
 
-		if _, code := helpers.ExecuteTerraform("plan", args, false, false); code == 0 {
-			// helpers.ExecuteTerraform("show", []string{"-json"}, false, false)
+		// Manually parsing arg (due to cobra lacking a feature)
+		parsedArgs, parsedArgMap := helpers.ParseArgs(args, pluralithArgs)
+		// Getting value of -out flag
+		planOut := parsedArgMap["out"]
+
+		// If no value is given for -out, replace it with standard ./pluralith
+		if planOut == "" {
+			planOut = "./pluralith"
+			parsedArgs = append(parsedArgs, "-out", planOut)
+		}
+
+		// Running terraform plan command with cleaned up args to generate execution plan
+		if _, code := helpers.ExecuteTerraform("plan", parsedArgs, false, false); code == 0 {
+			// If plan command succeeds -> Run terraform show on previously generated execution plan to generate plan state file
+			helpers.ExecuteTerraform("show", []string{"-json", planOut}, false, false)
 			printBlue("\n✔ All Done!\n")
 		}
 	},
@@ -45,14 +61,4 @@ to quickly create a Cobra application.`,
 
 func init() {
 	rootCmd.AddCommand(planCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// planCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// planCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

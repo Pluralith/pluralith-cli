@@ -37,7 +37,6 @@ func ParseArgs(args []string, pluralithArgs []string) ([]string, map[string]stri
 			if argLength >= index+2 {
 				// If there is a value beyond the current one -> Assign it to next arg
 				nextArg = parsedArgs[index+1]
-				// fmt.Println(arg, index, index+1)
 			} else {
 				// Otherwise assign "true" to mark the current argument as present
 				nextArg = "true"
