@@ -24,12 +24,12 @@ import (
 )
 
 // Defining command args/flags
-var pluralithApplyArgs = []string{}
+var pluralithDestroyArgs = []string{}
 
-// applyCmd represents the apply command
-var applyCmd = &cobra.Command{
-	Use:   "apply",
-	Short: "Run terraform apply and draw diagram",
+// destroyCmd represents the destroy command
+var destroyCmd = &cobra.Command{
+	Use:   "destroy",
+	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
@@ -41,7 +41,7 @@ to quickly create a Cobra application.`,
 		// Initializing variable for manual user confirmation
 		var confirm string
 		// Manually parsing arg (due to cobra lacking a feature)
-		parsedArgs, parsedArgMap := helpers.ParseArgs(args, pluralithApplyArgs)
+		parsedArgs, parsedArgMap := helpers.ParseArgs(args, pluralithDestroyArgs)
 
 		// Checking if auto-approve flag has been set
 		if parsedArgMap["auto-approve"] == "" {
@@ -49,33 +49,33 @@ to quickly create a Cobra application.`,
 			parsedArgs = append(parsedArgs, "-auto-approve")
 			// Handling UX and user input
 			ux.PrintFormatted("?", []string{"blue", "bold"})
-			fmt.Println(" Apply Current Plan?")
+			fmt.Println(" Destroy Current Infrastructure?")
 			ux.PrintFormatted("  Yes to confirm: ", []string{"bold"})
 			fmt.Scanln(&confirm)
 		}
 
-		// If user confirms manually or auto-approve flag has been set -> Run apply
+		// If user confirms manually or auto-approve flag has been set -> Run destroy
 		if confirm == "yes" || parsedArgMap["auto-approve"] != "" {
 			ux.PrintFormatted("\n✔", []string{"blue", "bold"})
-			fmt.Println(" Apply Confirmed")
+			fmt.Println(" Destruction Confirmed")
 
 			// Launching Pluralith
 			helpers.LaunchPluralith()
 
 			ux.PrintFormatted("⠿", []string{"blue", "bold"})
-			fmt.Println(" Apply Status:")
+			fmt.Println(" Destruction Status:")
 
-			// Running apply command with args passed by user
-			if _, code := helpers.ExecuteTerraform("apply", parsedArgs, false, true, true); code == 0 {
+			// Running destroy command with args passed by user
+			if _, code := helpers.ExecuteTerraform("destroy", parsedArgs, false, true, true); code == 0 {
 				ux.PrintFormatted("✔ All Done!\n", []string{"blue", "bold"})
 			}
 		} else {
 			ux.PrintFormatted("\n✖️", []string{"red", "bold"})
-			fmt.Println(" Apply Aborted")
+			fmt.Println(" Destroy Aborted")
 		}
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(applyCmd)
+	rootCmd.AddCommand(destroyCmd)
 }
