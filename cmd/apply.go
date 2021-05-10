@@ -38,36 +38,41 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	DisableFlagParsing: true,
 	Run: func(cmd *cobra.Command, args []string) {
-		// Manually parsing arg (due to cobra lacking a feature)
-		parsedArgs, _ := helpers.ParseArgs(args, pluralithApplyArgs)
-		parsedArgs = append(parsedArgs, "-auto-approve")
-
+		// Initializing variable for manual user confirmation
 		var confirm string
-		ux.PrintFormatted("?", []string{"blue", "bold"})
-		fmt.Println(" Apply Plan?")
-		ux.PrintFormatted("  Yes to confirm: ", []string{"bold"})
-		fmt.Scanln(&confirm)
+		// Manually parsing arg (due to cobra lacking a feature)
+		parsedArgs, parsedArgMap := helpers.ParseArgs(args, pluralithApplyArgs)
 
-		if confirm == "yes" {
+		// Checking if auto-approve flag has been set
+		if parsedArgMap["auto-approve"] == "" {
+			// Appending -auto-approve flag to run command properly after confirmation
+			parsedArgs = append(parsedArgs, "-auto-approve")
+			// Handling UX and user input
+			ux.PrintFormatted("?", []string{"blue", "bold"})
+			fmt.Println(" Apply Plan?")
+			ux.PrintFormatted("  Yes to confirm: ", []string{"bold"})
+			fmt.Scanln(&confirm)
+		}
+
+		// If user confirms manually or auto-approve flag has been set -> Run apply
+		if confirm == "yes" || parsedArgMap["auto-approve"] != "" {
 			ux.PrintFormatted("\n✔", []string{"blue", "bold"})
 			fmt.Println(" Apply Confirmed")
 
 			// Launching Pluralith
 			helpers.LaunchPluralith()
 
-			ux.PrintFormatted("⣿", []string{"blue", "bold"})
+			ux.PrintFormatted("⠿", []string{"blue", "bold"})
 			fmt.Println(" Status:")
 
+			// Running apply command with args passed by user
 			if _, code := helpers.ExecuteTerraform("apply", parsedArgs, false, true, true); code == 0 {
-
 				ux.PrintFormatted("✔ All Done!\n", []string{"blue", "bold"})
 			}
 		} else {
 			ux.PrintFormatted("\n✖️", []string{"red", "bold"})
 			fmt.Println(" Apply Aborted")
 		}
-		// helpers.ExecuteTerraform("apply", parsedArgs, false, false)
-
 	},
 }
 
