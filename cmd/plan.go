@@ -17,12 +17,13 @@ package cmd
 
 import (
 	"pluralith/helpers"
+	"pluralith/ux"
 
-	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
-var pluralithArgs = []string{"-show-output", "-s"}
+// Defining command args/flags
+var pluralithPlanArgs = []string{"-show-output", "-s"}
 
 // planCmd represents the plan command
 var planCmd = &cobra.Command{
@@ -36,11 +37,8 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	DisableFlagParsing: true,
 	Run: func(cmd *cobra.Command, args []string) {
-		// Defining blue print function
-		printBlue := color.New(color.FgBlue, color.Bold).PrintfFunc()
-
 		// Manually parsing arg (due to cobra lacking a feature)
-		parsedArgs, parsedArgMap := helpers.ParseArgs(args, pluralithArgs)
+		parsedArgs, parsedArgMap := helpers.ParseArgs(args, pluralithPlanArgs)
 		// Getting value of -out flag
 		planOut := parsedArgMap["out"]
 		// Checking if -show-output flag is set
@@ -53,10 +51,13 @@ to quickly create a Cobra application.`,
 		}
 
 		// Running terraform plan command with cleaned up args to generate execution plan
-		if _, code := helpers.ExecuteTerraform("plan", parsedArgs, showOutput); code == 0 {
+		if _, code := helpers.ExecuteTerraform("plan", parsedArgs, true, showOutput, true); code == 0 {
 			// If plan command succeeds -> Run terraform show on previously generated execution plan to generate plan state file
-			helpers.ExecuteTerraform("show", []string{"-json", planOut}, false)
-			printBlue("\n✔ All Done!\n")
+			helpers.ExecuteTerraform("show", []string{"-json", planOut}, true, false, false)
+			// Launching Pluralith
+			helpers.LaunchPluralith()
+
+			ux.PrintFormatted("✔ All Done!\n", []string{"blue", "bold"})
 		}
 	},
 }

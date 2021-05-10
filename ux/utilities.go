@@ -12,3 +12,24 @@ func PrintHead() {
 
 `)
 }
+
+// Function to print formatted output
+func PrintFormatted(text string, styling []string) {
+	// Creating map with available styles
+	styleMap := map[string]color.Attribute{
+		"blue": color.FgBlue,
+		"red":  color.FgRed,
+		"bold": color.Bold,
+	}
+
+	// Defining new blank color object
+	style := color.New()
+
+	// Applying all styles found in "styling" arg
+	for _, item := range styling {
+		style.Add(styleMap[item])
+	}
+
+	// Printing passed text with perviously configured styles
+	style.Printf(text)
+}
