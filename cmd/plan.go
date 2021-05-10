@@ -43,6 +43,8 @@ to quickly create a Cobra application.`,
 		parsedArgs, parsedArgMap := helpers.ParseArgs(args, pluralithArgs)
 		// Getting value of -out flag
 		planOut := parsedArgMap["out"]
+		// Checking if -show-output flag is set
+		showOutput := parsedArgMap["s"] != "" || parsedArgMap["show-output"] != ""
 
 		// If no value is given for -out, replace it with standard ./pluralith
 		if planOut == "" {
@@ -51,9 +53,9 @@ to quickly create a Cobra application.`,
 		}
 
 		// Running terraform plan command with cleaned up args to generate execution plan
-		if _, code := helpers.ExecuteTerraform("plan", parsedArgs, false, false); code == 0 {
+		if _, code := helpers.ExecuteTerraform("plan", parsedArgs, showOutput); code == 0 {
 			// If plan command succeeds -> Run terraform show on previously generated execution plan to generate plan state file
-			helpers.ExecuteTerraform("show", []string{"-json", planOut}, false, false)
+			helpers.ExecuteTerraform("show", []string{"-json", planOut}, false)
 			printBlue("\n✔ All Done!\n")
 		}
 	},

@@ -11,7 +11,7 @@ import (
 
 // - - - Code to execute terraform commands - - -
 
-func ExecuteTerraform(command string, args []string, stdOut bool, silent bool) (string, int) {
+func ExecuteTerraform(command string, args []string, stdOut bool) (string, int) {
 	// Capitalizing command string for UX
 	titledCommand := strings.Title(command)
 	// Instantiating new spinner
