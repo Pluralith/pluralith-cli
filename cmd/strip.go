@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"pluralith/helpers"
+	"pluralith/ux"
 
 	"github.com/spf13/cobra"
 )
@@ -34,28 +35,26 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// Specifying sensitive keys (will later be done via external config)
-		sensitiveKeys := []string{"tags", "owner_id"}
-
+		// Fetching all state files in current working directory
 		stateFiles := helpers.FetchFiles(".tfstate")
-		strippedFiles := helpers.StripSecrets(stateFiles, sensitiveKeys, "gatewatch")
 
-		for fileName, fileContent := range strippedFiles {
-			ioutil.WriteFile(fmt.Sprintf("%s.plstate", fileName), []byte(fileContent), 0644)
+		// Instantiating new strip spinner
+		stripSpinner := ux.NewSpinner("Stripping Secrets", fmt.Sprintf("%d Secrets Stripped", len(stateFiles)), "Stripping secrets failed")
+		stripSpinner.Start()
+
+		// Stripping secrets and writing stripped state to disk
+		for fileName, fileContent := range stateFiles {
+			strippedFile, err := helpers.StripSecrets(fileContent, sensitiveKeys, "gatewatch")
+			if err != nil {
+				stripSpinner.Fail("Failed to strip secrets from %s", fileName)
+			} else {
+				ioutil.WriteFile(fmt.Sprintf("%s.plstate.stripped", fileName), []byte(strippedFile), 0644)
+				stripSpinner.Success()
+			}
 		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(stripCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// stripCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// stripCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

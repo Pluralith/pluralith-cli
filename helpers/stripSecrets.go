@@ -2,8 +2,7 @@ package helpers
 
 import (
 	"encoding/json"
-	"fmt"
-	"pluralith/ux"
+	"errors"
 	"reflect"
 )
 
@@ -41,33 +40,21 @@ func replaceSensitive(jsonObject map[string]interface{}, targets []string, repla
 }
 
 // Function to strip state of secrets
-func StripSecrets(jsonStrings map[string]string, targets []string, replacement string) map[string]string {
-	// Instantiating new spinner
-	stripSpinner := ux.NewSpinner("Stripping Secrets", "4 Files Stripped", "Stripping secrets failed")
-	stripSpinner.Start()
-	// Initializing empty slice to house stipped file content
-	strippedStrings := make(map[string]string)
-	// Looping over passed file strings
-	for fileKey, fileString := range jsonStrings {
-		// Initializing empty variable to unmarshal JSON into
-		var jsonObject map[string]interface{}
-		// Unmarshalling JSON and handling potential errors
-		if err := json.Unmarshal([]byte(fileString), &jsonObject); err != nil {
-			stripSpinner.Fail()
-		}
-		// Calling recursive function to strip secrets and replace values on every level in JSON
-		replaceSensitive(jsonObject, targets, replacement)
-		// Properly formating returned JSON
-		strippedObject, err := json.MarshalIndent(jsonObject, "", " ")
-		if err != nil {
-			stripSpinner.Fail()
-		} else {
-			// Replacing raw file string with stipped one
-			strippedStrings[fileKey] = string(strippedObject)
-		}
+func StripSecrets(jsonString string, targets []string, replacement string) (string, error) {
+	// Initializing empty variable to unmarshal JSON into
+	var jsonObject map[string]interface{}
+	// Unmarshalling JSON and handling potential errors
+	if err := json.Unmarshal([]byte(jsonString), &jsonObject); err != nil {
+		return "", errors.New("json unmarshal failed")
 	}
 
-	stripSpinner.Success(fmt.Sprintf("State Files Stripped: %d", len(strippedStrings)))
-
-	return strippedStrings
+	// Calling recursive function to strip secrets and replace values on every level in JSON
+	replaceSensitive(jsonObject, targets, replacement)
+	// Properly formating returned JSON
+	strippedObject, err := json.MarshalIndent(jsonObject, "", " ")
+	if err != nil {
+		return "", errors.New("stripping secrets failed")
+	} else {
+		return string(strippedObject), nil
+	}
 }
