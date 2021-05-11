@@ -29,7 +29,7 @@ var pluralithDestroyArgs = []string{}
 // destroyCmd represents the destroy command
 var destroyCmd = &cobra.Command{
 	Use:   "destroy",
-	Short: "A brief description of your command",
+	Short: "Run terraform destroy and show changes in Pluralith",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
@@ -40,7 +40,7 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Initializing variable for manual user confirmation
 		var confirm string
-		// Manually parsing arg (due to cobra lacking a feature)
+		// Manually parsing args (due to cobra lacking a feature)
 		parsedArgs, parsedArgMap := helpers.ParseArgs(args, pluralithDestroyArgs)
 
 		// Checking if auto-approve flag has been set
@@ -66,9 +66,18 @@ to quickly create a Cobra application.`,
 			fmt.Println(" Destruction Status:")
 
 			// Running destroy command with args passed by user
-			if _, code := helpers.ExecuteTerraform("destroy", parsedArgs, false, true, true); code == 0 {
+			if destroyOutput, destroyErr := helpers.ExecuteTerraform("destroy", parsedArgs, true); destroyErr != nil {
+				// Handling failed terraform destroy
+				ux.PrintFormatted("✖️", []string{"red", "bold"})
+				fmt.Println(" Destroy Failed")
+				fmt.Println(destroyOutput)
+			} else {
+				// Handling successful terraform destroy
 				ux.PrintFormatted("✔ All Done!\n", []string{"blue", "bold"})
 			}
+
+			// Updating command in hist to update Pluralith UI
+			helpers.WriteToHist("destroy", "terraform-end\n")
 		} else {
 			ux.PrintFormatted("\n✖️", []string{"red", "bold"})
 			fmt.Println(" Destroy Aborted")

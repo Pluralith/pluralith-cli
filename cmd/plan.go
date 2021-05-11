@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"pluralith/helpers"
@@ -30,7 +31,7 @@ var pluralithPlanArgs = []string{"-show-output", "-s"}
 // planCmd represents the plan command
 var planCmd = &cobra.Command{
 	Use:   "plan",
-	Short: "Run terraform plan and draw diagram",
+	Short: "Run terraform plan and show changes in Pluralith",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
@@ -42,7 +43,6 @@ to quickly create a Cobra application.`,
 		// Instantiating spinners
 		planSpinner := ux.NewSpinner("Running Terraform Plan", "Terraform Plan Succeeded", "Terraform Plan Failed")
 		stripSpinner := ux.NewSpinner("Stripping Secrets", "Secrets Stripped", "Stripping Secrets Failed")
-
 		planSpinner.Start()
 
 		// Manually parsing arg (due to cobra lacking a feature)
@@ -59,25 +59,27 @@ to quickly create a Cobra application.`,
 		}
 
 		// Running terraform plan command with cleaned up args to generate execution plan
-		if _, planErr := helpers.ExecuteTerraform("plan", parsedArgs, true, showOutput, true); planErr != nil {
-			planSpinner.Fail("Failed to run terraform plan")
+		if planOutput, planErr := helpers.ExecuteTerraform("plan", parsedArgs, showOutput); planErr != nil {
+			planSpinner.Fail("Terraform Plan Failed")
+			fmt.Println(planOutput)
 		} else {
 			// Writing command and working directory to hist for Pluralith UI to pick up
 			helpers.WriteToHist("plan", "")
 			// If plan command succeeds -> Run terraform show on previously generated execution plan to generate plan state file
-			planState, showErr := helpers.ExecuteTerraform("show", []string{"-json", planOut}, true, false, false)
+			showOutput, showErr := helpers.ExecuteTerraform("show", []string{"-json", planOut}, false)
 			if showErr != nil {
-				planSpinner.Fail("Failed to generated state from execution plan")
+				planSpinner.Fail("Plan State Geenration Failed")
+				fmt.Println(showOutput)
 			} else {
 				planSpinner.Success()
 				stripSpinner.Start()
 
 				// Stripping secrets and writing to file
-				strippedFile, stripErr := helpers.StripSecrets(planState, sensitiveKeys, "gatewatch")
+				strippedFile, stripErr := helpers.StripSecrets(showOutput, sensitiveKeys, "gatewatch")
 				if stripErr != nil {
 					stripSpinner.Fail()
 				} else {
-					ioutil.WriteFile("terraform.plstate", []byte(strippedFile), 0644)
+					ioutil.WriteFile("terraform.plstate.stripped", []byte(strippedFile), 0644)
 					stripSpinner.Success()
 				}
 
@@ -86,10 +88,11 @@ to quickly create a Cobra application.`,
 
 				// Launching Pluralith
 				helpers.LaunchPluralith()
-
-				helpers.WriteToHist("plan", "terraform-end\n")
 				ux.PrintFormatted("✔ All Done!\n", []string{"blue", "bold"})
 			}
+
+			// Updating command in hist to update Pluralith UI
+			helpers.WriteToHist("plan", "terraform-end\n")
 		}
 	},
 }

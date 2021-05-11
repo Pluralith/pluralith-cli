@@ -29,7 +29,7 @@ var pluralithApplyArgs = []string{}
 // applyCmd represents the apply command
 var applyCmd = &cobra.Command{
 	Use:   "apply",
-	Short: "Run terraform apply and draw diagram",
+	Short: "Run terraform apply and show changes in Pluralith",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
@@ -40,7 +40,7 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Initializing variable for manual user confirmation
 		var confirm string
-		// Manually parsing arg (due to cobra lacking a feature)
+		// Manually parsing args (due to cobra lacking a feature)
 		parsedArgs, parsedArgMap := helpers.ParseArgs(args, pluralithApplyArgs)
 
 		// Checking if auto-approve flag has been set
@@ -59,6 +59,8 @@ to quickly create a Cobra application.`,
 			ux.PrintFormatted("\n✔", []string{"blue", "bold"})
 			fmt.Println(" Apply Confirmed")
 
+			// Writing command and working directory to hist for Pluralith UI to pick up
+			helpers.WriteToHist("apply", "")
 			// Launching Pluralith
 			helpers.LaunchPluralith()
 
@@ -66,12 +68,20 @@ to quickly create a Cobra application.`,
 			fmt.Println(" Apply Status:")
 
 			// Running apply command with args passed by user
-			if _, code := helpers.ExecuteTerraform("apply", parsedArgs, false, true, true); code == 0 {
+			if applyOutput, applyErr := helpers.ExecuteTerraform("apply", parsedArgs, true); applyErr != nil {
+				// Handling failed terraform apply
+				ux.PrintFormatted("✖️", []string{"red", "bold"})
+				fmt.Println(" Terraform Apply Failed")
+				fmt.Println(applyOutput)
+			} else {
+				// Handling successful terraform apply
 				ux.PrintFormatted("✔ All Done!\n", []string{"blue", "bold"})
 			}
+			// Updating command in hist to update Pluralith UI
+			helpers.WriteToHist("apply", "terraform-end\n")
 		} else {
 			ux.PrintFormatted("\n✖️", []string{"red", "bold"})
-			fmt.Println(" Apply Aborted")
+			fmt.Println(" Terraform Apply Aborted")
 		}
 	},
 }

@@ -3,14 +3,13 @@ package helpers
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"os"
 	"os/exec"
 )
 
 // - - - Code to execute terraform commands - - -
 
-func ExecuteTerraform(command string, args []string, spinner bool, stdOut bool, stdErr bool) (string, error) {
+func ExecuteTerraform(command string, args []string, stdOut bool) (string, error) {
 	// Constructing command to execute
 	cmd := exec.Command("terraform", append([]string{command}, args...)...)
 
@@ -30,12 +29,8 @@ func ExecuteTerraform(command string, args []string, spinner bool, stdOut bool, 
 
 	// Running terraform command
 	if err := cmd.Run(); err != nil {
-		if stdErr {
-			fmt.Println(errorSink.String())
-		}
-
 		// Handling error
-		return outputSink.String(), errors.New("terraform command failed")
+		return errorSink.String(), errors.New("terraform command failed")
 	}
 
 	// Returning stdout as string
