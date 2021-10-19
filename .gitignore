@@ -17,3 +17,10 @@
 # Terraform & Pluralith state files
 *.tfstate
 *.plstate
+
+# Distribution binaries
+dist/
+
+# Others
+release.sh
+.DS_Store
