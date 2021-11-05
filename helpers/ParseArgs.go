@@ -5,7 +5,7 @@ import (
 )
 
 // - - - Code to manually parse flags - - -
-// (Need to do it manually because cobra won't allow for unknown flags to pass throught to terraform commands)
+// (Need to do it manually because cobra won't allow for unknown flags to pass through to terraform commands)
 
 // Function to parse flags
 func ParseArgs(args []string, pluralithArgs []string) ([]string, map[string]string) {
