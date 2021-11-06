@@ -3,8 +3,12 @@ package stream
 import (
 	"bufio"
 	"bytes"
+	"os"
 	"os/exec"
-	"pluralith/pkg/ux"
+	"strings"
+
+	communication "pluralith/pkg/communication"
+	ux "pluralith/pkg/ux"
 )
 
 func StreamCommand(args []string, isDestroy bool) error {
@@ -43,12 +47,18 @@ func StreamCommand(args []string, isDestroy bool) error {
 	applyScanner := bufio.NewScanner(outStream)
 	applyScanner.Split(bufio.ScanLines)
 
+	// Get working directory for update emission
+	workingDir, workingErr := os.Getwd()
+	if workingErr != nil {
+		return workingErr
+	}
+
 	// While command line scan is running
 	for applyScanner.Scan() {
 		// Get current line json string
 		jsonString := applyScanner.Text()
 		// Decode json string to get event type and resource address
-		_, address, decodeErr := DecodeStateStream(jsonString)
+		event, address, decodeErr := DecodeStateStream(jsonString)
 		if decodeErr != nil {
 			streamSpinner.Fail()
 			return decodeErr
@@ -58,10 +68,24 @@ func StreamCommand(args []string, isDestroy bool) error {
 		// If address is given
 		if address != "" {
 			FetchResource(address, isDestroy)
-			// 	if fetchErr != nil {
-			// 		fmt.Println(fetchErr)
-			// 		return "", fetchErr
-			// 	}
+
+			// Determing command type for update message
+			commandType := "apply"
+			if isDestroy {
+				commandType = "destroy"
+			}
+
+			// Construct update message object
+			update := communication.UIUpdate{
+				Receiver: "UI",
+				Command:  commandType,
+				Address:  address,
+				Path:     workingDir,
+				Event:    strings.Split(event, "_")[1],
+			}
+
+			// Call function to emit update
+			communication.EmitUpdate(update)
 		}
 	}
 
