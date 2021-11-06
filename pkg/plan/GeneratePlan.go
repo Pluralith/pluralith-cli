@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"os/exec"
+	"path"
 
 	auxiliary "pluralith/pkg/auxiliary"
 )
@@ -13,15 +14,21 @@ import (
 var pluralithPlanArgs = []string{"-show-output", "-s"}
 
 func GeneratePlan(args []string) (string, error) {
+	// Get working directory
+	workingDir, workingErr := os.Getwd()
+	if workingErr != nil {
+		return "", workingErr
+	}
+
 	// Manually parsing arg (due to cobra lacking a feature)
 	parsedArgs, parsedArgMap := auxiliary.ParseArgs(args, pluralithPlanArgs)
 	// Getting value of -out flag
-	planOut := parsedArgMap["out"]
+	planExecutionPath := parsedArgMap["out"]
 
 	// If no value is given for -out, replace it with standard ./pluralith
-	if planOut == "" {
-		planOut = "./pluralith.plan"
-		parsedArgs = append(parsedArgs, "-out", planOut)
+	if planExecutionPath == "" {
+		planExecutionPath = path.Join(workingDir, "./pluralith.plan")
+		parsedArgs = append(parsedArgs, "-out", planExecutionPath)
 	}
 	// Constructing command to execute
 	cmd := exec.Command("terraform", append([]string{"plan"}, parsedArgs...)...)
@@ -39,6 +46,6 @@ func GeneratePlan(args []string) (string, error) {
 		return errorSink.String(), errors.New("terraform command failed")
 	}
 
-	// Returning location of execution plan
-	return planOut, nil
+	// Return location of execution plan
+	return planExecutionPath, nil
 }
