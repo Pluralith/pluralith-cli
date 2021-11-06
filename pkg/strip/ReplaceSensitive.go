@@ -8,18 +8,18 @@ import (
 
 // Function to recursively replace key values in JSON
 func ReplaceSensitive(jsonObject map[string]interface{}, targets []string, replacement string) {
-	// Iterating over current level key value pairs
+	// Iterate over current level key value pairs
 	for outerKey, outerValue := range jsonObject {
-		// Checking if value at key is given
+		// Check if value at key is given
 		if outerValue != nil {
-			// Subsituting value with replacement if key is among targets
+			// Subsitute value with replacement if key is among targets
 			if auxiliary.ElementInSlice(outerKey, targets) {
 				jsonObject[outerKey] = replacement
 			} else {
-				// Getting value type to handle different cases
+				// Get value type to handle different cases
 				outerValueType := reflect.TypeOf(outerValue)
 
-				// Switching between different data types
+				// Switch between different data types
 				switch outerValueType.Kind() {
 				case reflect.Map:
 					// If value is of type map -> Move on to next recursion level
