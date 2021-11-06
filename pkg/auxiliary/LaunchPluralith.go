@@ -1,14 +1,12 @@
-package helpers
+package auxiliary
 
 import (
 	"os/exec"
 	"runtime"
 	"time"
 
-	"pluralith/ux"
+	ux "pluralith/pkg/ux"
 )
-
-// - - - Code to launch Pluralith UI cross-platform - - -
 
 // Function to run OS specific launch command
 func runOsCommand(command []string) {

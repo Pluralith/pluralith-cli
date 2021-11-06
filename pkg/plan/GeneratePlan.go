@@ -1,21 +1,20 @@
-package auxiliary
+package plan
 
 import (
 	"bytes"
 	"errors"
 	"os"
 	"os/exec"
-	"pluralith/helpers"
+
+	auxiliary "pluralith/pkg/auxiliary"
 )
 
 // Defining command args/flags
 var pluralithPlanArgs = []string{"-show-output", "-s"}
 
-// - - - Generate Execution Plan - - -
-
-func GenerateExecutionPlan(args []string) (string, error) {
+func GeneratePlan(args []string) (string, error) {
 	// Manually parsing arg (due to cobra lacking a feature)
-	parsedArgs, parsedArgMap := helpers.ParseArgs(args, pluralithPlanArgs)
+	parsedArgs, parsedArgMap := auxiliary.ParseArgs(args, pluralithPlanArgs)
 	// Getting value of -out flag
 	planOut := parsedArgMap["out"]
 

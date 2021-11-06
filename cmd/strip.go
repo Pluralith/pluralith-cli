@@ -16,10 +16,7 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-	"io/ioutil"
-	"pluralith/helpers"
-	"pluralith/ux"
+	"pluralith/pkg/strip"
 
 	"github.com/spf13/cobra"
 )
@@ -35,23 +32,7 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// Fetching all state files in current working directory
-		stateFiles := helpers.FetchFiles(".tfstate")
-
-		// Instantiating new strip spinner
-		stripSpinner := ux.NewSpinner("Stripping Secrets", fmt.Sprintf("Secrets Stripped From %d File", len(stateFiles)), "Stripping Secrets Failed")
-		stripSpinner.Start()
-
-		// Stripping secrets and writing stripped state to disk
-		for fileName, fileContent := range stateFiles {
-			strippedFile, err := helpers.StripSecrets(fileContent, sensitiveKeys, "gatewatch")
-			if err != nil {
-				stripSpinner.Fail("Failed to strip secrets from %s", fileName)
-			} else {
-				ioutil.WriteFile(fmt.Sprintf("%s.plstate.stripped", fileName), []byte(strippedFile), 0644)
-				stripSpinner.Success()
-			}
-		}
+		strip.StripMethod(args)
 	},
 }
 

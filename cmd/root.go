@@ -19,11 +19,11 @@ import (
 	"fmt"
 	"os"
 
+	auxiliary "pluralith/pkg/auxiliary"
+	ux "pluralith/pkg/ux"
+
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-
-	"pluralith/helpers"
-	"pluralith/ux"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
@@ -58,7 +58,7 @@ var rootCmd = &cobra.Command{
 	Long:  longText,
 	Run: func(cmd *cobra.Command, args []string) {
 		ux.PrintHead()
-		helpers.LaunchPluralith()
+		auxiliary.LaunchPluralith()
 	},
 }
 

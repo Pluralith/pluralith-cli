@@ -1,4 +1,4 @@
-package helpers
+package auxiliary
 
 // - - - Collection of functions for common slice operations - - -
 

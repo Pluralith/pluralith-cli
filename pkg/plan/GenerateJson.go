@@ -1,4 +1,4 @@
-package auxiliary
+package plan
 
 import (
 	"bytes"
@@ -6,7 +6,8 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"pluralith/helpers"
+
+	strip "pluralith/pkg/strip"
 )
 
 func GenerateJson(planPath string) (string, error) {
@@ -31,7 +32,7 @@ func GenerateJson(planPath string) (string, error) {
 		return errorSink.String(), errors.New("terraform command failed")
 	}
 
-	strippedFile, stripErr := helpers.StripSecrets(outputSink.String(), []string{}, "gatewatch")
+	strippedFile, stripErr := strip.StripSecrets(outputSink.String(), []string{}, "gatewatch")
 	if stripErr == nil {
 		ioutil.WriteFile("pluralith.state.stripped", []byte(strippedFile), 0644)
 	}

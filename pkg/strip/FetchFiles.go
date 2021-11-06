@@ -1,4 +1,4 @@
-package helpers
+package strip
 
 import (
 	"fmt"
@@ -6,7 +6,8 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"pluralith/ux"
+
+	ux "pluralith/pkg/ux"
 )
 
 // - - - Code to find and load files in current working directory - - -

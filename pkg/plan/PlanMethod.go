@@ -1,10 +1,9 @@
-package cmdMethods
+package plan
 
 import (
 	"fmt"
-	"pluralith/auxiliary"
-	"pluralith/helpers"
-	"pluralith/ux"
+
+	ux "pluralith/pkg/ux"
 )
 
 func PlanMethod(args []string) {
@@ -14,7 +13,7 @@ func PlanMethod(args []string) {
 
 	// Run terraform plan
 	planSpinner.Start()
-	planOutput, planErr := auxiliary.GenerateExecutionPlan(args)
+	planOutput, planErr := GeneratePlan(args)
 	if planErr != nil {
 		planSpinner.Fail("Terraform Plan Failed")
 		fmt.Println(planOutput)
@@ -25,7 +24,7 @@ func PlanMethod(args []string) {
 
 	// Run terraform show + strip secrets
 	stripSpinner.Start()
-	_, showErr := auxiliary.GenerateJson(planOutput)
+	_, showErr := GenerateJson(planOutput)
 	if showErr != nil {
 		stripSpinner.Fail("JSON State Generation Failed")
 		fmt.Println(showErr)
@@ -33,7 +32,4 @@ func PlanMethod(args []string) {
 	} else {
 		stripSpinner.Success("Secrets Stripped")
 	}
-
-	// Launch Pluralith
-	helpers.LaunchPluralith()
 }
