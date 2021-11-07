@@ -3,13 +3,16 @@ package destroy
 import (
 	"fmt"
 	"pluralith/pkg/auxiliary"
+	"pluralith/pkg/communication"
 	"pluralith/pkg/plan"
 	"pluralith/pkg/stream"
 	"pluralith/pkg/ux"
 )
 
 func DestroyMethod(args []string) {
-	// Printing custom success message
+	// Instantiate wait spinner
+	confirmationSpinner := ux.NewSpinner("Waiting for Confirmation ⇢ Confirm destroy in the Pluralith UI", "Destroy Confirmed", "Destroy Canceled")
+	// Print running message
 	ux.PrintFormatted("⠿", []string{"blue"})
 	fmt.Println(" Running destroy ⇢ Confirm it in the Pluralith UI\n")
 
@@ -32,6 +35,20 @@ func DestroyMethod(args []string) {
 
 	// Add plan path to arguments to run apply on already created execution plan
 	parsedArgs = append(parsedArgs, planPath)
+
+	fmt.Println()
+	confirmationSpinner.Start()
+	// Watch for updates from UI and wait for confirmation
+	confirm, watchErr := communication.WatchForUpdates()
+	if watchErr != nil {
+		fmt.Println(watchErr)
+	}
+
 	// Stream apply command output (with destroy execution plan)
-	stream.StreamCommand(parsedArgs, true)
+	if confirm {
+		confirmationSpinner.Success()
+		stream.StreamCommand(parsedArgs, true)
+	} else {
+		confirmationSpinner.Fail()
+	}
 }

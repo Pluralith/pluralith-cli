@@ -9,11 +9,11 @@ import (
 	"time"
 )
 
-func FetchResource(address string, isDestroy bool) (string, error) {
+func FetchState(address string, isDestroy bool) (map[string]interface{}, error) {
 	// Define working dir
 	workingDir, workingErr := os.Getwd()
 	if workingErr != nil {
-		return "", workingErr
+		return make(map[string]interface{}), workingErr
 	}
 	// Define variable to hold state string
 	var stateString string
@@ -30,15 +30,15 @@ func FetchResource(address string, isDestroy bool) (string, error) {
 		// Convert read state to string
 		stateString = string(stateBytes) // Assign
 		if stateErr != nil {
-			return "", stateErr
+			return make(map[string]interface{}), stateErr
 		}
 	}
 
 	// Parsing state object
-	_, parseErr := auxiliary.ParseJson(stateString)
+	parsedState, parseErr := auxiliary.ParseJson(stateString) // FAILS ON DESTROY -> FIX
 	if parseErr != nil {
-		return "", parseErr
+		return make(map[string]interface{}), parseErr
 	}
 
-	return "", nil
+	return parsedState, nil
 }

@@ -64,10 +64,14 @@ func StreamCommand(args []string, isDestroy bool) error {
 			return decodeErr
 		}
 
-		// fmt.Println("\n", event, address)
 		// If address is given
 		if address != "" {
-			FetchResource(address, isDestroy)
+			// Fetch current tfstate from state file and strip secrets
+			fetchedState, fetchErr := FetchState(address, isDestroy)
+			if fetchErr != nil {
+				return fetchErr
+			}
+			FetchResourceAttributes(fetchedState)
 
 			// Determing command type for update message
 			commandType := "apply"
