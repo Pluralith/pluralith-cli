@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"os"
 	"os/exec"
-	"strings"
 
 	communication "pluralith/pkg/communication"
 	ux "pluralith/pkg/ux"
@@ -14,10 +13,27 @@ import (
 func StreamCommand(args []string, isDestroy bool) error {
 	// Instantiate spinners
 	streamSpinner := ux.NewSpinner("Apply Running", "Apply Completed", "Apply Failed")
+	command := "apply"
 	// Adapting spinner to destroy command
 	if isDestroy {
 		streamSpinner = ux.NewSpinner("Destroy Running", "Destroy Completed", "Destroy Failed")
+		command = "destroy"
 	}
+
+	// Get working directory for update emission
+	workingDir, workingErr := os.Getwd()
+	if workingErr != nil {
+		return workingErr
+	}
+
+	// Emit apply begin update to UI
+	communication.EmitUpdate(communication.UIUpdate{
+		Receiver: "UI",
+		Command:  command,
+		Address:  "",
+		Path:     workingDir,
+		Event:    "begin",
+	})
 
 	streamSpinner.Start()
 	// Constructing command to execute
@@ -47,18 +63,12 @@ func StreamCommand(args []string, isDestroy bool) error {
 	applyScanner := bufio.NewScanner(outStream)
 	applyScanner.Split(bufio.ScanLines)
 
-	// Get working directory for update emission
-	workingDir, workingErr := os.Getwd()
-	if workingErr != nil {
-		return workingErr
-	}
-
 	// While command line scan is running
 	for applyScanner.Scan() {
 		// Get current line json string
 		jsonString := applyScanner.Text()
 		// Decode json string to get event type and resource address
-		event, address, decodeErr := DecodeStateStream(jsonString)
+		_, address, decodeErr := DecodeStateStream(jsonString)
 		if decodeErr != nil {
 			streamSpinner.Fail()
 			return decodeErr
@@ -73,25 +83,26 @@ func StreamCommand(args []string, isDestroy bool) error {
 			}
 			FetchResourceAttributes(fetchedState)
 
-			// Determing command type for update message
-			commandType := "apply"
-			if isDestroy {
-				commandType = "destroy"
-			}
-
-			// Construct update message object
-			update := communication.UIUpdate{
-				Receiver: "UI",
-				Command:  commandType,
-				Address:  address,
-				Path:     workingDir,
-				Event:    strings.Split(event, "_")[1],
-			}
-
-			// Call function to emit update
-			communication.EmitUpdate(update)
+			// NOT NECESSARY -> Update plan json and UI will watch those file changes
+			// // Emit current event update to UI
+			// communication.EmitUpdate(communication.UIUpdate{
+			// 	Receiver: "UI",
+			// 	Command:  command,
+			// 	Address:  address,
+			// 	Path:     workingDir,
+			// 	Event:    strings.Split(event, "_")[1],
+			// })
 		}
 	}
+
+	// Emit apply start update to UI
+	communication.EmitUpdate(communication.UIUpdate{
+		Receiver: "UI",
+		Command:  command,
+		Address:  "",
+		Path:     workingDir,
+		Event:    "end",
+	})
 
 	streamSpinner.Success()
 

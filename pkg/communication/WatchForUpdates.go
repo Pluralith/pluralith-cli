@@ -61,7 +61,7 @@ func WatchForUpdates() (bool, error) {
 				// If path of latest bus file update is current working directory -> matching terraform project
 				if parsedData["Path"] == workingDir {
 					// If event is "confirmed" -> Execute apply, otherwise -> cancel
-					if parsedData["Event"] == "confirmed" {
+					if parsedData["Command"] == "confirmed" {
 						return true, nil
 					} else {
 						return false, nil

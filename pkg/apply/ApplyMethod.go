@@ -10,7 +10,7 @@ import (
 	ux "pluralith/pkg/ux"
 )
 
-func ApplyMethod(args []string) {
+func ApplyMethod(args []string) error {
 	// Instantiate wait spinner
 	confirmationSpinner := ux.NewSpinner("Waiting for Confirmation ⇢ Confirm apply in the Pluralith UI", "Apply Confirmed", "Apply Canceled")
 	// Print running message
@@ -31,7 +31,7 @@ func ApplyMethod(args []string) {
 	// Run Pluralith plan routine
 	planPath, planErr := plan.PlanMethod([]string{""}, true)
 	if planErr != nil {
-		fmt.Println(planErr)
+		return planErr
 	}
 
 	// Add plan path to arguments to run apply on already created execution plan
@@ -42,14 +42,19 @@ func ApplyMethod(args []string) {
 	// Watch for updates from UI and wait for confirmation
 	confirm, watchErr := communication.WatchForUpdates()
 	if watchErr != nil {
-		fmt.Println(watchErr)
+		return watchErr
 	}
 
 	// Stream apply command output
 	if confirm {
 		confirmationSpinner.Success()
-		stream.StreamCommand(parsedArgs, false)
+		streamErr := stream.StreamCommand(parsedArgs, false)
+		if streamErr != nil {
+			return streamErr
+		}
 	} else {
 		confirmationSpinner.Fail()
 	}
+
+	return nil
 }
