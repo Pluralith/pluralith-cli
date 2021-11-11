@@ -1,6 +1,6 @@
 package strip
 
-import auxiliary "pluralith/pkg/auxiliary"
+import "pluralith/pkg/auxiliary"
 
 // Function to strip state of secrets
 func StripSecrets(jsonString string, targets []string, replacement string) (string, error) {

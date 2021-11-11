@@ -4,9 +4,10 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"pluralith/pkg/auxiliary"
 	"strings"
 	"time"
+
+	"pluralith/pkg/auxiliary"
 )
 
 func FetchState(address string, isDestroy bool) (map[string]interface{}, error) {

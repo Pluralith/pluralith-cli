@@ -53,5 +53,5 @@ func EmitUpdate(message UIUpdate) error {
 // 	receiver: "UI"
 // 	command: "apply" || "destroy" || "plan"
 // 	path: "- working directory -"
-// 	event: "complete" || "progress" || "start"
+// 	event: "complete" || "progress" || "start" || "begin" || "end"
 // }

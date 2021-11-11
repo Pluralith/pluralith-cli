@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"pluralith/pkg/communication"
-	ux "pluralith/pkg/ux"
+	"pluralith/pkg/ux"
 )
 
 func PlanMethod(args []string, silent bool) (string, error) {

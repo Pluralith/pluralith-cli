@@ -16,7 +16,7 @@ limitations under the License.
 package cmd
 
 import (
-	apply "pluralith/pkg/apply"
+	"pluralith/pkg/apply"
 
 	"github.com/spf13/cobra"
 )

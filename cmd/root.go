@@ -19,8 +19,8 @@ import (
 	"fmt"
 	"os"
 
-	auxiliary "pluralith/pkg/auxiliary"
-	ux "pluralith/pkg/ux"
+	"pluralith/pkg/auxiliary"
+	"pluralith/pkg/ux"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"

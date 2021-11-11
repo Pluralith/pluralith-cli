@@ -19,7 +19,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"pluralith/helpers"
-	"pluralith/ux"
+	"pluralith/pkg/auxiliary"
+	"pluralith/pkg/communication"
+	"pluralith/pkg/strip"
+	"pluralith/pkg/ux"
 
 	"github.com/spf13/cobra"
 )
@@ -45,7 +48,7 @@ to quickly create a Cobra application.`,
 		planSpinner.Start()
 
 		// Manually parsing arg (due to cobra lacking a feature)
-		parsedArgs, parsedArgMap := helpers.ParseArgs(args, pluralithPlanArgs)
+		parsedArgs, parsedArgMap := auxiliary.ParseArgs(args, pluralithPlanArgs)
 		// Getting value of -out flag
 		planOut := parsedArgMap["out"]
 		// Checking if -show-output flag is set
@@ -63,7 +66,7 @@ to quickly create a Cobra application.`,
 			fmt.Println(planOutput)
 		} else {
 			// Writing command and working directory to hist for Pluralith UI to pick up
-			helpers.WriteToHist("plan", "")
+			communication.WriteToHist("plan", "")
 			// If plan command succeeds -> Run terraform show on previously generated execution plan to generate plan state file
 			showOutput, showErr := helpers.ExecuteTerraform("show", []string{"-json", planOut}, false)
 			if showErr != nil {
@@ -74,7 +77,7 @@ to quickly create a Cobra application.`,
 				stripSpinner.Start()
 
 				// Stripping secrets and writing to file
-				strippedFile, stripErr := helpers.StripSecrets(showOutput, sensitiveKeys, "gatewatch")
+				strippedFile, stripErr := strip.StripSecrets(showOutput, sensitiveKeys, "gatewatch")
 				if stripErr != nil {
 					stripSpinner.Fail()
 				} else {
@@ -86,12 +89,12 @@ to quickly create a Cobra application.`,
 				// os.Remove("./pluralith.plan")
 
 				// Launching Pluralith
-				helpers.LaunchPluralith()
+				auxiliary.LaunchPluralith()
 				ux.PrintFormatted("✔ All Done!\n", []string{"blue", "bold"})
 			}
 
 			// Updating command in hist to update Pluralith UI
-			helpers.WriteToHist("plan", "terraform-end\n")
+			communication.WriteToHist("plan", "terraform-end\n")
 		}
 	},
 }

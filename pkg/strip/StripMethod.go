@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	ux "pluralith/pkg/ux"
+	"pluralith/pkg/ux"
 )
 
 // Specifying sensitive keys (will later be done via external config)

@@ -5,7 +5,7 @@ import (
 	"runtime"
 	"time"
 
-	ux "pluralith/pkg/ux"
+	"pluralith/pkg/ux"
 )
 
 // Function to run OS specific launch command

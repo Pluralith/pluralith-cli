@@ -3,7 +3,7 @@ package strip
 import (
 	"reflect"
 
-	auxiliary "pluralith/pkg/auxiliary"
+	"pluralith/pkg/auxiliary"
 )
 
 // Function to recursively replace key values in JSON

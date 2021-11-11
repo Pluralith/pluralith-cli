@@ -16,8 +16,8 @@ limitations under the License.
 package cmd
 
 import (
-	auxiliary "pluralith/pkg/auxiliary"
-	plan "pluralith/pkg/plan"
+	"pluralith/pkg/auxiliary"
+	"pluralith/pkg/plan"
 
 	"github.com/spf13/cobra"
 )

@@ -18,7 +18,9 @@ package cmd
 import (
 	"fmt"
 	"pluralith/helpers"
-	"pluralith/ux"
+	"pluralith/pkg/auxiliary"
+	"pluralith/pkg/communication"
+	"pluralith/pkg/ux"
 
 	"github.com/spf13/cobra"
 )
@@ -41,7 +43,7 @@ to quickly create a Cobra application.`,
 		// Initializing variable for manual user confirmation
 		var confirm string
 		// Manually parsing args (due to cobra lacking a feature)
-		parsedArgs, parsedArgMap := helpers.ParseArgs(args, pluralithDestroyArgs)
+		parsedArgs, parsedArgMap := auxiliary.ParseArgs(args, pluralithDestroyArgs)
 
 		// Checking if auto-approve flag has been set
 		if parsedArgMap["auto-approve"] == "" {
@@ -60,7 +62,7 @@ to quickly create a Cobra application.`,
 			fmt.Println(" Destruction Confirmed")
 
 			// Launching Pluralith
-			helpers.LaunchPluralith()
+			auxiliary.LaunchPluralith()
 
 			ux.PrintFormatted("⠿", []string{"blue", "bold"})
 			fmt.Println(" Destruction Status:")
@@ -77,7 +79,7 @@ to quickly create a Cobra application.`,
 			}
 
 			// Updating command in hist to update Pluralith UI
-			helpers.WriteToHist("destroy", "terraform-end\n")
+			communication.WriteToHist("destroy", "terraform-end\n")
 		} else {
 			ux.PrintFormatted("\n✖️", []string{"red", "bold"})
 			fmt.Println(" Destroy Aborted")

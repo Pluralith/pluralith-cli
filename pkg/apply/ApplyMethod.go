@@ -5,9 +5,9 @@ import (
 
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/communication"
-	plan "pluralith/pkg/plan"
-	stream "pluralith/pkg/stream"
-	ux "pluralith/pkg/ux"
+	"pluralith/pkg/plan"
+	"pluralith/pkg/stream"
+	"pluralith/pkg/ux"
 )
 
 func ApplyMethod(args []string) error {

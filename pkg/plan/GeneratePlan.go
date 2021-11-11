@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"path"
 
-	auxiliary "pluralith/pkg/auxiliary"
+	"pluralith/pkg/auxiliary"
 )
 
 // Defining command args/flags

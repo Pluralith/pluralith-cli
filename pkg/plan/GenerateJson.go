@@ -8,7 +8,7 @@ import (
 	"os/exec"
 	"path"
 
-	strip "pluralith/pkg/strip"
+	"pluralith/pkg/strip"
 )
 
 func GenerateJson(planPath string) (string, error) {

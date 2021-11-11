@@ -18,7 +18,9 @@ package cmd
 import (
 	"fmt"
 	"pluralith/helpers"
-	"pluralith/ux"
+	"pluralith/pkg/auxiliary"
+	"pluralith/pkg/communication"
+	"pluralith/pkg/ux"
 
 	"github.com/spf13/cobra"
 )
@@ -41,7 +43,7 @@ to quickly create a Cobra application.`,
 		// Initializing variable for manual user confirmation
 		var confirm string
 		// Manually parsing args (due to cobra lacking a feature)
-		parsedArgs, parsedArgMap := helpers.ParseArgs(args, pluralithApplyArgs)
+		parsedArgs, parsedArgMap := auxiliary.ParseArgs(args, pluralithApplyArgs)
 
 		// Checking if auto-approve flag has been set
 		if parsedArgMap["auto-approve"] == "" {
@@ -60,9 +62,9 @@ to quickly create a Cobra application.`,
 			fmt.Println(" Apply Confirmed")
 
 			// Writing command and working directory to hist for Pluralith UI to pick up
-			helpers.WriteToHist("apply", "")
+			communication.WriteToHist("apply", "")
 			// Launching Pluralith
-			helpers.LaunchPluralith()
+			auxiliary.LaunchPluralith()
 
 			ux.PrintFormatted("⠿", []string{"blue", "bold"})
 			fmt.Println(" Apply Status:")
@@ -78,7 +80,7 @@ to quickly create a Cobra application.`,
 				ux.PrintFormatted("✔ All Done!\n", []string{"blue", "bold"})
 			}
 			// Updating command in hist to update Pluralith UI
-			helpers.WriteToHist("apply", "terraform-end\n")
+			communication.WriteToHist("apply", "terraform-end\n")
 		} else {
 			ux.PrintFormatted("\n✖️", []string{"red", "bold"})
 			fmt.Println(" Terraform Apply Aborted")

@@ -5,9 +5,10 @@ import (
 	"bytes"
 	"os"
 	"os/exec"
+	"strings"
 
-	communication "pluralith/pkg/communication"
-	ux "pluralith/pkg/ux"
+	"pluralith/pkg/communication"
+	"pluralith/pkg/ux"
 )
 
 func StreamCommand(args []string, isDestroy bool) error {
@@ -68,7 +69,7 @@ func StreamCommand(args []string, isDestroy bool) error {
 		// Get current line json string
 		jsonString := applyScanner.Text()
 		// Decode json string to get event type and resource address
-		_, address, decodeErr := DecodeStateStream(jsonString)
+		event, address, decodeErr := DecodeStateStream(jsonString)
 		if decodeErr != nil {
 			streamSpinner.Fail()
 			return decodeErr
@@ -85,13 +86,13 @@ func StreamCommand(args []string, isDestroy bool) error {
 
 			// NOT NECESSARY -> Update plan json and UI will watch those file changes
 			// // Emit current event update to UI
-			// communication.EmitUpdate(communication.UIUpdate{
-			// 	Receiver: "UI",
-			// 	Command:  command,
-			// 	Address:  address,
-			// 	Path:     workingDir,
-			// 	Event:    strings.Split(event, "_")[1],
-			// })
+			communication.EmitUpdate(communication.UIUpdate{
+				Receiver: "UI",
+				Command:  command,
+				Address:  address,
+				Path:     workingDir,
+				Event:    strings.Split(event, "_")[1],
+			})
 		}
 	}
 
