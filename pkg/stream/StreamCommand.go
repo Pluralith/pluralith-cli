@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	"pluralith/pkg/communication"
 	"pluralith/pkg/ux"
@@ -28,12 +29,15 @@ func StreamCommand(args []string, isDestroy bool) error {
 	}
 
 	// Emit apply begin update to UI
-	communication.EmitUpdate(communication.UIUpdate{
-		Receiver: "UI",
-		Command:  command,
-		Address:  "",
-		Path:     workingDir,
-		Event:    "begin",
+	communication.EmitUpdate(communication.Update{
+		Receiver:   "UI",
+		Timestamp:  time.Now().UnixNano(),
+		Command:    command,
+		Event:      "begin",
+		Address:    "",
+		Attributes: make(map[string]interface{}),
+		Path:       workingDir,
+		Received:   false,
 	})
 
 	streamSpinner.Start()
@@ -82,27 +86,33 @@ func StreamCommand(args []string, isDestroy bool) error {
 			if fetchErr != nil {
 				return fetchErr
 			}
-			FetchResourceAttributes(fetchedState)
+			FetchResourceAttributes(address, fetchedState)
 
 			// NOT NECESSARY -> Update plan json and UI will watch those file changes
 			// // Emit current event update to UI
-			communication.EmitUpdate(communication.UIUpdate{
-				Receiver: "UI",
-				Command:  command,
-				Address:  address,
-				Path:     workingDir,
-				Event:    strings.Split(event, "_")[1],
+			communication.EmitUpdate(communication.Update{
+				Receiver:   "UI",
+				Timestamp:  time.Now().UnixNano(),
+				Command:    command,
+				Event:      strings.Split(event, "_")[1],
+				Address:    address,
+				Attributes: make(map[string]interface{}),
+				Path:       workingDir,
+				Received:   false,
 			})
 		}
 	}
 
 	// Emit apply start update to UI
-	communication.EmitUpdate(communication.UIUpdate{
-		Receiver: "UI",
-		Command:  command,
-		Address:  "",
-		Path:     workingDir,
-		Event:    "end",
+	communication.EmitUpdate(communication.Update{
+		Receiver:   "UI",
+		Timestamp:  time.Now().UnixNano(),
+		Command:    command,
+		Event:      "end",
+		Address:    "",
+		Attributes: make(map[string]interface{}),
+		Path:       workingDir,
+		Received:   false,
 	})
 
 	streamSpinner.Success()

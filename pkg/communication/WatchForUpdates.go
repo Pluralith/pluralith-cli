@@ -14,7 +14,7 @@ func WatchForUpdates() (bool, error) {
 	workingDir, _ := os.Getwd()
 	homeDir, _ := os.UserHomeDir()
 	pluralithDir := path.Join(homeDir, "Pluralith")
-	busFilePath := path.Join(pluralithDir, "pluralith_cli.bus")
+	pluralithBus := path.Join(pluralithDir, "pluralith.bus")
 
 	// Create parent directories for path if they don't exist yet
 	if mkErr := os.MkdirAll(pluralithDir, 0700); mkErr != nil {
@@ -22,7 +22,7 @@ func WatchForUpdates() (bool, error) {
 	}
 
 	// Create file if it doesn't exist yet
-	if _, fileMkErr := os.Create(busFilePath); fileMkErr != nil {
+	if _, fileMkErr := os.Create(pluralithBus); fileMkErr != nil {
 		return false, fileMkErr
 	}
 
@@ -34,7 +34,7 @@ func WatchForUpdates() (bool, error) {
 	defer watcherInstance.Close()
 
 	// Add bus file to watcher
-	addErr := watcherInstance.Add(busFilePath)
+	addErr := watcherInstance.Add(pluralithBus)
 	if addErr != nil {
 		return false, addErr
 	}
@@ -48,7 +48,7 @@ func WatchForUpdates() (bool, error) {
 			// If a write event happens
 			case event.Op&fsnotify.Write == fsnotify.Write:
 				// Read bus file content
-				readData, readErr := os.ReadFile(busFilePath)
+				readData, readErr := os.ReadFile(pluralithBus)
 				if readErr != nil {
 					return false, readErr
 				}
@@ -62,7 +62,7 @@ func WatchForUpdates() (bool, error) {
 				// If path of latest bus file update is current working directory -> matching terraform project
 				if parsedData["Path"] == workingDir {
 					// If event is "confirmed" -> Execute apply, otherwise -> cancel
-					if parsedData["Command"] == "confirmed" {
+					if parsedData["Command"] == "confirm" {
 						return true, nil
 					} else {
 						return false, nil

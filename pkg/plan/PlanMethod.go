@@ -25,7 +25,7 @@ func PlanMethod(args []string, silent bool) (string, error) {
 	stripSpinner := ux.NewSpinner("Stripping Secrets", "Secrets Stripped", "Stripping Secrets Failed")
 
 	// Emit plan begin update to UI
-	communication.EmitUpdate(communication.UIUpdate{
+	communication.EmitUpdate(communication.Update{
 		Receiver: "UI",
 		Command:  "plan",
 		Address:  "",
@@ -54,7 +54,7 @@ func PlanMethod(args []string, silent bool) (string, error) {
 	stripSpinner.Success("Secrets Stripped")
 
 	// Emit plan end update to UI -> ask for confirmation
-	communication.EmitUpdate(communication.UIUpdate{
+	communication.EmitUpdate(communication.Update{
 		Receiver: "UI",
 		Command:  "plan",
 		Address:  "",

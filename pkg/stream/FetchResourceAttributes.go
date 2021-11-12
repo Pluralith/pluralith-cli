@@ -1,10 +1,9 @@
 package stream
 
-func FetchResourceAttributes(stateObject map[string]interface{}) error {
-	// formattedJson, formatErr := auxiliary.FormatJson(stateObject)
-	// if formatErr != nil {
-	// 	return formatErr
-	// }
+import "fmt"
+
+func FetchResourceAttributes(address string, stateObject map[string]interface{}) error {
+	fmt.Println(address)
 
 	// fmt.Println(formattedJson)
 
