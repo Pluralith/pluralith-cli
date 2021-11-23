@@ -3,13 +3,17 @@ package plan
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"pluralith/pkg/communication"
 	"pluralith/pkg/ux"
 )
 
 func PlanMethod(args []string, silent bool) (string, error) {
+	command := "apply"
+
 	if !silent {
+		command = "plan"
 		ux.PrintFormatted("⠿", []string{"blue"})
 		fmt.Println(" Running plan ⇢ Inspect it in the Pluralith UI\n")
 	}
@@ -26,11 +30,14 @@ func PlanMethod(args []string, silent bool) (string, error) {
 
 	// Emit plan begin update to UI
 	communication.EmitUpdate(communication.Update{
-		Receiver: "UI",
-		Command:  "plan",
-		Address:  "",
-		Path:     workingDir,
-		Event:    "begin",
+		Receiver:   "UI",
+		Timestamp:  time.Now().Unix(),
+		Command:    "plan",
+		Event:      "begin",
+		Address:    "",
+		Attributes: make(map[string]interface{}),
+		Path:       workingDir,
+		Received:   false,
 	})
 
 	// Run terraform plan
@@ -55,11 +62,25 @@ func PlanMethod(args []string, silent bool) (string, error) {
 
 	// Emit plan end update to UI -> ask for confirmation
 	communication.EmitUpdate(communication.Update{
-		Receiver: "UI",
-		Command:  "plan",
-		Address:  "",
-		Path:     workingDir,
-		Event:    "end",
+		Receiver:   "UI",
+		Timestamp:  time.Now().Unix(),
+		Command:    "plan",
+		Event:      "end",
+		Address:    "",
+		Attributes: make(map[string]interface{}),
+		Path:       workingDir,
+		Received:   false,
+	})
+
+	communication.EmitUpdate(communication.Update{
+		Receiver:   "UI",
+		Timestamp:  time.Now().Unix(),
+		Command:    command,
+		Event:      "confirm",
+		Address:    "",
+		Attributes: make(map[string]interface{}),
+		Path:       workingDir,
+		Received:   false,
 	})
 
 	return planExecutionPath, nil

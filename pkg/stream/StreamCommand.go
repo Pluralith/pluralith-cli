@@ -31,7 +31,7 @@ func StreamCommand(args []string, isDestroy bool) error {
 	// Emit apply begin update to UI
 	communication.EmitUpdate(communication.Update{
 		Receiver:   "UI",
-		Timestamp:  time.Now().UnixNano(),
+		Timestamp:  time.Now().Unix(),
 		Command:    command,
 		Event:      "begin",
 		Address:    "",
@@ -92,7 +92,7 @@ func StreamCommand(args []string, isDestroy bool) error {
 			// // Emit current event update to UI
 			communication.EmitUpdate(communication.Update{
 				Receiver:   "UI",
-				Timestamp:  time.Now().UnixNano(),
+				Timestamp:  time.Now().Unix(),
 				Command:    command,
 				Event:      strings.Split(event, "_")[1],
 				Address:    address,
@@ -106,7 +106,7 @@ func StreamCommand(args []string, isDestroy bool) error {
 	// Emit apply start update to UI
 	communication.EmitUpdate(communication.Update{
 		Receiver:   "UI",
-		Timestamp:  time.Now().UnixNano(),
+		Timestamp:  time.Now().Unix(),
 		Command:    command,
 		Event:      "end",
 		Address:    "",

@@ -1,6 +1,7 @@
 package communication
 
 import (
+	"errors"
 	"os"
 	"path"
 
@@ -14,16 +15,20 @@ func WatchForUpdates() (bool, error) {
 	workingDir, _ := os.Getwd()
 	homeDir, _ := os.UserHomeDir()
 	pluralithDir := path.Join(homeDir, "Pluralith")
-	pluralithBus := path.Join(pluralithDir, "pluralith.bus")
+	pluralithBus := path.Join(pluralithDir, "pluralith_bus.json")
 
 	// Create parent directories for path if they don't exist yet
 	if mkErr := os.MkdirAll(pluralithDir, 0700); mkErr != nil {
 		return false, mkErr
 	}
 
-	// Create file if it doesn't exist yet
-	if _, fileMkErr := os.Create(pluralithBus); fileMkErr != nil {
-		return false, fileMkErr
+	// Check if bus file already exists
+	_, existErr := os.Stat(pluralithBus)
+	if errors.Is(existErr, os.ErrNotExist) {
+		// Create file if it doesn't exist yet
+		if _, fileMkErr := os.Create(pluralithBus); fileMkErr != nil {
+			return false, fileMkErr
+		}
 	}
 
 	// Define file watcher
@@ -62,12 +67,14 @@ func WatchForUpdates() (bool, error) {
 				// If path of latest bus file update is current working directory -> matching terraform project
 				if parsedData["Path"] == workingDir {
 					// If event is "confirmed" -> Execute apply, otherwise -> cancel
-					if parsedData["Command"] == "confirm" {
+					if parsedData["Event"] == "confirm" {
 						return true, nil
 					} else {
 						return false, nil
 					}
 				}
+
+				return false, nil
 			}
 		// Handle watcher error
 		case err := <-watcherInstance.Errors:

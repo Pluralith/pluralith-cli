@@ -2,6 +2,7 @@ package communication
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path"
 	"pluralith/pkg/auxiliary"
@@ -79,6 +80,7 @@ func EmitUpdate(message Update) error {
 
 	// Create parent directories for path if they don't exist yet
 	if mkErr := os.MkdirAll(pluralithDir, 0700); mkErr != nil {
+		fmt.Println(mkErr.Error())
 		return mkErr
 	}
 
@@ -90,6 +92,7 @@ func EmitUpdate(message Update) error {
 		// Reading communication database
 		db, lockStatus, dbErr := readCommunicationDB(pluralithBus)
 		if dbErr != nil {
+			fmt.Println(dbErr.Error())
 			return dbErr
 		}
 
@@ -104,6 +107,7 @@ func EmitUpdate(message Update) error {
 	// JSONify DB
 	dbJson, dbJsonErr := json.MarshalIndent(eventDB, "", " ")
 	if dbJsonErr != nil {
+		fmt.Println(dbJsonErr.Error())
 		return dbJsonErr
 	}
 
