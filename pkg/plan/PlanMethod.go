@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"pluralith/pkg/communication"
+	"pluralith/pkg/comdb"
 	"pluralith/pkg/ux"
 )
 
@@ -29,7 +29,7 @@ func PlanMethod(args []string, silent bool) (string, error) {
 	stripSpinner := ux.NewSpinner("Stripping Secrets", "Secrets Stripped", "Stripping Secrets Failed")
 
 	// Emit plan begin update to UI
-	communication.EmitUpdate(communication.Update{
+	comdb.PushComDBEvent(comdb.Update{
 		Receiver:   "UI",
 		Timestamp:  time.Now().Unix(),
 		Command:    "plan",
@@ -61,7 +61,7 @@ func PlanMethod(args []string, silent bool) (string, error) {
 	stripSpinner.Success("Secrets Stripped")
 
 	// Emit plan end update to UI -> ask for confirmation
-	communication.EmitUpdate(communication.Update{
+	comdb.PushComDBEvent(comdb.Update{
 		Receiver:   "UI",
 		Timestamp:  time.Now().Unix(),
 		Command:    "plan",
@@ -72,7 +72,7 @@ func PlanMethod(args []string, silent bool) (string, error) {
 		Received:   false,
 	})
 
-	communication.EmitUpdate(communication.Update{
+	comdb.PushComDBEvent(comdb.Update{
 		Receiver:   "UI",
 		Timestamp:  time.Now().Unix(),
 		Command:    command,

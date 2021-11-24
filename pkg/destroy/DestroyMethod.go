@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"pluralith/pkg/auxiliary"
-	"pluralith/pkg/communication"
+	"pluralith/pkg/comdb"
 	"pluralith/pkg/plan"
 	"pluralith/pkg/stream"
 	"pluralith/pkg/ux"
@@ -40,7 +40,7 @@ func DestroyMethod(args []string) error {
 	fmt.Println()
 	confirmationSpinner.Start()
 	// Watch for updates from UI and wait for confirmation
-	confirm, watchErr := communication.WatchForUpdates()
+	confirm, watchErr := comdb.WatchComDB()
 	if watchErr != nil {
 		return watchErr
 	}

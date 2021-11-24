@@ -1,5 +1,11 @@
 package communication
 
+type ComDB struct {
+	Locked bool
+	Events []interface{}
+	Errors []interface{}
+}
+
 type Update struct {
 	Receiver   string
 	Timestamp  int64

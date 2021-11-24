@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"pluralith/pkg/communication"
+	"pluralith/pkg/comdb"
 	"pluralith/pkg/ux"
 )
 
@@ -29,7 +29,7 @@ func StreamCommand(args []string, isDestroy bool) error {
 	}
 
 	// Emit apply begin update to UI
-	communication.EmitUpdate(communication.Update{
+	comdb.PushComDBEvent(comdb.Update{
 		Receiver:   "UI",
 		Timestamp:  time.Now().Unix(),
 		Command:    command,
@@ -90,7 +90,7 @@ func StreamCommand(args []string, isDestroy bool) error {
 
 			// NOT NECESSARY -> Update plan json and UI will watch those file changes
 			// // Emit current event update to UI
-			communication.EmitUpdate(communication.Update{
+			comdb.PushComDBEvent(comdb.Update{
 				Receiver:   "UI",
 				Timestamp:  time.Now().Unix(),
 				Command:    command,
@@ -104,7 +104,7 @@ func StreamCommand(args []string, isDestroy bool) error {
 	}
 
 	// Emit apply start update to UI
-	communication.EmitUpdate(communication.Update{
+	comdb.PushComDBEvent(comdb.Update{
 		Receiver:   "UI",
 		Timestamp:  time.Now().Unix(),
 		Command:    command,

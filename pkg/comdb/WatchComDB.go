@@ -1,7 +1,8 @@
-package communication
+package comdb
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path"
 
@@ -10,7 +11,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
-func WatchForUpdates() (bool, error) {
+func WatchComDB() (bool, error) {
 	// Set up path variables
 	workingDir, _ := os.Getwd()
 	homeDir, _ := os.UserHomeDir()
@@ -62,6 +63,14 @@ func WatchForUpdates() (bool, error) {
 				parsedData, parseErr := auxiliary.ParseJson(string(readData))
 				if parseErr != nil {
 					return false, parseErr
+				}
+
+				communicationEvents := parsedData["Events"].([]Update)
+
+				for _, event := range communicationEvents {
+					if event.Path == workingDir && event.Receiver == "CLI" && !event.Received {
+						fmt.Println(event)
+					}
 				}
 
 				// If path of latest bus file update is current working directory -> matching terraform project
