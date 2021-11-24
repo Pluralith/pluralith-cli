@@ -1,4 +1,4 @@
-package communication
+package comdb
 
 type ComDB struct {
 	Locked bool

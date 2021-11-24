@@ -1,5 +1,5 @@
 package comdb
 
-func Lock() {}
+func LockComDB() {}
 
-func Unlock() {}
+func UnlockComDB() {}
