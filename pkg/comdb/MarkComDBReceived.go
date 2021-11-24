@@ -1,0 +1,5 @@
+package comdb
+
+func MarkComDBReceived() {
+
+}

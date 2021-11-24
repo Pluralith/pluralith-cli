@@ -11,7 +11,7 @@ import (
 	"pluralith/pkg/strip"
 )
 
-func GenerateJson(planPath string) (string, error) {
+func CreatePlanJson(planPath string) (string, error) {
 	// Get working directory
 	workingDir, workingErr := os.Getwd()
 	if workingErr != nil {

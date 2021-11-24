@@ -11,7 +11,7 @@ import (
 // - - - Custom Spinner Struct - - -
 
 // Custom spinner struct
-type spin struct {
+type Spin struct {
 	spinMsg    string
 	successMsg string
 	failMsg    string
@@ -23,7 +23,7 @@ var printBlue = color.New(color.FgBlue).SprintFunc()
 var printRed = color.New(color.FgRed).SprintFunc()
 
 // Method to instantiate customer spinner
-func NewSpinner(spinMsg string, successMsg string, failMsg string) spin {
+func NewSpinner(spinMsg string, successMsg string, failMsg string) Spin {
 	// Creating base spinner instance
 	instance := spinner.New(spinner.CharSets[14], 100*time.Millisecond)
 	// Adding spinning message
@@ -32,17 +32,17 @@ func NewSpinner(spinMsg string, successMsg string, failMsg string) spin {
 	instance.Color("blue")
 
 	// Returning custom spin instance
-	s := spin{spinMsg, successMsg, failMsg, instance}
+	s := Spin{spinMsg, successMsg, failMsg, instance}
 	return s
 }
 
 // Method to start custom spinner
-func (s spin) Start() {
+func (s Spin) Start() {
 	s.instance.Start()
 }
 
 // Method to update spinner state on successful completion
-func (s spin) Success(customMessage ...string) {
+func (s Spin) Success(customMessage ...string) {
 	// Handling custom message if given
 	var message string
 	if len(customMessage) > 0 {
@@ -57,7 +57,7 @@ func (s spin) Success(customMessage ...string) {
 }
 
 // Method to update spinner state on failure
-func (s spin) Fail(customMessage ...string) {
+func (s Spin) Fail(customMessage ...string) {
 	// Handling custom message if given
 	var message string
 	if len(customMessage) > 0 {

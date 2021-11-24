@@ -25,6 +25,8 @@ func ReadComDB() (ComDB, error) {
 			fmt.Println(newErr.Error())
 			return ComDB{}, newErr
 		}
+
+		return eventDB, nil
 	}
 
 	// Parse DB string and handle parse error
@@ -37,6 +39,8 @@ func ReadComDB() (ComDB, error) {
 			fmt.Println(newErr.Error())
 			return ComDB{}, newErr
 		}
+
+		return eventDB, nil
 	}
 
 	// Construct ComDB object
