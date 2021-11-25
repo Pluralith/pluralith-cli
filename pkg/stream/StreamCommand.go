@@ -12,14 +12,12 @@ import (
 	"pluralith/pkg/ux"
 )
 
-func StreamCommand(args []string, isDestroy bool) error {
+func StreamCommand(command string, args []string) error {
 	// Instantiate spinners
 	streamSpinner := ux.NewSpinner("Apply Running", "Apply Completed", "Apply Failed")
-	command := "apply"
 	// Adapting spinner to destroy command
-	if isDestroy {
+	if command == "destroy" {
 		streamSpinner = ux.NewSpinner("Destroy Running", "Destroy Completed", "Destroy Failed")
-		command = "destroy"
 	}
 
 	// Get working directory for update emission
@@ -82,10 +80,11 @@ func StreamCommand(args []string, isDestroy bool) error {
 		// If address is given
 		if address != "" {
 			// Fetch current tfstate from state file and strip secrets
-			fetchedState, fetchErr := FetchState(address, isDestroy)
+			fetchedState, fetchErr := FetchState(address, false)
 			if fetchErr != nil {
 				return fetchErr
 			}
+
 			FetchResourceAttributes(address, fetchedState)
 
 			// NOT NECESSARY -> Update plan json and UI will watch those file changes

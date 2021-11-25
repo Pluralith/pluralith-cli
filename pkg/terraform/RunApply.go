@@ -1,18 +1,38 @@
 package terraform
 
 import (
+	"os"
 	"pluralith/pkg/comdb"
 	"pluralith/pkg/stream"
 	"pluralith/pkg/ux"
+	"time"
 )
 
 func RunApply(command string, args []string) error {
+	// Get working directory
+	workingDir, workingErr := os.Getwd()
+	if workingErr != nil {
+		return workingErr
+	}
+
 	// Instantiate spinner
 	confirmSpinner := ux.NewSpinner(
 		RunMessages[command].([]string)[1],
 		RunMessages[command].([]string)[2],
 		RunMessages[command].([]string)[3],
 	)
+
+	// Emit confirm event
+	comdb.PushComDBEvent(comdb.Update{
+		Receiver:   "UI",
+		Timestamp:  time.Now().Unix(),
+		Command:    command,
+		Event:      "confirm",
+		Address:    "",
+		Attributes: make(map[string]interface{}),
+		Path:       workingDir,
+		Received:   false,
+	})
 
 	confirmSpinner.Start()
 
@@ -25,7 +45,7 @@ func RunApply(command string, args []string) error {
 	// Stream apply command output
 	if confirm {
 		confirmSpinner.Success()
-		streamErr := stream.StreamCommand(args, false)
+		streamErr := stream.StreamCommand(command, args)
 		if streamErr != nil {
 			return streamErr
 		}

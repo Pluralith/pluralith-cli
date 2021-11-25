@@ -48,7 +48,7 @@ func ApplyMethod(args []string) error {
 	// Stream apply command output
 	if confirm {
 		confirmationSpinner.Success()
-		streamErr := stream.StreamCommand(parsedArgs, false)
+		streamErr := stream.StreamCommand("apply", parsedArgs)
 		if streamErr != nil {
 			return streamErr
 		}

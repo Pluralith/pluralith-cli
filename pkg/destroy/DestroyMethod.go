@@ -48,7 +48,7 @@ func DestroyMethod(args []string) error {
 	// Stream apply command output (with destroy execution plan)
 	if confirm {
 		confirmationSpinner.Success()
-		streamErr := stream.StreamCommand(parsedArgs, true)
+		streamErr := stream.StreamCommand("destroy", parsedArgs)
 		if streamErr != nil {
 			return streamErr
 		}

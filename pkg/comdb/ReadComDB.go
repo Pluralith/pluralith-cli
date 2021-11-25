@@ -1,10 +1,10 @@
 package comdb
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path"
-	"pluralith/pkg/auxiliary"
 )
 
 func ReadComDB() (ComDB, error) {
@@ -30,7 +30,7 @@ func ReadComDB() (ComDB, error) {
 	}
 
 	// Parse DB string and handle parse error
-	eventDBObject, parseErr := auxiliary.ParseJson(string(eventDBString))
+	parseErr := json.Unmarshal([]byte(eventDBString), &eventDB)
 	if parseErr != nil {
 		var newErr error
 
@@ -41,13 +41,6 @@ func ReadComDB() (ComDB, error) {
 		}
 
 		return eventDB, nil
-	}
-
-	// Construct ComDB object
-	eventDB = ComDB{
-		Locked: eventDBObject["Locked"].(bool),
-		Events: eventDBObject["Events"].([]interface{}),
-		Errors: eventDBObject["Errors"].([]interface{}),
 	}
 
 	// Return parsed DB content

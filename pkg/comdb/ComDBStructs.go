@@ -2,8 +2,8 @@ package comdb
 
 type ComDB struct {
 	Locked bool
-	Events []interface{}
-	Errors []interface{}
+	Events []Update
+	Errors []map[string]interface{}
 }
 
 type Update struct {
@@ -16,3 +16,12 @@ type Update struct {
 	Path       string
 	Received   bool
 }
+
+// Receiver  string
+// Timestamp  float64
+// Command  string
+// Event  string
+// Address  string
+// Attributes  map[string]interface {}
+// Path  string
+// Received  bool

@@ -14,8 +14,8 @@ func InitComDB() (ComDB, error) {
 	// Create empty DB template to write to file
 	emptyDB := ComDB{
 		Locked: false,
-		Events: make([]interface{}, 0),
-		Errors: make([]interface{}, 0),
+		Events: make([]Update, 0),
+		Errors: make([]map[string]interface{}, 0),
 	}
 
 	// Turn emtpy DB template into string

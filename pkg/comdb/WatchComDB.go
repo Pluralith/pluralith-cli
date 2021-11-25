@@ -6,8 +6,6 @@ import (
 	"os"
 	"path"
 
-	"pluralith/pkg/auxiliary"
-
 	"github.com/fsnotify/fsnotify"
 )
 
@@ -54,34 +52,40 @@ func WatchComDB() (bool, error) {
 			// If a write event happens
 			case event.Op&fsnotify.Write == fsnotify.Write:
 				// Read bus file content
-				readData, readErr := os.ReadFile(pluralithBus)
+				// readData, readErr := os.ReadFile(pluralithBus)
+				// if readErr != nil {
+				// 	return false, readErr
+				// }
+
+				// // Parse bus file content to JSON
+				// parsedData, parseErr := auxiliary.ParseJson(string(readData))
+				// if parseErr != nil {
+				// 	return false, parseErr
+				// }
+
+				eventDB, readErr := ReadComDB()
 				if readErr != nil {
 					return false, readErr
 				}
 
-				// Parse bus file content to JSON
-				parsedData, parseErr := auxiliary.ParseJson(string(readData))
-				if parseErr != nil {
-					return false, parseErr
-				}
+				comDBEvents := eventDB.Events
 
-				communicationEvents := parsedData["Events"].([]Update)
+				for _, event := range comDBEvents {
 
-				for _, event := range communicationEvents {
 					if event.Path == workingDir && event.Receiver == "CLI" && !event.Received {
 						fmt.Println(event)
 					}
 				}
 
 				// If path of latest bus file update is current working directory -> matching terraform project
-				if parsedData["Path"] == workingDir {
-					// If event is "confirmed" -> Execute apply, otherwise -> cancel
-					if parsedData["Event"] == "confirm" {
-						return true, nil
-					} else {
-						return false, nil
-					}
-				}
+				// if parsedData["Path"] == workingDir {
+				// 	// If event is "confirmed" -> Execute apply, otherwise -> cancel
+				// 	if parsedData["Event"] == "confirm" {
+				// 		return true, nil
+				// 	} else {
+				// 		return false, nil
+				// 	}
+				// }
 
 				return false, nil
 			}
