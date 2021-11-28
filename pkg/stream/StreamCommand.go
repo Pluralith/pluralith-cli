@@ -80,12 +80,14 @@ func StreamCommand(command string, args []string) error {
 		// If address is given
 		if address != "" {
 			// Fetch current tfstate from state file and strip secrets
-			fetchedState, fetchErr := FetchState(address, false)
+			fetchedState, resourceFound, fetchErr := FetchState(address, false)
 			if fetchErr != nil {
 				return fetchErr
 			}
 
-			FetchResourceAttributes(address, fetchedState)
+			if resourceFound {
+				FetchResourceAttributes(address, fetchedState)
+			}
 
 			// NOT NECESSARY -> Update plan json and UI will watch those file changes
 			// // Emit current event update to UI

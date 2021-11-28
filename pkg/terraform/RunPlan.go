@@ -75,11 +75,11 @@ func RunPlan(command string) (string, error) {
 	}
 
 	// Emit plan end update to UI
-	comdb.PushComDBEvent(comdb.Update{
+	comdb.PushComDBEvent(comdb.Event{
 		Receiver:   "UI",
 		Timestamp:  time.Now().Unix(),
 		Command:    "plan",
-		Event:      "end",
+		Type:       "end",
 		Address:    "",
 		Attributes: make(map[string]interface{}),
 		Path:       workingDir,
