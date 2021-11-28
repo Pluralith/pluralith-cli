@@ -35,11 +35,11 @@ func RunPlan(command string) (string, error) {
 
 	planSpinner.Start()
 	// Emit plan begin update to UI
-	comdb.PushComDBEvent(comdb.Update{
+	comdb.PushComDBEvent(comdb.Event{
 		Receiver:   "UI",
 		Timestamp:  time.Now().Unix(),
 		Command:    "plan",
-		Event:      "begin",
+		Type:       "begin",
 		Address:    "",
 		Attributes: make(map[string]interface{}),
 		Path:       workingDir,

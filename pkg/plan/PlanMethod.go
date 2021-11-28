@@ -29,11 +29,11 @@ func PlanMethod(args []string, silent bool) (string, error) {
 	stripSpinner := ux.NewSpinner("Stripping Secrets", "Secrets Stripped", "Stripping Secrets Failed")
 
 	// Emit plan begin update to UI
-	comdb.PushComDBEvent(comdb.Update{
+	comdb.PushComDBEvent(comdb.Event{
 		Receiver:   "UI",
 		Timestamp:  time.Now().Unix(),
 		Command:    "plan",
-		Event:      "begin",
+		Type:       "begin",
 		Address:    "",
 		Attributes: make(map[string]interface{}),
 		Path:       workingDir,
@@ -61,22 +61,22 @@ func PlanMethod(args []string, silent bool) (string, error) {
 	stripSpinner.Success("Secrets Stripped")
 
 	// Emit plan end update to UI -> ask for confirmation
-	comdb.PushComDBEvent(comdb.Update{
+	comdb.PushComDBEvent(comdb.Event{
 		Receiver:   "UI",
 		Timestamp:  time.Now().Unix(),
 		Command:    "plan",
-		Event:      "end",
+		Type:       "end",
 		Address:    "",
 		Attributes: make(map[string]interface{}),
 		Path:       workingDir,
 		Received:   false,
 	})
 
-	comdb.PushComDBEvent(comdb.Update{
+	comdb.PushComDBEvent(comdb.Event{
 		Receiver:   "UI",
 		Timestamp:  time.Now().Unix(),
 		Command:    command,
-		Event:      "confirm",
+		Type:       "confirm",
 		Address:    "",
 		Attributes: make(map[string]interface{}),
 		Path:       workingDir,

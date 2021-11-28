@@ -34,7 +34,7 @@ func WriteComDB(updatedDB ComDB) error {
 	}
 
 	// Lock DB for write
-	LockComDB()
+	ToggleLockComDB(true)
 
 	// Write to Pluralith UI bus file (WriteFile replaces all file contents)
 	if writeErr := os.WriteFile(pluralithBus, updatedDBString, 0700); writeErr != nil {
@@ -42,7 +42,7 @@ func WriteComDB(updatedDB ComDB) error {
 	}
 
 	// Unlock DB after write
-	UnlockComDB()
+	ToggleLockComDB(false)
 
 	return nil
 }

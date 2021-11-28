@@ -23,11 +23,11 @@ func RunApply(command string, args []string) error {
 	)
 
 	// Emit confirm event
-	comdb.PushComDBEvent(comdb.Update{
+	comdb.PushComDBEvent(comdb.Event{
 		Receiver:   "UI",
 		Timestamp:  time.Now().Unix(),
-		Command:    command,
-		Event:      "confirm",
+		Command:    command, // UI can only mark as received when command is "apply" for some reason
+		Type:       "confirm",
 		Address:    "",
 		Attributes: make(map[string]interface{}),
 		Path:       workingDir,

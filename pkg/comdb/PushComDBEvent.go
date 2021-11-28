@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func PushComDBEvent(message Update) error {
+func PushComDBEvent(message Event) error {
 	// Read DB from disk
 	eventDB, readErr := ReadComDB()
 	if readErr != nil {

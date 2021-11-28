@@ -2,12 +2,15 @@ package comdb
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"path"
 
 	"github.com/fsnotify/fsnotify"
 )
+
+func handleComDBEvent() {
+
+}
 
 func WatchComDB() (bool, error) {
 	// Set up path variables
@@ -51,43 +54,20 @@ func WatchComDB() (bool, error) {
 			switch {
 			// If a write event happens
 			case event.Op&fsnotify.Write == fsnotify.Write:
-				// Read bus file content
-				// readData, readErr := os.ReadFile(pluralithBus)
-				// if readErr != nil {
-				// 	return false, readErr
-				// }
-
-				// // Parse bus file content to JSON
-				// parsedData, parseErr := auxiliary.ParseJson(string(readData))
-				// if parseErr != nil {
-				// 	return false, parseErr
-				// }
-
+				// Read comDB from file
 				eventDB, readErr := ReadComDB()
 				if readErr != nil {
 					return false, readErr
 				}
 
-				comDBEvents := eventDB.Events
-
-				for _, event := range comDBEvents {
-
-					if event.Path == workingDir && event.Receiver == "CLI" && !event.Received {
-						fmt.Println(event)
+				// Iteratve over comDB events
+				for _, event := range eventDB.Events {
+					// Filter for confirm events (the only events targeted at CLI)
+					if event.Path == workingDir && event.Receiver == "CLI" && !event.Received && event.Type == "confirmed" {
+						MarkComDBReceived(event) // Mark event as received in comDB
+						return true, nil
 					}
 				}
-
-				// If path of latest bus file update is current working directory -> matching terraform project
-				// if parsedData["Path"] == workingDir {
-				// 	// If event is "confirmed" -> Execute apply, otherwise -> cancel
-				// 	if parsedData["Event"] == "confirm" {
-				// 		return true, nil
-				// 	} else {
-				// 		return false, nil
-				// 	}
-				// }
-
-				return false, nil
 			}
 		// Handle watcher error
 		case err := <-watcherInstance.Errors:

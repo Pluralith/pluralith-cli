@@ -27,11 +27,11 @@ func StreamCommand(command string, args []string) error {
 	}
 
 	// Emit apply begin update to UI
-	comdb.PushComDBEvent(comdb.Update{
+	comdb.PushComDBEvent(comdb.Event{
 		Receiver:   "UI",
 		Timestamp:  time.Now().Unix(),
-		Command:    command,
-		Event:      "begin",
+		Command:    "apply",
+		Type:       "begin",
 		Address:    "",
 		Attributes: make(map[string]interface{}),
 		Path:       workingDir,
@@ -89,11 +89,11 @@ func StreamCommand(command string, args []string) error {
 
 			// NOT NECESSARY -> Update plan json and UI will watch those file changes
 			// // Emit current event update to UI
-			comdb.PushComDBEvent(comdb.Update{
+			comdb.PushComDBEvent(comdb.Event{
 				Receiver:   "UI",
 				Timestamp:  time.Now().Unix(),
-				Command:    command,
-				Event:      strings.Split(event, "_")[1],
+				Command:    "apply",
+				Type:       strings.Split(event, "_")[1],
 				Address:    address,
 				Attributes: make(map[string]interface{}),
 				Path:       workingDir,
@@ -103,11 +103,11 @@ func StreamCommand(command string, args []string) error {
 	}
 
 	// Emit apply start update to UI
-	comdb.PushComDBEvent(comdb.Update{
+	comdb.PushComDBEvent(comdb.Event{
 		Receiver:   "UI",
 		Timestamp:  time.Now().Unix(),
-		Command:    command,
-		Event:      "end",
+		Command:    "apply",
+		Type:       "end",
 		Address:    "",
 		Attributes: make(map[string]interface{}),
 		Path:       workingDir,
