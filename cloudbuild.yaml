@@ -6,7 +6,8 @@ steps:
 - name: 'golang'
   entrypoint: gox
   args: ['-os="linux darwin windows"', '-arch="amd64"', '-output="./dist/pluralith-cli_v0.0.1_{{.OS}}_{{.Arch}}"']
-- name: gcr.io/cloud-builders/gsutil
+  dir: 'app'
+  - name: gcr.io/cloud-builders/gsutil
   args: ["-m", "rsync", "-r", "-c", "-d", "./dist", "gs://pluralith-cli-releases"]
 options:
   volumes:
