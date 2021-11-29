@@ -24,3 +24,7 @@ dist/
 # Others
 release.sh
 .DS_Store
+
+# Terraform
+.terraform*
+*.tfstate*
