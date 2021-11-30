@@ -30,14 +30,14 @@ func PlanMethod(args []string, silent bool) (string, error) {
 
 	// Emit plan begin update to UI
 	comdb.PushComDBEvent(comdb.Event{
-		Receiver:   "UI",
-		Timestamp:  time.Now().Unix(),
-		Command:    "plan",
-		Type:       "begin",
-		Address:    "",
-		Attributes: make(map[string]interface{}),
-		Path:       workingDir,
-		Received:   false,
+		Receiver:  "UI",
+		Timestamp: time.Now().Unix(),
+		Command:   "plan",
+		Type:      "begin",
+		Address:   "",
+		Instances: make([]interface{}, 0),
+		Path:      workingDir,
+		Received:  false,
 	})
 
 	// Run terraform plan
@@ -62,25 +62,25 @@ func PlanMethod(args []string, silent bool) (string, error) {
 
 	// Emit plan end update to UI -> ask for confirmation
 	comdb.PushComDBEvent(comdb.Event{
-		Receiver:   "UI",
-		Timestamp:  time.Now().Unix(),
-		Command:    "plan",
-		Type:       "end",
-		Address:    "",
-		Attributes: make(map[string]interface{}),
-		Path:       workingDir,
-		Received:   false,
+		Receiver:  "UI",
+		Timestamp: time.Now().Unix(),
+		Command:   "plan",
+		Type:      "end",
+		Address:   "",
+		Instances: make([]interface{}, 0),
+		Path:      workingDir,
+		Received:  false,
 	})
 
 	comdb.PushComDBEvent(comdb.Event{
-		Receiver:   "UI",
-		Timestamp:  time.Now().Unix(),
-		Command:    command,
-		Type:       "confirm",
-		Address:    "",
-		Attributes: make(map[string]interface{}),
-		Path:       workingDir,
-		Received:   false,
+		Receiver:  "UI",
+		Timestamp: time.Now().Unix(),
+		Command:   command,
+		Type:      "confirm",
+		Address:   "",
+		Instances: make([]interface{}, 0),
+		Path:      workingDir,
+		Received:  false,
 	})
 
 	return planExecutionPath, nil

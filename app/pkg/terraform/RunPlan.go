@@ -36,14 +36,14 @@ func RunPlan(command string) (string, error) {
 	planSpinner.Start()
 	// Emit plan begin update to UI
 	comdb.PushComDBEvent(comdb.Event{
-		Receiver:   "UI",
-		Timestamp:  time.Now().Unix(),
-		Command:    "plan",
-		Type:       "begin",
-		Address:    "",
-		Attributes: make(map[string]interface{}),
-		Path:       workingDir,
-		Received:   false,
+		Receiver:  "UI",
+		Timestamp: time.Now().Unix(),
+		Command:   "plan",
+		Type:      "begin",
+		Address:   "",
+		Instances: make([]interface{}, 0),
+		Path:      workingDir,
+		Received:  false,
 	})
 
 	// Constructing command to execute
@@ -76,14 +76,14 @@ func RunPlan(command string) (string, error) {
 
 	// Emit plan end update to UI
 	comdb.PushComDBEvent(comdb.Event{
-		Receiver:   "UI",
-		Timestamp:  time.Now().Unix(),
-		Command:    "plan",
-		Type:       "end",
-		Address:    "",
-		Attributes: make(map[string]interface{}),
-		Path:       workingDir,
-		Received:   false,
+		Receiver:  "UI",
+		Timestamp: time.Now().Unix(),
+		Command:   "plan",
+		Type:      "end",
+		Address:   "",
+		Instances: make([]interface{}, 0),
+		Path:      workingDir,
+		Received:  false,
 	})
 
 	stripSpinner.Success()

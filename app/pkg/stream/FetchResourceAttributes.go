@@ -1,18 +1,20 @@
 package stream
 
-func FetchResourceAttributes(address string, stateObject map[string]interface{}) error {
+import (
+	"strings"
+)
 
-	// for _, resource := range stateObject["resources"].([]interface{}) {
-	// 	convertedResource := resource.(map[string]interface{})
-	// 	fmt.Println(convertedResource)
+func FetchResourceInstances(address string, stateObject map[string]interface{}) ([]interface{}, error) {
+	// Find match based on resource name
+	for _, item := range stateObject["resources"].([]interface{}) {
+		name := strings.Split(address, ".")[1]
+		itemMap := item.(map[string]interface{})
 
-	// 	// currentAddress := convertedResource["type"].(string) + convertedResource["name"].(string)
-	// 	// if currentAddress == address {
-	// 	// 	fmt.Println(resource)
-	// 	// 	fmt.Println("- - - - - - - -")
-	// 	// }
-	// }
-	// fmt.Println(formattedJson)
+		// If resource with name present
+		if itemMap["name"] == name {
+			return itemMap["instances"].([]interface{}), nil
+		}
+	}
 
-	return nil
+	return make([]interface{}, 0), nil
 }

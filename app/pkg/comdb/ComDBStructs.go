@@ -7,12 +7,12 @@ type ComDB struct {
 }
 
 type Event struct {
-	Receiver   string
-	Timestamp  int64
-	Command    string
-	Type       string
-	Address    string
-	Attributes map[string]interface{}
-	Path       string
-	Received   bool
+	Receiver  string
+	Timestamp int64
+	Command   string
+	Type      string
+	Address   string
+	Instances []interface{}
+	Path      string
+	Received  bool
 }

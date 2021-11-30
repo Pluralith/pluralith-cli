@@ -28,14 +28,14 @@ func StreamCommand(command string, args []string) error {
 
 	// Emit apply begin update to UI
 	comdb.PushComDBEvent(comdb.Event{
-		Receiver:   "UI",
-		Timestamp:  time.Now().Unix(),
-		Command:    "apply",
-		Type:       "begin",
-		Address:    "",
-		Attributes: make(map[string]interface{}),
-		Path:       workingDir,
-		Received:   false,
+		Receiver:  "UI",
+		Timestamp: time.Now().Unix(),
+		Command:   "apply",
+		Type:      "begin",
+		Address:   "",
+		Instances: make([]interface{}, 0),
+		Path:      workingDir,
+		Received:  false,
 	})
 
 	streamSpinner.Start()
@@ -77,43 +77,49 @@ func StreamCommand(command string, args []string) error {
 			return decodeErr
 		}
 
-		// If address is given
+		// If address is given -> Resource event
 		if address != "" {
-			// Fetch current tfstate from state file and strip secrets
-			fetchedState, resourceFound, fetchErr := FetchState(address, false)
-			if fetchErr != nil {
-				return fetchErr
+
+			var instances []interface{}
+			var fetchAttrErr error
+
+			// If event complete -> Fetch resource instances with attributes
+			if event == "apply_complete" {
+				fetchedState, fetchErr := FetchState(address)
+				if fetchErr != nil {
+					return fetchErr
+				}
+
+				instances, fetchAttrErr = FetchResourceInstances(address, fetchedState)
+				if fetchAttrErr != nil {
+					return fetchAttrErr
+				}
 			}
 
-			if resourceFound {
-				FetchResourceAttributes(address, fetchedState)
-			}
-
-			// NOT NECESSARY -> Update plan json and UI will watch those file changes
 			// // Emit current event update to UI
 			comdb.PushComDBEvent(comdb.Event{
-				Receiver:   "UI",
-				Timestamp:  time.Now().Unix(),
-				Command:    "apply",
-				Type:       strings.Split(event, "_")[1],
-				Address:    address,
-				Attributes: make(map[string]interface{}),
-				Path:       workingDir,
-				Received:   false,
+				Receiver:  "UI",
+				Timestamp: time.Now().Unix(),
+				Command:   "apply",
+				Type:      strings.Split(event, "_")[1],
+				Address:   address,
+				Instances: instances,
+				Path:      workingDir,
+				Received:  false,
 			})
 		}
 	}
 
 	// Emit apply start update to UI
 	comdb.PushComDBEvent(comdb.Event{
-		Receiver:   "UI",
-		Timestamp:  time.Now().Unix(),
-		Command:    "apply",
-		Type:       "end",
-		Address:    "",
-		Attributes: make(map[string]interface{}),
-		Path:       workingDir,
-		Received:   false,
+		Receiver:  "UI",
+		Timestamp: time.Now().Unix(),
+		Command:   "apply",
+		Type:      "end",
+		Address:   "",
+		Instances: make([]interface{}, 0),
+		Path:      workingDir,
+		Received:  false,
 	})
 
 	streamSpinner.Success()

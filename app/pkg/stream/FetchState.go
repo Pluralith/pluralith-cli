@@ -1,51 +1,36 @@
 package stream
 
 import (
-	"io/ioutil"
-	"os"
-	"path"
-	"strings"
-	"time"
-
+	"bytes"
+	"errors"
+	"fmt"
+	"os/exec"
 	"pluralith/pkg/auxiliary"
 )
 
-func FetchState(address string, isDestroy bool) (map[string]interface{}, bool, error) {
-	// Define working dir
-	workingDir, workingErr := os.Getwd()
-	if workingErr != nil {
-		return make(map[string]interface{}), false, workingErr
-	}
-	// Define variables
-	var stateString string
-	var resourceFound bool = false
-	var retries int = 0
+func FetchState(address string) (map[string]interface{}, error) {
+	// Constructing command to execute
+	cmd := exec.Command("terraform", "state", "pull")
 
-	// Catching the terraform state right on an apply event is a bit all over the place
-	// Sometimes the terraform.tfstate file is already updated, sometimes it isn't
-	// Therefore we use a while loop to continuously poll terraform.tfstate and check for the presence of the recently updated resource's name
-	// On apply -> should be present (should not equal isDestroy), on destroy -> shouldn't be present anymore (should equal isDestroy)
-	for resourceFound == isDestroy && retries <= 20 {
-		// Check if resource name has been found in string
-		resourceFound = strings.Contains(stateString, strings.Split(address, ".")[1])
-		// Introduce delay to avoid unnecessarily aggressive polling
-		time.Sleep(20 * time.Millisecond)
-		// Read tfstate file
-		stateBytes, stateErr := ioutil.ReadFile(path.Join(workingDir, "terraform.tfstate"))
-		// Convert read state to string
-		stateString = string(stateBytes) // Assign
-		if stateErr != nil {
-			return make(map[string]interface{}), false, stateErr
-		}
+	// Defining sinks for std data
+	var outputSink bytes.Buffer
+	var errorSink bytes.Buffer
+	// Redirecting command std data
+	cmd.Stdout = &outputSink
+	cmd.Stderr = &errorSink
 
-		retries += 1
+	// Running terraform command
+	if err := cmd.Run(); err != nil {
+		fmt.Println(errorSink.String())
+		// Handling error
+		return make(map[string]interface{}), errors.New("terraform command failed")
 	}
 
-	// Parsing state object
-	parsedState, parseErr := auxiliary.ParseJson(stateString) // FAILS ON DESTROY -> FIX
+	// Parse state received from terraform state pull
+	parsedState, parseErr := auxiliary.ParseJson(outputSink.String()) // FAILS ON DESTROY -> FIX
 	if parseErr != nil {
-		return make(map[string]interface{}), false, parseErr
+		return make(map[string]interface{}), parseErr
 	}
 
-	return parsedState, resourceFound, nil
+	return parsedState, nil
 }
