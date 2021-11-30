@@ -1,6 +1,11 @@
 // - - Pluralith CLI CI/CD Infrastructure - -
 
 terraform {
+  backend "gcs" {
+    bucket = "pluralith-infrastructure-state"
+    prefix = "pluralith-cli"
+  }
+  
   required_providers {
     google = {
       source = "hashicorp/google"
