@@ -1,13 +1,19 @@
 steps:
-# Install gox
+# Build macOS binary
 - name: 'golang'
-  args: ['go', 'install', 'github.com/mitchellh/gox@latest']
-# Build binaries for target OS list
-- name: 'golang'
-  args: ['gox', '-os', '"linux darwin windows"', '-arch', '"amd64"', '-output', '"./dist/pluralith-cli_v0.0.1_{{.OS}}_{{.Arch}}"']
+  args: ['env', 'GOOS=darwin', 'GOARCH=amd64', 'go', 'build', '-o', 'dist/pluralith_cli_darwin_amd64']
   dir: 'app'
+# Build Linux binary
+- name: 'golang'
+  args: ['env', 'GOOS=linux', 'GOARCH=amd64', 'go', 'build', '-o', 'dist/pluralith_cli_linux_amd64']
+  dir: 'app'
+# Build Windows binary
+- name: 'golang'
+  args: ['env', 'GOOS=windows', 'GOARCH=amd64', 'go', 'build', '-o', 'dist/pluralith_cli_windows_amd64']
+  dir: 'app'
+# Upload to release GCS bucket
 - name: gcr.io/cloud-builders/gsutil
-  args: ["-m", "rsync", "-r", "-c", "-d", "./dist", "gs://pluralith-cli-releases"]
+  args: ["-m", "rsync", "-r", "-c", "-d", "app/dist/", "gs://pluralith-cli-releases"]
 options:
   volumes:
   - name: 'go-modules'
