@@ -8,10 +8,6 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
-func handleComDBEvent() {
-
-}
-
 func WatchComDB() (bool, error) {
 	// Set up path variables
 	workingDir, _ := os.Getwd()

@@ -30,7 +30,7 @@ func StreamCommand(command string, args []string) error {
 	comdb.PushComDBEvent(comdb.Event{
 		Receiver:  "UI",
 		Timestamp: time.Now().Unix(),
-		Command:   "apply",
+		Command:   command,
 		Type:      "begin",
 		Address:   "",
 		Instances: make([]interface{}, 0),
@@ -39,6 +39,7 @@ func StreamCommand(command string, args []string) error {
 	})
 
 	streamSpinner.Start()
+
 	// Constructing command to execute
 	cmd := exec.Command("terraform", append([]string{"apply"}, args...)...)
 
@@ -100,7 +101,7 @@ func StreamCommand(command string, args []string) error {
 			comdb.PushComDBEvent(comdb.Event{
 				Receiver:  "UI",
 				Timestamp: time.Now().Unix(),
-				Command:   "apply",
+				Command:   command,
 				Type:      strings.Split(event, "_")[1],
 				Address:   address,
 				Instances: instances,
@@ -114,7 +115,7 @@ func StreamCommand(command string, args []string) error {
 	comdb.PushComDBEvent(comdb.Event{
 		Receiver:  "UI",
 		Timestamp: time.Now().Unix(),
-		Command:   "apply",
+		Command:   command,
 		Type:      "end",
 		Address:   "",
 		Instances: make([]interface{}, 0),

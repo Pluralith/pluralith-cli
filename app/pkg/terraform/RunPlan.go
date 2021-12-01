@@ -88,5 +88,5 @@ func RunPlan(command string) (string, error) {
 
 	stripSpinner.Success()
 
-	return "", nil
+	return workingPlan, nil
 }
