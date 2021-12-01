@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"time"
 )
 
 func ReadComDB() (ComDB, error) {
@@ -29,18 +30,36 @@ func ReadComDB() (ComDB, error) {
 		return eventDB, nil
 	}
 
-	// Parse DB string and handle parse error
-	parseErr := json.Unmarshal([]byte(eventDBString), &eventDB)
-	if parseErr != nil {
-		var newErr error
+	// Initialize variables for retry logic
+	// var parseSuccess bool = false
+	var parseRetries int = 0
 
-		eventDB, newErr = InitComDB() // Create empty DB file
-		if newErr != nil {
-			fmt.Println(newErr.Error())
-			return ComDB{}, newErr
+	// Retry parsing as long as criteria are met
+	for parseRetries <= 10 {
+		// Get file length to check if comDB file is empty
+		fileSize, statErr := os.Stat(pluralithBus)
+		if statErr != nil {
+			return ComDB{}, statErr
 		}
 
-		return eventDB, nil
+		// Parse DB string and handle parse error
+		parseErr := json.Unmarshal([]byte(eventDBString), &eventDB)
+		if parseErr != nil && fileSize.Size() == 0 { // If parsing fails and file is empty -> New comDB needs to initialized
+			var newErr error
+
+			eventDB, newErr = InitComDB() // Create empty DB file
+			if newErr != nil {
+				fmt.Println(newErr.Error())
+				return ComDB{}, newErr
+			}
+
+			return eventDB, nil
+		}
+
+		// Increment retries
+		parseRetries += 1
+		// Introduce delay to avoid unnecessarily aggressive polling
+		time.Sleep(50 * time.Millisecond)
 	}
 
 	// Return parsed DB content

@@ -12,8 +12,8 @@ func PushComDBEvent(message Event) error {
 		return readErr
 	}
 
-	// Append new event to existing event list
-	eventDB.Events = append(eventDB.Events, message)
+	// Prepend new event to existing event list
+	eventDB.Events = append([]Event{message}, eventDB.Events...)
 
 	// Write updated DB to disk
 	writeErr := WriteComDB(eventDB)
