@@ -12,7 +12,7 @@ import (
 
 func WriteComDB(updatedDB ComDB) error {
 	var writeRetries int = 0
-	var processId int64 = 0
+	var lock bool = true // Initializing local lock -> default: locked
 
 	// Generate proper path
 	homeDir, _ := os.UserHomeDir()
@@ -25,38 +25,41 @@ func WriteComDB(updatedDB ComDB) error {
 		return marshalErr
 	}
 
-	fmt.Println(dblock.LockInstance.Lock)
-
 	// Wait until DB is unlocked
-	for dblock.LockInstance.Lock && dblock.LockInstance.Id != processId && writeRetries < 10 {
+	for lock && writeRetries < 10 {
 		lockObject, readErr := dblock.ReadDBLock()
 		if readErr != nil {
 			return readErr
 		}
 
-		// Set lock to current value in file
-		dblock.LockInstance.SetLock(lockObject.Lock)
-		processId = dblock.LockInstance.Id
+		// Unlocking writes for current process if lock in file belongs to current process id
+		if lockObject.Id == dblock.LockInstance.Id {
+			lock = false
+		}
+
+		// Unlocking writes for current process if comDB is not locked
+		lock = lockObject.Lock
+
+		// Increment retries
+		writeRetries += 1
 		// Introduce random delay until next try (between 50 and 100 ms)
 		time.Sleep(time.Duration(rand.Intn(100-50)+50) * time.Millisecond)
 	}
 
-	// eventDB, readErr := ReadComDB()
-	// 	if readErr != nil {
-	// 		fmt.Println(marshalErr.Error())
-	// 		return readErr
-	// 	}
-
-	// Lock DB for write
-	// ToggleLockComDB(true)
+	// Lock comDB before write
+	if lockErr := dblock.UpdateDBLock(true); lockErr != nil {
+		return lockErr
+	}
 
 	// Write to Pluralith UI bus file (WriteFile replaces all file contents)
 	if writeErr := os.WriteFile(pluralithBus, updatedDBString, 0700); writeErr != nil {
 		return writeErr
 	}
 
-	// Unlock DB after write
-	// ToggleLockComDB(false)
+	// Unlock comDB after write
+	if unlockErr := dblock.UpdateDBLock(false); unlockErr != nil {
+		return unlockErr
+	}
 
 	return nil
 }

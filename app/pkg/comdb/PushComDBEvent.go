@@ -2,6 +2,7 @@ package comdb
 
 import (
 	"fmt"
+	"time"
 )
 
 func PushComDBEvent(message Event) error {
@@ -21,6 +22,9 @@ func PushComDBEvent(message Event) error {
 		fmt.Println(writeErr.Error())
 		return writeErr
 	}
+
+	// Introduce small delay to ensure proper event pushes
+	time.Sleep(50 * time.Millisecond)
 
 	return nil
 }
