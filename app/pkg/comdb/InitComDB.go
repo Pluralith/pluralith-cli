@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path"
+	"pluralith/pkg/dblock"
 )
 
 func InitComDB() (ComDB, error) {
@@ -28,6 +29,9 @@ func InitComDB() (ComDB, error) {
 	if writeErr := os.WriteFile(pluralithBus, emptyDBString, 0700); writeErr != nil {
 		return ComDB{}, writeErr
 	}
+
+	// Instantiate comDB lock
+	dblock.InitDBLock()
 
 	return emptyDB, nil
 }

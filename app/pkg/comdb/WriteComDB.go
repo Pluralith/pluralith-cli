@@ -3,13 +3,16 @@ package comdb
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"os"
 	"path"
+	"pluralith/pkg/dblock"
+	"time"
 )
 
 func WriteComDB(updatedDB ComDB) error {
-	// Initialize variables
-	var lock bool = true
+	var writeRetries int = 0
+	var processId int64 = 0
 
 	// Generate proper path
 	homeDir, _ := os.UserHomeDir()
@@ -22,16 +25,27 @@ func WriteComDB(updatedDB ComDB) error {
 		return marshalErr
 	}
 
+	fmt.Println(dblock.LockInstance.Lock)
+
 	// Wait until DB is unlocked
-	for lock {
-		eventDB, readErr := ReadComDB()
+	for dblock.LockInstance.Lock && dblock.LockInstance.Id != processId && writeRetries < 10 {
+		lockObject, readErr := dblock.ReadDBLock()
 		if readErr != nil {
-			fmt.Println(marshalErr.Error())
 			return readErr
 		}
 
-		lock = eventDB.Locked
+		// Set lock to current value in file
+		dblock.LockInstance.SetLock(lockObject.Lock)
+		processId = dblock.LockInstance.Id
+		// Introduce random delay until next try (between 50 and 100 ms)
+		time.Sleep(time.Duration(rand.Intn(100-50)+50) * time.Millisecond)
 	}
+
+	// eventDB, readErr := ReadComDB()
+	// 	if readErr != nil {
+	// 		fmt.Println(marshalErr.Error())
+	// 		return readErr
+	// 	}
 
 	// Lock DB for write
 	// ToggleLockComDB(true)

@@ -3,6 +3,7 @@ package terraform
 import (
 	"fmt"
 	"pluralith/pkg/auxiliary"
+	"pluralith/pkg/dblock"
 	"pluralith/pkg/ux"
 )
 
@@ -10,6 +11,9 @@ func RunTerraform(command string, args []string) error {
 	// Print running message
 	ux.PrintFormatted("⠿", []string{"blue"})
 	fmt.Println(RunMessages[command].([]string)[0])
+
+	// Initialize comDB locking for this process instance
+	dblock.LockInstance.GenerateLock()
 
 	// Manually parse arg (due to cobra lacking a feature)
 	parsedArgs, parsedArgMap := auxiliary.ParseArgs(args, []string{})
