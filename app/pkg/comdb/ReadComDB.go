@@ -46,14 +46,13 @@ func ReadComDB() (ComDB, error) {
 
 	// If read retries hit 11
 	if readRetries == 11 {
-		var newErr error
-		// fmt.Println("failed to read repeatedly -> INIT NEW COMDB")
-
 		// Init new ComDB
-		comDB, newErr = InitComDB()
+		newDB, newErr := InitComDB()
 		if newErr != nil {
 			return ComDB{}, newErr
 		}
+
+		return newDB, nil
 	}
 
 	// Attempt to parse ComDB
@@ -72,6 +71,23 @@ func ReadComDB() (ComDB, error) {
 
 	// If parse retries hit 11
 	if parseRetries == 11 {
+		// Get file info
+		statFile, statErr := os.Stat(pluralithBus)
+		if statErr != nil {
+			return ComDB{}, statErr
+		}
+
+		// If file is empty -> Init new comDB
+		if statFile.Size() == 0 {
+			// Init new ComDB
+			newDB, newErr := InitComDB()
+			if newErr != nil {
+				return ComDB{}, newErr
+			}
+
+			return newDB, nil
+		}
+
 		return ComDB{}, errors.New("could not parse comDB")
 	}
 
