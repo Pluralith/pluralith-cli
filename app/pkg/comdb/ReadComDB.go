@@ -2,7 +2,7 @@ package comdb
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
 	"os"
 	"path"
 	"time"
@@ -10,58 +10,71 @@ import (
 
 func ReadComDB() (ComDB, error) {
 	// Initialize variables
-	var eventDB ComDB
+	var comDB ComDB
+	var comDBRaw []byte
+	var readRetries int = 0
+	var parseRetries int = 0
 
 	// Generate proper path
 	homeDir, _ := os.UserHomeDir()
 	pluralithBus := path.Join(homeDir, "Pluralith", "pluralith_bus.json")
 
-	// Read DB file and handle non-existence
-	eventDBString, readErr := os.ReadFile(pluralithBus)
-	if readErr != nil {
-		var newErr error
+	// Read file
+	// -> If read fails after 10 retries
+	//		-> File does not exist
+	//			-> Init ComDB
+	// -> Else
+	// 		-> Unmarshal file
+	// 				-> If unmarshal fails after 10 retries
+	//					-> File doesn't contain proper ComDB
+	//						-> Init ComDB
 
-		eventDB, newErr = InitComDB() // Create empty DB file
-		if newErr != nil {
-			fmt.Println(newErr.Error())
-			return ComDB{}, newErr
+	// Attempt to read file
+	for readRetries <= 10 {
+		var readErr error
+
+		comDBRaw, readErr = os.ReadFile(pluralithBus)
+		if readErr != nil {
+			readRetries += 1
+		} else {
+			break
 		}
 
-		return eventDB, nil
-	}
-
-	// Initialize variables for retry logic
-	// var parseSuccess bool = false
-	var parseRetries int = 0
-
-	// Retry parsing as long as criteria are met
-	for parseRetries <= 10 {
-		// Get file length to check if comDB file is empty
-		fileSize, statErr := os.Stat(pluralithBus)
-		if statErr != nil {
-			return ComDB{}, statErr
-		}
-
-		// Parse DB string and handle parse error
-		parseErr := json.Unmarshal([]byte(eventDBString), &eventDB)
-		if parseErr != nil && fileSize.Size() == 0 { // If parsing fails and file is empty -> New comDB needs to initialized
-			var newErr error
-
-			eventDB, newErr = InitComDB() // Create empty DB file
-			if newErr != nil {
-				fmt.Println(newErr.Error())
-				return ComDB{}, newErr
-			}
-
-			return eventDB, nil
-		}
-
-		// Increment retries
-		parseRetries += 1
 		// Introduce delay to avoid unnecessarily aggressive polling
 		time.Sleep(50 * time.Millisecond)
 	}
 
+	// If read retries hit 11
+	if readRetries == 11 {
+		var newErr error
+		// fmt.Println("failed to read repeatedly -> INIT NEW COMDB")
+
+		// Init new ComDB
+		comDB, newErr = InitComDB()
+		if newErr != nil {
+			return ComDB{}, newErr
+		}
+	}
+
+	// Attempt to parse ComDB
+	for parseRetries <= 10 {
+		parseErr := json.Unmarshal(comDBRaw, &comDB)
+		if parseErr != nil { // If parsing fails and file is empty -> New comDB needs to initialized
+			// Increment retries
+			parseRetries += 1
+		} else {
+			break
+		}
+
+		// Introduce delay to avoid unnecessarily aggressive polling
+		time.Sleep(100 * time.Millisecond)
+	}
+
+	// If parse retries hit 11
+	if parseRetries == 11 {
+		return ComDB{}, errors.New("could not parse comDB")
+	}
+
 	// Return parsed DB content
-	return eventDB, nil
+	return comDB, nil
 }
