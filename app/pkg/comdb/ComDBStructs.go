@@ -1,7 +1,6 @@
 package comdb
 
 type ComDB struct {
-	Locked bool
 	Events []Event
 	Errors []map[string]interface{}
 }

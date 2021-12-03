@@ -14,7 +14,6 @@ func InitComDB() (ComDB, error) {
 
 	// Create empty DB template to write to file
 	emptyDB := ComDB{
-		Locked: false,
 		Events: make([]Event, 0),
 		Errors: make([]map[string]interface{}, 0),
 	}

@@ -35,10 +35,10 @@ func WriteComDB(updatedDB ComDB) error {
 		// Unlocking writes for current process if lock in file belongs to current process id
 		if lockObject.Id == dblock.LockInstance.Id {
 			lock = false
+		} else {
+			// Unlocking writes for current process if comDB is not locked
+			lock = lockObject.Lock
 		}
-
-		// Unlocking writes for current process if comDB is not locked
-		lock = lockObject.Lock
 
 		// Increment retries
 		writeRetries += 1
