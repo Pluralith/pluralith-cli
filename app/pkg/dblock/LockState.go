@@ -2,7 +2,9 @@ package dblock
 
 import (
 	"encoding/json"
+	"fmt"
 	"math/rand"
+	"time"
 )
 
 // Lock struct
@@ -13,7 +15,11 @@ type Lock struct {
 
 // Populate new lock instance
 func (L *Lock) GenerateLock() {
+	// Set seed for rand
+	rand.Seed(time.Now().UnixNano())
+
 	L.Id = int64(rand.Intn(1000000))
+	fmt.Println("  Process Id is: ", L.Id)
 	L.Lock = true
 }
 

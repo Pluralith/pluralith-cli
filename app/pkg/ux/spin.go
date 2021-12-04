@@ -19,8 +19,8 @@ type Spin struct {
 }
 
 // Defining custom color print functions
-var printBlue = color.New(color.FgBlue).SprintFunc()
-var printRed = color.New(color.FgRed).SprintFunc()
+var printBlue = color.New(color.FgHiBlue).SprintFunc()
+var printRed = color.New(color.FgHiRed).SprintFunc()
 
 // Method to instantiate customer spinner
 func NewSpinner(spinMsg string, successMsg string, failMsg string) Spin {
@@ -29,7 +29,7 @@ func NewSpinner(spinMsg string, successMsg string, failMsg string) Spin {
 	// Adding spinning message
 	instance.Suffix = " " + spinMsg
 	// Chaning color
-	instance.Color("blue")
+	instance.Color("fgHiBlue")
 
 	// Returning custom spin instance
 	s := Spin{spinMsg, successMsg, failMsg, instance}

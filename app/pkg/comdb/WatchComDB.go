@@ -59,9 +59,15 @@ func WatchComDB() (bool, error) {
 				// Iteratve over comDB events
 				for _, event := range eventDB.Events {
 					// Filter for confirm events (the only events targeted at CLI)
-					if event.Path == workingDir && event.Receiver == "CLI" && !event.Received && event.Type == "confirmed" {
-						MarkComDBReceived(event) // Mark event as received in comDB
-						return true, nil
+					if event.Path == workingDir && event.Receiver == "CLI" && !event.Received {
+						// Mark event as received in comDB
+						MarkComDBReceived(event)
+
+						if event.Type == "confirmed" {
+							return true, nil
+						} else {
+							return false, nil
+						}
 					}
 				}
 			}

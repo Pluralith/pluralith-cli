@@ -6,7 +6,7 @@ import "github.com/fatih/color"
 
 // Function to print Pluralith head art
 func PrintHead() {
-	color.Blue(` _
+	color.HiBlue(` _
 |_)|    _ _ |._|_|_ 
 |  ||_|| (_||| | | |
 
@@ -17,8 +17,8 @@ func PrintHead() {
 func PrintFormatted(text string, styling []string) {
 	// Creating map with available styles
 	styleMap := map[string]color.Attribute{
-		"blue": color.FgBlue,
-		"red":  color.FgRed,
+		"blue": color.FgHiBlue,
+		"red":  color.FgHiRed,
 		"bold": color.Bold,
 	}
 
