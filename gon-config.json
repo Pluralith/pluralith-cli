@@ -1,0 +1,14 @@
+{
+  "source": ["./dist/unsigned/pluralith_cli_macos"],
+  "bundle_id": "com.pluralith.cli",
+  "apple_id": {
+    "username": "danielputzer.work@gmail.com",
+    "password": "@env:AC_PASSWORD"
+  },
+  "sign" :{
+    "application_identity": "Developer ID Application: Daniel Putzer (8BRYZRVLK7)"
+  },
+  "zip" :{
+    "output_path": "./dist/signed/pluralith_cli_macos.zip"
+  }
+}
