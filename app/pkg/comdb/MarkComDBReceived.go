@@ -1,14 +1,17 @@
 package comdb
 
 import (
+	"fmt"
 	"reflect"
 )
 
 func MarkComDBReceived(event Event) error {
+	functionName := "MarkComDBReceived"
+
 	// Read comDB from file
 	comDB, readErr := ReadComDB()
 	if readErr != nil {
-		return readErr
+		return fmt.Errorf("reading ComDB failed -> %v: %w", functionName, readErr)
 	}
 
 	// Iterate over events
@@ -19,8 +22,11 @@ func MarkComDBReceived(event Event) error {
 		}
 	}
 
-	// Write updated comDB to file
-	WriteComDB(comDB)
+	// Write updated DB to disk
+	writeErr := WriteComDB(comDB)
+	if writeErr != nil {
+		return fmt.Errorf("writing to ComDB failed -> %v: %w", functionName, writeErr)
+	}
 
 	return nil
 }

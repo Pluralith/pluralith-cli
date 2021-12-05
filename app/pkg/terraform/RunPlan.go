@@ -2,7 +2,6 @@ package terraform
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -14,10 +13,12 @@ import (
 )
 
 func RunPlan(command string) (string, error) {
+	functionName := "RunPlan"
+
 	// Get working directory
 	workingDir, workingErr := os.Getwd()
 	if workingErr != nil {
-		return "", workingErr
+		return "", fmt.Errorf("%v: %w", functionName, workingErr)
 	}
 
 	// Constructing execution plan path
@@ -60,9 +61,8 @@ func RunPlan(command string) (string, error) {
 
 	// Run terraform plan
 	if err := cmd.Run(); err != nil {
-		fmt.Println(errorSink.String())
 		planSpinner.Fail()
-		return errorSink.String(), errors.New("Terraform plan failed")
+		return errorSink.String(), fmt.Errorf("%v: %w", functionName, err)
 	}
 
 	planSpinner.Success()
@@ -71,7 +71,7 @@ func RunPlan(command string) (string, error) {
 	_, planJsonErr := plan.CreatePlanJson(workingPlan)
 	if planJsonErr != nil {
 		stripSpinner.Fail()
-		return "", planJsonErr
+		return "", fmt.Errorf("creating terraform plan json failed -> %v: %w", functionName, planJsonErr)
 	}
 
 	// Emit plan end update to UI

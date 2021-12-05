@@ -8,6 +8,8 @@ import (
 )
 
 func RunTerraform(command string, args []string) error {
+	functionName := "RunTerraform"
+
 	// Print running message
 	ux.PrintFormatted("⠿", []string{"blue"})
 	fmt.Println(RunMessages[command].([]string)[0])
@@ -29,7 +31,7 @@ func RunTerraform(command string, args []string) error {
 	// Run terraform plan to create execution plan
 	planPath, planErr := RunPlan(command)
 	if planErr != nil {
-		return planErr
+		return fmt.Errorf("running terraform plan failed -> %v: %w", functionName, planErr)
 	}
 
 	// Add plan path to arguments to run apply on already created execution plan
@@ -38,7 +40,7 @@ func RunTerraform(command string, args []string) error {
 	// Run terraform apply on existing execution plan
 	applyErr := RunApply(command, parsedArgs)
 	if applyErr != nil {
-		return applyErr
+		return fmt.Errorf("running terraform apply failed -> %v: %w", functionName, applyErr)
 	}
 
 	return nil

@@ -3,12 +3,15 @@ package comdb
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path"
 	"time"
 )
 
 func ReadComDB() (ComDB, error) {
+	functionName := "ReadComDB"
+
 	// Initialize variables
 	var comDB ComDB
 	var comDBRaw []byte
@@ -16,7 +19,11 @@ func ReadComDB() (ComDB, error) {
 	var parseRetries int = 0
 
 	// Generate proper path
-	homeDir, _ := os.UserHomeDir()
+	homeDir, homeErr := os.UserHomeDir()
+	if homeErr != nil {
+		return ComDB{}, fmt.Errorf("%v: %w", functionName, homeErr)
+	}
+
 	pluralithBus := path.Join(homeDir, "Pluralith", "pluralith_bus.json")
 
 	// Read file
@@ -49,7 +56,7 @@ func ReadComDB() (ComDB, error) {
 		// Init new ComDB
 		newDB, newErr := InitComDB()
 		if newErr != nil {
-			return ComDB{}, newErr
+			return ComDB{}, fmt.Errorf("initializing ComDB failed -> %v: %w", functionName, newErr)
 		}
 
 		return newDB, nil
@@ -74,7 +81,7 @@ func ReadComDB() (ComDB, error) {
 		// Get file info
 		statFile, statErr := os.Stat(pluralithBus)
 		if statErr != nil {
-			return ComDB{}, statErr
+			return ComDB{}, fmt.Errorf("could not get file information -> %v: %w", functionName, statErr)
 		}
 
 		// If file is empty -> Init new comDB
@@ -82,13 +89,13 @@ func ReadComDB() (ComDB, error) {
 			// Init new ComDB
 			newDB, newErr := InitComDB()
 			if newErr != nil {
-				return ComDB{}, newErr
+				return ComDB{}, fmt.Errorf("initializing ComDB failed -> %v: %w", functionName, newErr)
 			}
 
 			return newDB, nil
 		}
 
-		return ComDB{}, errors.New("could not parse comDB")
+		return ComDB{}, errors.New("parsing ComDB failed")
 	}
 
 	// Return parsed DB content

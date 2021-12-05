@@ -2,7 +2,7 @@ package plan
 
 import (
 	"bytes"
-	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -12,10 +12,12 @@ import (
 )
 
 func CreatePlanJson(planPath string) (string, error) {
+	functionName := "CreatePlanJson"
+
 	// Get working directory
 	workingDir, workingErr := os.Getwd()
 	if workingErr != nil {
-		return "", workingErr
+		return "", fmt.Errorf("%v: %w", functionName, workingErr)
 	}
 	// Construct file path for stripped state
 	strippedPath := path.Join(workingDir, "pluralith.state.stripped")
@@ -34,17 +36,19 @@ func CreatePlanJson(planPath string) (string, error) {
 
 	// Run terraform command
 	if err := cmd.Run(); err != nil {
-		return errorSink.String(), errors.New("terraform command failed")
+		return errorSink.String(), fmt.Errorf("terraform command failed -> %v: %w", functionName, err)
 	}
 
 	// Strip secrets from plan state json
 	strippedState, stripErr := strip.StripSecrets(outputSink.String(), []string{}, "gatewatch")
 	if stripErr != nil {
-		return "", stripErr
+		return "", fmt.Errorf("failed to strip secrets -> %v: %w", functionName, stripErr)
 	}
 
 	// Write stripped state to file
-	ioutil.WriteFile(strippedPath, []byte(strippedState), 0644)
+	if writeErr := ioutil.WriteFile(strippedPath, []byte(strippedState), 0700); writeErr != nil {
+		return "", fmt.Errorf("%v: %w", functionName, writeErr)
+	}
 
 	// Return path to execution plan
 	return strippedPath, nil

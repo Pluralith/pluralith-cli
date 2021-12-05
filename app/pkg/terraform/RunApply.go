@@ -1,6 +1,7 @@
 package terraform
 
 import (
+	"fmt"
 	"os"
 	"pluralith/pkg/comdb"
 	"pluralith/pkg/stream"
@@ -9,10 +10,12 @@ import (
 )
 
 func RunApply(command string, args []string) error {
+	functionName := "RunApply"
+
 	// Get working directory
 	workingDir, workingErr := os.Getwd()
 	if workingErr != nil {
-		return workingErr
+		return fmt.Errorf("%v: %w", functionName, workingErr)
 	}
 
 	// Instantiate spinner
@@ -39,7 +42,7 @@ func RunApply(command string, args []string) error {
 	// Watch for updates from UI and wait for confirmation
 	confirm, watchErr := comdb.WatchComDB()
 	if watchErr != nil {
-		return watchErr
+		return fmt.Errorf("instantiating ComDB watcher failed -> %v: %w", functionName, watchErr)
 	}
 
 	// Stream apply command output
@@ -47,7 +50,7 @@ func RunApply(command string, args []string) error {
 		confirmSpinner.Success()
 		streamErr := stream.StreamCommand(command, args)
 		if streamErr != nil {
-			return streamErr
+			return fmt.Errorf("streaming terraform command output failed -> %v: %w", functionName, streamErr)
 		}
 	} else {
 		confirmSpinner.Fail()

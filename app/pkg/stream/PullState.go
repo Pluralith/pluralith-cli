@@ -2,13 +2,14 @@ package stream
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"os/exec"
 	"pluralith/pkg/auxiliary"
 )
 
-func FetchState(address string) (map[string]interface{}, error) {
+func PullState(address string) (map[string]interface{}, error) {
+	functionName := "FetchState"
+
 	// Constructing command to execute
 	cmd := exec.Command("terraform", "state", "pull")
 
@@ -23,13 +24,13 @@ func FetchState(address string) (map[string]interface{}, error) {
 	if err := cmd.Run(); err != nil {
 		fmt.Println(errorSink.String())
 		// Handling error
-		return make(map[string]interface{}), errors.New("terraform command failed")
+		return make(map[string]interface{}), fmt.Errorf("%v: %w", functionName, err)
 	}
 
 	// Parse state received from terraform state pull
 	parsedState, parseErr := auxiliary.ParseJson(outputSink.String()) // FAILS ON DESTROY -> FIX
 	if parseErr != nil {
-		return make(map[string]interface{}), parseErr
+		return make(map[string]interface{}), fmt.Errorf("parsing terraform state failed -> %v: %w", functionName, parseErr)
 	}
 
 	return parsedState, nil

@@ -3,6 +3,7 @@ package stream
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"os"
 	"os/exec"
 	"strings"
@@ -13,6 +14,8 @@ import (
 )
 
 func StreamCommand(command string, args []string) error {
+	functionName := "StreamCommand"
+
 	// Instantiate spinners
 	streamSpinner := ux.NewSpinner("Apply Running", "Apply Completed", "Apply Failed")
 	// Adapting spinner to destroy command
@@ -23,7 +26,7 @@ func StreamCommand(command string, args []string) error {
 	// Get working directory for update emission
 	workingDir, workingErr := os.Getwd()
 	if workingErr != nil {
-		return workingErr
+		return fmt.Errorf("%v: %w", functionName, workingErr)
 	}
 
 	// Emit apply begin update to UI
@@ -53,14 +56,14 @@ func StreamCommand(command string, args []string) error {
 	outStream, outErr := cmd.StdoutPipe()
 	if outErr != nil {
 		streamSpinner.Fail()
-		return outErr
+		return fmt.Errorf("%v: %w", functionName, outErr)
 	}
 
 	// Run terraform command
 	cmdErr := cmd.Start()
 	if cmdErr != nil {
 		streamSpinner.Fail()
-		return cmdErr
+		return fmt.Errorf("%v: %w", functionName, cmdErr)
 	}
 
 	// Scan for command line updates
@@ -75,26 +78,21 @@ func StreamCommand(command string, args []string) error {
 		event, address, decodeErr := DecodeStateStream(jsonString)
 		if decodeErr != nil {
 			streamSpinner.Fail()
-			return decodeErr
+			return fmt.Errorf("%v: %w", functionName, decodeErr)
 		}
 
 		// If address is given -> Resource event
 		if address != "" {
-
 			var instances []interface{}
-			var fetchAttrErr error
 
 			// If event complete -> Fetch resource instances with attributes
 			if event == "apply_complete" {
-				fetchedState, fetchErr := FetchState(address)
+				fetchedState, fetchErr := PullState(address)
 				if fetchErr != nil {
-					return fetchErr
+					return fmt.Errorf("pulling terraform state failed -> %v: %w", functionName, fetchErr)
 				}
 
-				instances, fetchAttrErr = FetchResourceInstances(address, fetchedState)
-				if fetchAttrErr != nil {
-					return fetchAttrErr
-				}
+				instances = FetchResourceInstances(address, fetchedState)
 			}
 
 			// // Emit current event update to UI

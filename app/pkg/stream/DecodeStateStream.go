@@ -1,16 +1,18 @@
 package stream
 
 import (
-	"errors"
+	"fmt"
 	"pluralith/pkg/auxiliary"
 	"strings"
 )
 
 func DecodeStateStream(jsonString string) (string, string, error) {
+	functionName := "DecodeStateStream"
+
 	// Parsing state stream JSON
 	parsedState, parseErr := auxiliary.ParseJson(jsonString)
 	if parseErr != nil {
-		return "", "", errors.New("decode_state_stream: Could not parse json")
+		return "", "", fmt.Errorf("could not parse json -> %v: %w", functionName, parseErr)
 	}
 
 	// Retrieving event type from parsed state JSON

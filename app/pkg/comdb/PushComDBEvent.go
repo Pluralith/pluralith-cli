@@ -6,21 +6,21 @@ import (
 )
 
 func PushComDBEvent(message Event) error {
+	functionName := "PushComDBEvent"
+
 	// Read DB from disk
-	eventDB, readErr := ReadComDB()
+	comDB, readErr := ReadComDB()
 	if readErr != nil {
-		fmt.Println(readErr.Error())
-		return readErr
+		return fmt.Errorf("reading ComDB failed -> %v: %w", functionName, readErr)
 	}
 
 	// Prepend new event to existing event list
-	eventDB.Events = append([]Event{message}, eventDB.Events...)
+	comDB.Events = append([]Event{message}, comDB.Events...)
 
 	// Write updated DB to disk
-	writeErr := WriteComDB(eventDB)
+	writeErr := WriteComDB(comDB)
 	if writeErr != nil {
-		fmt.Println(writeErr.Error())
-		return writeErr
+		return fmt.Errorf("writing to ComDB failed -> %v: %w", functionName, writeErr)
 	}
 
 	// Introduce small delay to ensure proper event pushes

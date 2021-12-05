@@ -25,9 +25,11 @@ func (L *Lock) GenerateLock() {
 
 // Get lock string
 func (L *Lock) GetLockString() (string, error) {
+	functionName := "GetLockString"
+
 	lockBytes, marshalErr := json.MarshalIndent(L, "", " ")
 	if marshalErr != nil {
-		return "", marshalErr
+		return "", fmt.Errorf("%v: %w", functionName, marshalErr)
 	}
 
 	return string(lockBytes), nil
