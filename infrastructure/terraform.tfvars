@@ -1,4 +1,4 @@
-project_id = "pluralith-gcp"
+project_id = "pluralith"
 bucket_name = "pluralith-cli-releases"
 bucket_location = "us-central1"
 cloud_build_trigger_name = "pluralith-cli-build"
