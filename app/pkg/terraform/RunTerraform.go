@@ -10,13 +10,14 @@ import (
 func RunTerraform(command string, args []string) error {
 	functionName := "RunTerraform"
 
+	// Initialize various components of application
+	dblock.LockInstance.GenerateLock()
+	auxiliary.PathInstance.GeneratePaths()
+	auxiliary.FilterInstance.InitializeFilters()
+
 	// Print running message
 	ux.PrintFormatted("⠿", []string{"blue"})
 	fmt.Println(RunMessages[command].([]string)[0])
-
-	// Initialize comDB locking and proper paths for this process instance
-	dblock.LockInstance.GenerateLock()
-	auxiliary.PathInstance.GeneratePaths()
 
 	// Manually parse arg (due to cobra lacking a feature)
 	parsedArgs, parsedArgMap := auxiliary.ParseArgs(args, []string{})

@@ -7,7 +7,7 @@ import (
 )
 
 // Function to strip state of secrets
-func StripSecrets(jsonString string, targets []string, replacement string) (string, error) {
+func StripSecrets(jsonString string) (string, error) {
 	functionName := "StripSecrets"
 	// Parse JSON object from string
 	parsedJson, parseErr := auxiliary.ParseJson(jsonString)
@@ -16,7 +16,7 @@ func StripSecrets(jsonString string, targets []string, replacement string) (stri
 	}
 
 	// Call recursive function to strip secrets and replace values on every level in JSON
-	ReplaceSensitive(parsedJson, targets, replacement)
+	ReplaceSensitive(parsedJson)
 
 	// Format JSON for output
 	formattedJson, formatErr := json.MarshalIndent(parsedJson, "", " ")

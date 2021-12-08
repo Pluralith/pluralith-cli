@@ -40,7 +40,7 @@ func CreatePlanJson(planPath string) (string, error) {
 	}
 
 	// Strip secrets from plan state json
-	strippedState, stripErr := strip.StripSecrets(outputSink.String(), []string{}, "gatewatch")
+	strippedState, stripErr := strip.StripSecrets(outputSink.String())
 	if stripErr != nil {
 		return "", fmt.Errorf("failed to strip secrets -> %v: %w", functionName, stripErr)
 	}

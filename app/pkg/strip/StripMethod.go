@@ -7,9 +7,6 @@ import (
 	"pluralith/pkg/ux"
 )
 
-// Specifying sensitive keys (will later be done via external config)
-var sensitiveKeys = []string{"tags", "owner_id"}
-
 func StripMethod(args []string) {
 	// Fetching all state files in current working directory
 	stateFiles := FetchFiles(".tfstate")
@@ -20,7 +17,7 @@ func StripMethod(args []string) {
 
 	// Stripping secrets and writing stripped state to disk
 	for fileName, fileContent := range stateFiles {
-		strippedFile, err := StripSecrets(fileContent, sensitiveKeys, "gatewatch")
+		strippedFile, err := StripSecrets(fileContent)
 		if err != nil {
 			stripSpinner.Fail("Failed to strip secrets from %s", fileName)
 		} else {
