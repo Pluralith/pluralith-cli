@@ -2,7 +2,6 @@ package comdb
 
 type ComDB struct {
 	Events []Event
-	Errors []map[string]interface{}
 }
 
 type Event struct {

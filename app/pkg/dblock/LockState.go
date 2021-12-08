@@ -19,7 +19,6 @@ func (L *Lock) GenerateLock() {
 	rand.Seed(time.Now().UnixNano())
 
 	L.Id = int64(rand.Intn(1000000))
-	fmt.Println("  Process Id is: ", L.Id)
 	L.Lock = true
 }
 

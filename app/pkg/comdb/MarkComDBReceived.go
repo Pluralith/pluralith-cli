@@ -2,15 +2,17 @@ package comdb
 
 import (
 	"fmt"
+	"pluralith/pkg/auxiliary"
 	"reflect"
 )
 
 func MarkComDBReceived(event Event) error {
 	functionName := "MarkComDBReceived"
 
+	var comDB ComDB
+
 	// Read comDB from file
-	comDB, readErr := ReadComDB()
-	if readErr != nil {
+	if readErr := ReadComFile(auxiliary.PathInstance.ComDBPath, &comDB); readErr != nil {
 		return fmt.Errorf("reading ComDB failed -> %v: %w", functionName, readErr)
 	}
 

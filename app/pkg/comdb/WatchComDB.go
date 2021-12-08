@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"pluralith/pkg/auxiliary"
 
 	"github.com/fsnotify/fsnotify"
 )
@@ -12,30 +13,16 @@ import (
 func WatchComDB() (bool, error) {
 	functionName := "WatchComDB"
 
-	// Set up path variables
-	workingDir, workingErr := os.Getwd()
-	if workingErr != nil {
-		return false, fmt.Errorf("%v: %w", functionName, workingErr)
-	}
-
-	homeDir, homeErr := os.UserHomeDir()
-	if homeErr != nil {
-		return false, fmt.Errorf("%v: %w", functionName, homeErr)
-	}
-
-	pluralithDir := path.Join(homeDir, "Pluralith")
-	pluralithBus := path.Join(pluralithDir, "pluralith_bus.json")
-
 	// Create parent directories for path if they don't exist yet
-	if mkErr := os.MkdirAll(pluralithDir, 0700); mkErr != nil {
+	if mkErr := os.MkdirAll(path.Dir(auxiliary.PathInstance.ComDBPath), 0700); mkErr != nil {
 		return false, fmt.Errorf("%v: %w", functionName, mkErr)
 	}
 
 	// Check if bus file already exists
-	_, existErr := os.Stat(pluralithBus)
+	_, existErr := os.Stat(auxiliary.PathInstance.ComDBPath)
 	if errors.Is(existErr, os.ErrNotExist) {
 		// Create file if it doesn't exist yet
-		if _, fileMkErr := os.Create(pluralithBus); fileMkErr != nil {
+		if _, fileMkErr := os.Create(auxiliary.PathInstance.ComDBPath); fileMkErr != nil {
 			return false, fmt.Errorf("%v: %w", functionName, fileMkErr)
 		}
 	}
@@ -48,7 +35,7 @@ func WatchComDB() (bool, error) {
 	defer watcherInstance.Close()
 
 	// Add bus file to watcher
-	addErr := watcherInstance.Add(pluralithBus)
+	addErr := watcherInstance.Add(auxiliary.PathInstance.ComDBPath)
 	if addErr != nil {
 		return false, fmt.Errorf("%v: %w", functionName, addErr)
 	}
@@ -61,20 +48,20 @@ func WatchComDB() (bool, error) {
 			switch {
 			// If a write event happens
 			case event.Op&fsnotify.Write == fsnotify.Write:
+
+				var comDB ComDB
 				// Read comDB from file
-				eventDB, readErr := ReadComDB()
-				if readErr != nil {
+				if readErr := ReadComFile(auxiliary.PathInstance.ComDBPath, &comDB); readErr != nil {
 					return false, fmt.Errorf("reading ComDB failed -> %v: %w", functionName, readErr)
 				}
 
 				// Iteratve over comDB events
-				for _, event := range eventDB.Events {
+				for _, event := range comDB.Events {
 					// Filter for confirm events (the only events targeted at CLI)
-					if event.Path == workingDir && event.Receiver == "CLI" && !event.Received {
+					if event.Path == auxiliary.PathInstance.WorkingPath && event.Receiver == "CLI" && !event.Received {
 						// Mark event as received in comDB
-						markErr := MarkComDBReceived(event)
-						if markErr != nil {
-							return false, fmt.Errorf("could not mark event as received -> %v --- %v: %w", event.Type, functionName, readErr)
+						if markErr := MarkComDBReceived(event); markErr != nil {
+							return false, fmt.Errorf("could not mark event as received -> %v --- %v: %w", event.Type, functionName, markErr)
 						}
 
 						if event.Type == "confirmed" {

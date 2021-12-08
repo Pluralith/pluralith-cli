@@ -2,10 +2,11 @@ package comdb
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/rand"
 	"os"
-	"path"
+	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/dblock"
 	"time"
 )
@@ -15,14 +16,7 @@ func WriteComDB(updatedDB ComDB) error {
 
 	var writeRetries int = 0
 	var lock bool = true // Initializing local lock -> default: locked
-
-	// Generate proper path
-	homeDir, homeErr := os.UserHomeDir()
-	if homeErr != nil {
-		return fmt.Errorf("%v: %w", functionName, homeErr)
-	}
-
-	pluralithBus := path.Join(homeDir, "Pluralith", "pluralith_bus.json")
+	var lockObject dblock.Lock
 
 	// Stringify updated DB for write
 	updatedDBString, marshalErr := json.MarshalIndent(updatedDB, "", " ")
@@ -31,9 +25,8 @@ func WriteComDB(updatedDB ComDB) error {
 	}
 
 	// Wait until DB is unlocked
-	for lock && writeRetries < 10 {
-		lockObject, readErr := dblock.ReadDBLock()
-		if readErr != nil {
+	for lock && writeRetries <= 10 {
+		if readErr := ReadComFile(auxiliary.PathInstance.LockPath, &lockObject); readErr != nil {
 			return fmt.Errorf("reading Lock failed -> %v: %w", functionName, readErr)
 		}
 
@@ -51,13 +44,18 @@ func WriteComDB(updatedDB ComDB) error {
 		time.Sleep(time.Duration(rand.Intn(100-50)+50) * time.Millisecond)
 	}
 
+	// If parse retries hit 11
+	if writeRetries == 11 {
+		return errors.New("writing to ComDB failed")
+	}
+
 	// Lock comDB before write
 	if lockErr := dblock.UpdateDBLock(true); lockErr != nil {
 		return fmt.Errorf("failed to updated lock -> %v: %w", functionName, lockErr)
 	}
 
 	// Write to Pluralith UI bus file (WriteFile replaces all file contents)
-	if writeErr := os.WriteFile(pluralithBus, updatedDBString, 0700); writeErr != nil {
+	if writeErr := os.WriteFile(auxiliary.PathInstance.ComDBPath, updatedDBString, 0700); writeErr != nil {
 		return fmt.Errorf("%v: %w", functionName, writeErr)
 	}
 

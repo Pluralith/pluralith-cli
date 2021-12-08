@@ -3,6 +3,8 @@ package dblock
 import (
 	"fmt"
 	"math/rand"
+	"os"
+	"pluralith/pkg/auxiliary"
 	"time"
 )
 
@@ -15,9 +17,8 @@ func UpdateDBLock(lock bool) error {
 	}
 
 	// Write lock string to lock file
-	writeErr := WriteDBLock(lockString)
-	if writeErr != nil {
-		return fmt.Errorf("writing lock failed -> %v: %w", functionName, writeErr)
+	if writeErr := os.WriteFile(auxiliary.PathInstance.LockPath, []byte(lockString), 0700); writeErr != nil {
+		return fmt.Errorf("%v: %w", functionName, writeErr)
 	}
 
 	// Introduce random delay until next try (between 50 and 100 ms)

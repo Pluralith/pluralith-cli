@@ -9,8 +9,11 @@ import (
 
 func ReadDBLock() (Lock, error) {
 	functionName := "ReadDBLock"
+
 	// Initialize variables
+	var lockBytes []byte
 	var lockObject Lock
+	var readRetries int = 0
 
 	// Generate proper path
 	homeDir, homeErr := os.UserHomeDir()
@@ -20,14 +23,19 @@ func ReadDBLock() (Lock, error) {
 
 	pluralithLock := path.Join(homeDir, "Pluralith", "pluralith_bus.lock")
 
-	// Read lock file
-	lockBytes, readErr := os.ReadFile(pluralithLock)
-	if readErr != nil {
-		// Initialize new lock if file doesn't exist
-		if initErr := InitDBLock(); initErr != nil {
-			return Lock{}, fmt.Errorf("initializing lock failed -> %v: %w", functionName, initErr)
+	for readRetries <= 10 {
+		var readErr error
+
+		// Read lock file
+		lockBytes, readErr = os.ReadFile(pluralithLock) // TODO: Check if OS locked file
+		if readErr != nil {
+			// Initialize new lock if file doesn't exist
+			if initErr := InitDBLock(); initErr != nil {
+				return Lock{}, fmt.Errorf("initializing lock failed -> %v: %w", functionName, initErr)
+			}
+			return Lock{}, fmt.Errorf("%v: %w", functionName, readErr)
 		}
-		return Lock{}, fmt.Errorf("%v: %w", functionName, readErr)
+
 	}
 
 	// Unmarshal lock

@@ -15,7 +15,9 @@ limitations under the License.
 */
 package main
 
-import "pluralith/cmd"
+import (
+	"pluralith/cmd"
+)
 
 func main() {
 	cmd.Execute()

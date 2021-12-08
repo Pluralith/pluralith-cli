@@ -14,8 +14,9 @@ func RunTerraform(command string, args []string) error {
 	ux.PrintFormatted("⠿", []string{"blue"})
 	fmt.Println(RunMessages[command].([]string)[0])
 
-	// Initialize comDB locking for this process instance
+	// Initialize comDB locking and proper paths for this process instance
 	dblock.LockInstance.GenerateLock()
+	auxiliary.PathInstance.GeneratePaths()
 
 	// Manually parse arg (due to cobra lacking a feature)
 	parsedArgs, parsedArgMap := auxiliary.ParseArgs(args, []string{})
@@ -27,6 +28,9 @@ func RunTerraform(command string, args []string) error {
 	if parsedArgMap["json"] == "" {
 		parsedArgs = append(parsedArgs, "-json")
 	}
+
+	// Launching Pluralith
+	auxiliary.LaunchPluralith()
 
 	// Run terraform plan to create execution plan
 	planPath, planErr := RunPlan(command)
