@@ -32,7 +32,7 @@ func StreamCommand(command string, args []string) error {
 	// Emit apply begin update to UI
 	comdb.PushComDBEvent(comdb.Event{
 		Receiver:  "UI",
-		Timestamp: time.Now().Unix(),
+		Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
 		Command:   command,
 		Type:      "begin",
 		Address:   "",
@@ -98,7 +98,7 @@ func StreamCommand(command string, args []string) error {
 			// // Emit current event update to UI
 			comdb.PushComDBEvent(comdb.Event{
 				Receiver:  "UI",
-				Timestamp: time.Now().Unix(),
+				Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
 				Command:   command,
 				Type:      strings.Split(event, "_")[1],
 				Address:   address,
@@ -112,7 +112,7 @@ func StreamCommand(command string, args []string) error {
 	// Emit apply start update to UI
 	comdb.PushComDBEvent(comdb.Event{
 		Receiver:  "UI",
-		Timestamp: time.Now().Unix(),
+		Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
 		Command:   command,
 		Type:      "end",
 		Address:   "",

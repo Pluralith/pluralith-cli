@@ -31,7 +31,7 @@ func PlanMethod(args []string, silent bool) (string, error) {
 	// Emit plan begin update to UI
 	comdb.PushComDBEvent(comdb.Event{
 		Receiver:  "UI",
-		Timestamp: time.Now().Unix(),
+		Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
 		Command:   "plan",
 		Type:      "begin",
 		Address:   "",
@@ -63,7 +63,7 @@ func PlanMethod(args []string, silent bool) (string, error) {
 	// Emit plan end update to UI -> ask for confirmation
 	comdb.PushComDBEvent(comdb.Event{
 		Receiver:  "UI",
-		Timestamp: time.Now().Unix(),
+		Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
 		Command:   "plan",
 		Type:      "end",
 		Address:   "",
@@ -74,7 +74,7 @@ func PlanMethod(args []string, silent bool) (string, error) {
 
 	comdb.PushComDBEvent(comdb.Event{
 		Receiver:  "UI",
-		Timestamp: time.Now().Unix(),
+		Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
 		Command:   command,
 		Type:      "confirm",
 		Address:   "",

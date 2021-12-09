@@ -28,7 +28,7 @@ func RunApply(command string, args []string) error {
 	// Emit confirm event
 	comdb.PushComDBEvent(comdb.Event{
 		Receiver:  "UI",
-		Timestamp: time.Now().Unix(),
+		Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
 		Command:   command, // UI can only mark as received when command is "apply" for some reason
 		Type:      "confirm",
 		Address:   "",
@@ -48,6 +48,12 @@ func RunApply(command string, args []string) error {
 	// Stream apply command output
 	if confirm {
 		confirmSpinner.Success()
+
+		// Adapt command string if plan
+		if command == "plan" {
+			command = "apply"
+		}
+
 		streamErr := stream.StreamCommand(command, args)
 		if streamErr != nil {
 			return fmt.Errorf("streaming terraform command output failed -> %v: %w", functionName, streamErr)

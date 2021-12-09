@@ -38,7 +38,7 @@ func RunPlan(command string) (string, error) {
 	// Emit plan begin update to UI
 	comdb.PushComDBEvent(comdb.Event{
 		Receiver:  "UI",
-		Timestamp: time.Now().Unix(),
+		Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
 		Command:   "plan",
 		Type:      "begin",
 		Address:   "",
@@ -77,7 +77,7 @@ func RunPlan(command string) (string, error) {
 	// Emit plan end update to UI
 	comdb.PushComDBEvent(comdb.Event{
 		Receiver:  "UI",
-		Timestamp: time.Now().Unix(),
+		Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
 		Command:   "plan",
 		Type:      "end",
 		Address:   "",
