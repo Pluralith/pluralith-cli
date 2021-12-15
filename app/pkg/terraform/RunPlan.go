@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/comdb"
 	"pluralith/pkg/plan"
 	"pluralith/pkg/ux"
@@ -15,14 +16,8 @@ import (
 func RunPlan(command string) (string, error) {
 	functionName := "RunPlan"
 
-	// Get working directory
-	workingDir, workingErr := os.Getwd()
-	if workingErr != nil {
-		return "", fmt.Errorf("%v: %w", functionName, workingErr)
-	}
-
 	// Constructing execution plan path
-	workingPlan := path.Join(workingDir, "pluralith.plan")
+	workingPlan := path.Join(auxiliary.PathInstance.WorkingPath, "pluralith.plan")
 
 	// Initialize variables
 	planArgs := []string{"-out", workingPlan}
@@ -43,7 +38,7 @@ func RunPlan(command string) (string, error) {
 		Type:      "begin",
 		Address:   "",
 		Instances: make([]interface{}, 0),
-		Path:      workingDir,
+		Path:      auxiliary.PathInstance.WorkingPath,
 		Received:  false,
 	})
 
@@ -82,7 +77,7 @@ func RunPlan(command string) (string, error) {
 		Type:      "end",
 		Address:   "",
 		Instances: make([]interface{}, 0),
-		Path:      workingDir,
+		Path:      auxiliary.PathInstance.WorkingPath,
 		Received:  false,
 	})
 

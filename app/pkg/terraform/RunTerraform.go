@@ -14,6 +14,7 @@ func RunTerraform(command string, args []string) error {
 	dblock.LockInstance.GenerateLock()
 	auxiliary.PathInstance.GeneratePaths()
 	auxiliary.FilterInstance.InitializeFilters()
+	auxiliary.FilterInstance.GetSecretConfig()
 
 	// Print running message
 	ux.PrintFormatted("⠿", []string{"blue"})

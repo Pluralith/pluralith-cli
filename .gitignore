@@ -18,6 +18,10 @@
 *.tfstate
 *.plstate
 
+# Pluralith
+pluralith.*
+
+
 # Distribution binaries
 dist/
 
