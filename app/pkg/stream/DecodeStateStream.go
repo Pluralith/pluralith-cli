@@ -6,30 +6,29 @@ import (
 	"strings"
 )
 
-func DecodeStateStream(jsonString string) (string, string, error) {
+func DecodeStateStream(jsonString string) (DecodedEvent, error) {
 	functionName := "DecodeStateStream"
+	decodedEvent := DecodedEvent{}
 
 	// Parsing state stream JSON
 	parsedState, parseErr := auxiliary.ParseJson(jsonString)
 	if parseErr != nil {
-		return "", "", fmt.Errorf("could not parse json -> %v: %w", functionName, parseErr)
+		return decodedEvent, fmt.Errorf("could not parse json -> %v: %w", functionName, parseErr)
 	}
 
 	// Retrieving event type from parsed state JSON
-	eventType := parsedState["type"].(string)
+	decodedEvent.Type = parsedState["type"].(string)
+	decodedEvent.Message = parsedState["@message"].(string)
 
 	// Filtering for "apply" event types
-	if strings.Contains(eventType, "apply") {
+	if strings.Contains(decodedEvent.Type, "apply") {
 		// Getting address of current resource
 		hook := parsedState["hook"].(map[string]interface{})
 		resource := hook["resource"].(map[string]interface{})
-		address := resource["addr"]
-
-		// If address key is given in current object -> Return event type and address
-		if address != nil {
-			return eventType, address.(string), nil
-		}
+		decodedEvent.Address = resource["addr"].(string)
 	}
 
-	return eventType, "", nil
+	// if decodedEvent
+
+	return decodedEvent, nil
 }

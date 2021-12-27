@@ -30,12 +30,13 @@ func StreamCommand(command string, args []string) error {
 	}
 
 	// Emit apply begin update to UI
-	comdb.PushComDBEvent(comdb.Event{
+	comdb.PushComDBEvent(comdb.ComDBEvent{
 		Receiver:  "UI",
 		Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
 		Command:   command,
 		Type:      "begin",
 		Address:   "",
+		Message:   "",
 		Instances: make([]interface{}, 0),
 		Path:      workingDir,
 		Received:  false,
@@ -75,33 +76,34 @@ func StreamCommand(command string, args []string) error {
 		// Get current line json string
 		jsonString := applyScanner.Text()
 		// Decode json string to get event type and resource address
-		event, address, decodeErr := DecodeStateStream(jsonString)
+		event, decodeErr := DecodeStateStream(jsonString)
 		if decodeErr != nil {
 			streamSpinner.Fail()
 			return fmt.Errorf("%v: %w", functionName, decodeErr)
 		}
 
 		// If address is given -> Resource event
-		if address != "" {
+		if event.Address != "" {
 			var instances []interface{}
 
 			// If event complete -> Fetch resource instances with attributes
-			if event == "apply_complete" {
-				fetchedState, fetchErr := PullState(address)
+			if event.Type == "apply_complete" {
+				fetchedState, fetchErr := PullState(event.Address)
 				if fetchErr != nil {
 					return fmt.Errorf("pulling terraform state failed -> %v: %w", functionName, fetchErr)
 				}
 
-				instances = FetchResourceInstances(address, fetchedState)
+				instances = FetchResourceInstances(event.Address, fetchedState)
 			}
 
 			// // Emit current event update to UI
-			comdb.PushComDBEvent(comdb.Event{
+			comdb.PushComDBEvent(comdb.ComDBEvent{
 				Receiver:  "UI",
 				Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
 				Command:   command,
-				Type:      strings.Split(event, "_")[1],
-				Address:   address,
+				Type:      strings.Split(event.Type, "_")[1],
+				Address:   event.Address,
+				Message:   event.Message,
 				Instances: instances,
 				Path:      workingDir,
 				Received:  false,
@@ -110,12 +112,13 @@ func StreamCommand(command string, args []string) error {
 	}
 
 	// Emit apply start update to UI
-	comdb.PushComDBEvent(comdb.Event{
+	comdb.PushComDBEvent(comdb.ComDBEvent{
 		Receiver:  "UI",
 		Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
 		Command:   command,
 		Type:      "end",
 		Address:   "",
+		Message:   "",
 		Instances: make([]interface{}, 0),
 		Path:      workingDir,
 		Received:  false,

@@ -5,7 +5,7 @@ import (
 	"pluralith/pkg/auxiliary"
 )
 
-func PushComDBEvent(message Event) error {
+func PushComDBEvent(message ComDBEvent) error {
 	functionName := "PushComDBEvent"
 
 	var comDB ComDB
@@ -16,7 +16,7 @@ func PushComDBEvent(message Event) error {
 	}
 
 	// Prepend new event to existing event list
-	comDB.Events = append([]Event{message}, comDB.Events...)
+	comDB.Events = append([]ComDBEvent{message}, comDB.Events...)
 
 	// Write updated DB to disk
 	if writeErr := WriteComDB(comDB); writeErr != nil {

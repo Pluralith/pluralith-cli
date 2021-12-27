@@ -1,6 +1,6 @@
 # 1) Build unsigned binary
 cd app
-env GOOS=darwin GOARCH=amd64 go build -o ../dist/unsigned/pluralith_cli_macos
+env GOOS=darwin GOARCH=amd64 go build -o ../dist/unsigned/pluralith_cli_darwin_am64
 
 # 2) Sign & notarize binary
 cd ..
@@ -14,4 +14,4 @@ unzip -o *.zip
 rm *.zip
 
 # 5) Upload to GCS
-gsutil cp ./* gs://pluralith-cli-releases
+# gsutil cp ./* gs://pluralith-cli-releases

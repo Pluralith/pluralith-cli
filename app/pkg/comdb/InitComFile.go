@@ -13,7 +13,7 @@ func InitComFile(file string, object interface{}) error {
 
 	if strings.Contains(file, "ComDB") {
 		object = ComDB{
-			Events: make([]Event, 0),
+			Events: make([]ComDBEvent, 0),
 		}
 	} else {
 		object = dblock.LockInstance
