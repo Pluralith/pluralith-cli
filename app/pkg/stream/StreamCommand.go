@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strings"
 	"time"
 
 	"pluralith/pkg/comdb"
@@ -87,7 +86,7 @@ func StreamCommand(command string, args []string) error {
 			var instances []interface{}
 
 			// If event complete -> Fetch resource instances with attributes
-			if event.Type == "apply_complete" {
+			if event.Type == "complete" {
 				fetchedState, fetchErr := PullState(event.Address)
 				if fetchErr != nil {
 					return fmt.Errorf("pulling terraform state failed -> %v: %w", functionName, fetchErr)
@@ -101,7 +100,7 @@ func StreamCommand(command string, args []string) error {
 				Receiver:  "UI",
 				Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
 				Command:   command,
-				Type:      strings.Split(event.Type, "_")[1],
+				Type:      event.Type,
 				Address:   event.Address,
 				Message:   event.Message,
 				Instances: instances,
