@@ -6,7 +6,7 @@ import (
 	"reflect"
 )
 
-func MarkComDBReceived(event Event) error {
+func MarkComDBReceived(event ComDBEvent) error {
 	functionName := "MarkComDBReceived"
 
 	var comDB ComDB

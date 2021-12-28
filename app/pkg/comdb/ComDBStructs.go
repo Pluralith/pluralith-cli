@@ -1,15 +1,16 @@
 package comdb
 
 type ComDB struct {
-	Events []Event
+	Events []ComDBEvent
 }
 
-type Event struct {
+type ComDBEvent struct {
 	Receiver  string
 	Timestamp int64
 	Command   string
 	Type      string
 	Address   string
+	Message   string
 	Instances []interface{}
 	Path      string
 	Received  bool

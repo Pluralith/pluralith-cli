@@ -13,7 +13,7 @@ func ReplaceSensitive(jsonObject map[string]interface{}) {
 		// Check if value at key is given
 		if outerValue != nil {
 			// Subsitute value with replacement if key is among targets
-			if auxiliary.ElementInSlice(outerKey, auxiliary.FilterInstance.TempTargets) {
+			if auxiliary.ElementInSlice(outerKey, auxiliary.FilterInstance.Config.Sensitive) {
 				jsonObject[outerKey] = auxiliary.FilterInstance.Replacement
 			} else {
 				// Get value type to handle different cases

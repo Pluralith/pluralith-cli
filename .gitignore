@@ -14,10 +14,6 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
-# Terraform & Pluralith state files
-*.tfstate
-*.plstate
-
 # Distribution binaries
 dist/
 
@@ -28,3 +24,6 @@ release.sh
 # Terraform
 .terraform*
 *.tfstate*
+
+# Pluralith
+pluralith.*

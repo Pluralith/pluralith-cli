@@ -6,30 +6,42 @@ import (
 	"strings"
 )
 
-func DecodeStateStream(jsonString string) (string, string, error) {
+func DecodeStateStream(jsonString string) (DecodedEvent, error) {
 	functionName := "DecodeStateStream"
+	decodedEvent := DecodedEvent{}
 
 	// Parsing state stream JSON
 	parsedState, parseErr := auxiliary.ParseJson(jsonString)
 	if parseErr != nil {
-		return "", "", fmt.Errorf("could not parse json -> %v: %w", functionName, parseErr)
+		return decodedEvent, fmt.Errorf("could not parse json -> %v: %w", functionName, parseErr)
 	}
 
-	// Retrieving event type from parsed state JSON
+	// Get event message
+	decodedEvent.Message = parsedState["@message"].(string)
+
+	// Retrieve event type from parsed state JSON
 	eventType := parsedState["type"].(string)
 
-	// Filtering for "apply" event types
+	// Handle apply events
 	if strings.Contains(eventType, "apply") {
-		// Getting address of current resource
+		// Get address of current resource
 		hook := parsedState["hook"].(map[string]interface{})
 		resource := hook["resource"].(map[string]interface{})
-		address := resource["addr"]
 
-		// If address key is given in current object -> Return event type and address
-		if address != nil {
-			return eventType, address.(string), nil
-		}
+		// Set address and type
+		decodedEvent.Address = resource["addr"].(string)
+		decodedEvent.Type = strings.Split(eventType, "_")[1]
 	}
 
-	return eventType, "", nil
+	// Handle diagnostic events
+	if eventType == "diagnostic" {
+		// Get address of current resource
+		diagnostic := parsedState["diagnostic"].(map[string]interface{})
+
+		// Set address and type
+		decodedEvent.Address = diagnostic["address"].(string)
+		decodedEvent.Type = parsedState["@level"].(string)
+	}
+
+	return decodedEvent, nil
 }

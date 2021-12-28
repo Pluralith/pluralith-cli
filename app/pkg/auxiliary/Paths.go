@@ -7,9 +7,10 @@ import (
 )
 
 type Paths struct {
+	HomePath    string
+	WorkingPath string
 	ComDBPath   string
 	LockPath    string
-	WorkingPath string
 }
 
 func (P *Paths) GeneratePaths() error {
@@ -28,9 +29,10 @@ func (P *Paths) GeneratePaths() error {
 	}
 
 	// Set path parameters
+	P.HomePath = homeDir
+	P.WorkingPath = workingDir
 	P.ComDBPath = path.Join(homeDir, "Pluralith", "pluralithComDB.json")
 	P.LockPath = path.Join(homeDir, "Pluralith", "pluralithLock.json")
-	P.WorkingPath = workingDir
 
 	return nil
 }
