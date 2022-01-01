@@ -14,4 +14,5 @@ type ComDBEvent struct {
 	Instances []interface{}
 	Path      string
 	Received  bool
+	Providers []string `json:"Providers,omitempty"`
 }

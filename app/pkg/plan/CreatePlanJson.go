@@ -11,13 +11,13 @@ import (
 	"pluralith/pkg/strip"
 )
 
-func CreatePlanJson(planPath string) (string, error) {
+func CreatePlanJson(planPath string) (string, []string, error) {
 	functionName := "CreatePlanJson"
 
 	// Get working directory
 	workingDir, workingErr := os.Getwd()
 	if workingErr != nil {
-		return "", fmt.Errorf("%v: %w", functionName, workingErr)
+		return "", []string{}, fmt.Errorf("%v: %w", functionName, workingErr)
 	}
 	// Construct file path for stripped state
 	strippedPath := path.Join(workingDir, "pluralith.state.stripped")
@@ -36,20 +36,26 @@ func CreatePlanJson(planPath string) (string, error) {
 
 	// Run terraform command
 	if err := cmd.Run(); err != nil {
-		return errorSink.String(), fmt.Errorf("terraform command failed -> %v: %w", functionName, err)
+		return errorSink.String(), []string{}, fmt.Errorf("terraform command failed -> %v: %w", functionName, err)
 	}
 
 	// Strip secrets from plan state json
 	strippedState, stripErr := strip.StripSecrets(outputSink.String())
 	if stripErr != nil {
-		return "", fmt.Errorf("failed to strip secrets -> %v: %w", functionName, stripErr)
+		return "", []string{}, fmt.Errorf("failed to strip secrets -> %v: %w", functionName, stripErr)
+	}
+
+	// Fetch providers present in state
+	providers, providerErr := FetchProviders(outputSink.String())
+	if providerErr != nil {
+		return "", []string{}, fmt.Errorf("failed to fetch providers -> %v: %w", functionName, providerErr)
 	}
 
 	// Write stripped state to file
 	if writeErr := ioutil.WriteFile(strippedPath, []byte(strippedState), 0700); writeErr != nil {
-		return "", fmt.Errorf("%v: %w", functionName, writeErr)
+		return "", providers, fmt.Errorf("%v: %w", functionName, writeErr)
 	}
 
 	// Return path to execution plan
-	return strippedPath, nil
+	return strippedPath, providers, nil
 }

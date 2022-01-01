@@ -31,8 +31,6 @@ func RunApply(command string, args []string) error {
 		Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
 		Command:   command, // UI can only mark as received when command is "apply" for some reason
 		Type:      "confirm",
-		Address:   "",
-		Message:   "",
 		Instances: make([]interface{}, 0),
 		Path:      workingDir,
 		Received:  false,

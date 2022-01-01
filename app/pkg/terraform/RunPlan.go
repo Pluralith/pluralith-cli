@@ -36,9 +36,6 @@ func RunPlan(command string) (string, error) {
 		Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
 		Command:   "plan",
 		Type:      "begin",
-		Address:   "",
-		Message:   "",
-		Instances: make([]interface{}, 0),
 		Path:      auxiliary.PathInstance.WorkingPath,
 		Received:  false,
 	})
@@ -64,7 +61,7 @@ func RunPlan(command string) (string, error) {
 	planSpinner.Success()
 	stripSpinner.Start()
 
-	_, planJsonErr := plan.CreatePlanJson(workingPlan)
+	_, providers, planJsonErr := plan.CreatePlanJson(workingPlan)
 	if planJsonErr != nil {
 		stripSpinner.Fail()
 		return "", fmt.Errorf("creating terraform plan json failed -> %v: %w", functionName, planJsonErr)
@@ -76,11 +73,9 @@ func RunPlan(command string) (string, error) {
 		Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
 		Command:   "plan",
 		Type:      "end",
-		Address:   "",
-		Message:   "",
-		Instances: make([]interface{}, 0),
 		Path:      auxiliary.PathInstance.WorkingPath,
 		Received:  false,
+		Providers: providers,
 	})
 
 	stripSpinner.Success()
