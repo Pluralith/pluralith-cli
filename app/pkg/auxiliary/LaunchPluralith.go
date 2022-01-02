@@ -30,7 +30,6 @@ func runOsCommand(command []string) error {
 	} else {
 		time.Sleep(200 * time.Millisecond)
 		spinner.Success()
-		return fmt.Errorf("%v: %w", functionName, err)
 	}
 }
 
