@@ -1,3 +1,6 @@
+# 0) Clean up previous dist
+rm -rf dist
+
 # 1) Build unsigned binary
 cd app
 env GOOS=darwin GOARCH=amd64 go build -o ../dist/unsigned/pluralith_cli_darwin_amd64
