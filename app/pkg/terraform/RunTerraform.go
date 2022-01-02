@@ -12,9 +12,19 @@ func RunTerraform(command string, args []string) error {
 
 	// Initialize various components of application
 	dblock.LockInstance.GenerateLock()
-	auxiliary.PathInstance.GeneratePaths()
-	auxiliary.FilterInstance.InitializeFilters()
-	auxiliary.FilterInstance.GetSecretConfig()
+
+	if pathGenErr := auxiliary.PathInstance.GeneratePaths(); pathGenErr != nil {
+		return fmt.Errorf("generating application paths failed -> %v: %w", functionName, pathGenErr)
+	}
+	if pathInitErr := auxiliary.PathInstance.InitPaths(); pathInitErr != nil {
+		return fmt.Errorf("initializing application directories failed -> %v: %w", functionName, pathInitErr)
+	}
+	if filterInitErr := auxiliary.FilterInstance.InitFilters(); filterInitErr != nil {
+		return fmt.Errorf("initializing secret filters failed -> %v: %w", functionName, filterInitErr)
+	}
+	if getConfigErr := auxiliary.FilterInstance.GetSecretConfig(); getConfigErr != nil {
+		return fmt.Errorf("fetching secret config failed -> %v: %w", functionName, getConfigErr)
+	}
 
 	// Print running message
 	ux.PrintFormatted("⠿", []string{"blue"})

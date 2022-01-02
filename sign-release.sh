@@ -1,6 +1,8 @@
 # 1) Build unsigned binary
 cd app
-env GOOS=darwin GOARCH=amd64 go build -o ../dist/unsigned/pluralith_cli_darwin_am64
+env GOOS=darwin GOARCH=amd64 go build -o ../dist/unsigned/pluralith_cli_darwin_amd64
+env GOOS=windows GOARCH=amd64 go build -o ../dist/unsigned/pluralith_cli_windows_amd64
+env GOOS=linux GOARCH=amd64 go build -o ../dist/unsigned/pluralith_cli_linux_amd64
 
 # 2) Sign & notarize binary
 cd ..

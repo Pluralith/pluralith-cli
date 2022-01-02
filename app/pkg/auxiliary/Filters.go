@@ -51,7 +51,7 @@ func (F *Filters) GetSecretConfig() error {
 	return nil
 }
 
-func (F *Filters) InitializeFilters() error {
+func (F *Filters) InitFilters() error {
 	// functionName := "InitializeFilters"
 	F.Replacement = "gatewatch"
 

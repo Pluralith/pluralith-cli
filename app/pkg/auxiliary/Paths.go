@@ -7,10 +7,11 @@ import (
 )
 
 type Paths struct {
-	HomePath    string
-	WorkingPath string
-	ComDBPath   string
-	LockPath    string
+	HomePath      string
+	WorkingPath   string
+	PluralithPath string
+	ComDBPath     string
+	LockPath      string
 }
 
 func (P *Paths) GeneratePaths() error {
@@ -31,8 +32,20 @@ func (P *Paths) GeneratePaths() error {
 	// Set path parameters
 	P.HomePath = homeDir
 	P.WorkingPath = workingDir
-	P.ComDBPath = filepath.Join(homeDir, "Pluralith", "pluralithComDB.json")
-	P.LockPath = filepath.Join(homeDir, "Pluralith", "pluralithLock.json")
+	P.PluralithPath = filepath.Join(homeDir, "Pluralith")
+	P.ComDBPath = filepath.Join(P.PluralithPath, "pluralithComDB.json")
+	P.LockPath = filepath.Join(P.PluralithPath, "Pluralith", "pluralithLock.json")
+
+	return nil
+}
+
+func (P *Paths) InitPaths() error {
+	functionName := "InitPaths"
+
+	// Create parent directories for path if they don't exist yet
+	if mkErr := os.MkdirAll(P.PluralithPath, 0700); mkErr != nil {
+		return fmt.Errorf("%v: %w", functionName, mkErr)
+	}
 
 	return nil
 }

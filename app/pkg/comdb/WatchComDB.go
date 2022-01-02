@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path"
 	"pluralith/pkg/auxiliary"
 
 	"github.com/fsnotify/fsnotify"
@@ -12,11 +11,6 @@ import (
 
 func WatchComDB() (bool, error) {
 	functionName := "WatchComDB"
-
-	// Create parent directories for path if they don't exist yet
-	if mkErr := os.MkdirAll(path.Dir(auxiliary.PathInstance.ComDBPath), 0700); mkErr != nil {
-		return false, fmt.Errorf("%v: %w", functionName, mkErr)
-	}
 
 	// Check if bus file already exists
 	_, existErr := os.Stat(auxiliary.PathInstance.ComDBPath)

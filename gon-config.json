@@ -1,5 +1,5 @@
 {
-  "source": ["./dist/unsigned/pluralith_cli_macos"],
+  "source": ["./dist/unsigned/pluralith_cli_darwin_amd64"],
   "bundle_id": "com.pluralith.cli",
   "apple_id": {
     "username": "danielputzer.work@gmail.com",
@@ -9,6 +9,6 @@
     "application_identity": "Developer ID Application: Daniel Putzer (8BRYZRVLK7)"
   },
   "zip" :{
-    "output_path": "./dist/signed/pluralith_cli_macos.zip"
+    "output_path": "./dist/signed/pluralith_cli_darwin_amd64.zip"
   }
 }
