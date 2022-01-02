@@ -3,7 +3,7 @@ package auxiliary
 import (
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 )
 
 type Paths struct {
@@ -31,8 +31,8 @@ func (P *Paths) GeneratePaths() error {
 	// Set path parameters
 	P.HomePath = homeDir
 	P.WorkingPath = workingDir
-	P.ComDBPath = path.Join(homeDir, "Pluralith", "pluralithComDB.json")
-	P.LockPath = path.Join(homeDir, "Pluralith", "pluralithLock.json")
+	P.ComDBPath = filepath.Join(homeDir, "Pluralith", "pluralithComDB.json")
+	P.LockPath = filepath.Join(homeDir, "Pluralith", "pluralithLock.json")
 
 	return nil
 }

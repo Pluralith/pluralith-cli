@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 	"pluralith/pkg/dblock"
 )
 
@@ -17,7 +17,7 @@ func InitComDB() (ComDB, error) {
 		return ComDB{}, fmt.Errorf("%v: %w", functionName, homeErr)
 	}
 
-	pluralithBus := path.Join(homeDir, "Pluralith", "pluralith_bus.json")
+	pluralithBus := filepath.Join(homeDir, "Pluralith", "pluralith_bus.json")
 
 	// Create empty DB template to write to file
 	emptyDB := ComDB{

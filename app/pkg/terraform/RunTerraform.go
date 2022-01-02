@@ -32,7 +32,10 @@ func RunTerraform(command string, args []string) error {
 	}
 
 	// Launching Pluralith
-	auxiliary.LaunchPluralith()
+	launchErr := auxiliary.LaunchPluralith()
+	if launchErr != nil {
+		return fmt.Errorf("launching Pluralith failed -> %v: %w", functionName, launchErr)
+	}
 
 	// Run terraform plan to create execution plan
 	planPath, planErr := RunPlan(command)

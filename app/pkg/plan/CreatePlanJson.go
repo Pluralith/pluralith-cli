@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 
 	"pluralith/pkg/strip"
 )
@@ -20,7 +20,7 @@ func CreatePlanJson(planPath string) (string, []string, error) {
 		return "", []string{}, fmt.Errorf("%v: %w", functionName, workingErr)
 	}
 	// Construct file path for stripped state
-	strippedPath := path.Join(workingDir, "pluralith.state.stripped")
+	strippedPath := filepath.Join(workingDir, "pluralith.state.stripped")
 
 	// Constructing command to execute
 	cmd := exec.Command("terraform", append([]string{"show", "-json", planPath})...)

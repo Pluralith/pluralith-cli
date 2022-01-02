@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 )
 
 func ReadDBLock() (Lock, error) {
@@ -21,7 +21,7 @@ func ReadDBLock() (Lock, error) {
 		return Lock{}, fmt.Errorf("%v: %w", functionName, homeErr)
 	}
 
-	pluralithLock := path.Join(homeDir, "Pluralith", "pluralith_bus.lock")
+	pluralithLock := filepath.Join(homeDir, "Pluralith", "pluralith_bus.lock")
 
 	for readRetries <= 10 {
 		var readErr error

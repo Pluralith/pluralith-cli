@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 	"time"
 )
 
@@ -24,7 +24,7 @@ func ReadComDB() (ComDB, error) {
 		return ComDB{}, fmt.Errorf("%v: %w", functionName, homeErr)
 	}
 
-	pluralithBus := path.Join(homeDir, "Pluralith", "pluralith_bus.json")
+	pluralithBus := filepath.Join(homeDir, "Pluralith", "pluralith_bus.json")
 
 	// Read file
 	// -> If read fails after 10 retries

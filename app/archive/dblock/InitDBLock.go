@@ -3,7 +3,7 @@ package dblock
 import (
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 )
 
 func InitDBLock() error {
@@ -14,7 +14,7 @@ func InitDBLock() error {
 		return fmt.Errorf("%v: %w", functionName, homeErr)
 	}
 
-	pluralithLock := path.Join(homeDir, "Pluralith", "pluralith_bus.lock")
+	pluralithLock := filepath.Join(homeDir, "Pluralith", "pluralith_bus.lock")
 
 	// Get lock string
 	lockString, getErr := LockInstance.GetLockString()

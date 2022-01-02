@@ -5,7 +5,7 @@ import (
 	"errors"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 
 	"pluralith/pkg/auxiliary"
 )
@@ -27,7 +27,7 @@ func GeneratePlan(args []string) (string, error) {
 
 	// If no value is given for -out, replace it with standard ./pluralith
 	if planExecutionPath == "" {
-		planExecutionPath = path.Join(workingDir, "./pluralith.plan")
+		planExecutionPath = filepath.Join(workingDir, "./pluralith.plan")
 		parsedArgs = append(parsedArgs, "-out", planExecutionPath)
 	}
 	// Constructing command to execute

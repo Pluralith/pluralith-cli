@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/comdb"
 	"pluralith/pkg/plan"
@@ -17,7 +17,7 @@ func RunPlan(command string) (string, error) {
 	functionName := "RunPlan"
 
 	// Constructing execution plan path
-	workingPlan := path.Join(auxiliary.PathInstance.WorkingPath, "pluralith.plan")
+	workingPlan := filepath.Join(auxiliary.PathInstance.WorkingPath, "pluralith.plan")
 
 	// Initialize variables
 	planArgs := []string{"-out", workingPlan}
@@ -55,6 +55,7 @@ func RunPlan(command string) (string, error) {
 	// Run terraform plan
 	if err := cmd.Run(); err != nil {
 		planSpinner.Fail()
+		fmt.Println(errorSink)
 		return errorSink.String(), fmt.Errorf("%v: %w", functionName, err)
 	}
 

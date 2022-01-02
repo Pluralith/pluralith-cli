@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 )
 
 type Filters struct {
@@ -25,8 +25,8 @@ func (F *Filters) GetSecretConfig() error {
 	var config SecretConfig
 
 	// Get relevant paths to read config from
-	workingConfig := path.Join(PathInstance.WorkingPath, "pluralith-config.json")
-	defaultConfig := path.Join(PathInstance.HomePath, "Pluralith", "pluralith-config.json")
+	workingConfig := filepath.Join(PathInstance.WorkingPath, "pluralith-config.json")
+	defaultConfig := filepath.Join(PathInstance.HomePath, "Pluralith", "pluralith-config.json")
 
 	// Read config file from working directory
 	configByte, configErr = os.ReadFile(workingConfig)

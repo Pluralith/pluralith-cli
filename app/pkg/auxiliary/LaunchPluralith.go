@@ -4,12 +4,15 @@ import (
 	"os/exec"
 	"runtime"
 	"time"
+	"path/filepath"
+	"os"
+	"fmt"
 
 	"pluralith/pkg/ux"
 )
 
 // Function to run OS specific launch command
-func runOsCommand(command []string) {
+func runOsCommand(command []string) {	
 	// Instantiating new custom spinner
 	spinner := ux.NewSpinner("Launching Pluralith...", "Pluralith Running\n", "Failed to launch Pluralith\n")
 	spinner.Start()
@@ -28,14 +31,23 @@ func runOsCommand(command []string) {
 }
 
 // Function to launch Pluralith UI
-func LaunchPluralith() {
+func LaunchPluralith() error {
+	functionName := "LaunchPluralith"
+
+	// Get homedir
+	homeDir, homeErr := os.UserHomeDir()
+	if homeErr != nil {
+		return fmt.Errorf("%v: %w", functionName, homeErr)
+	}
 	// Running terminal command to launch application based on current OS
 	switch os := runtime.GOOS; os {
 	case "windows":
-		runOsCommand([]string{"command", "and", "arguments"})
+		runOsCommand([]string{filepath.Join(homeDir, "AppData", "Local", "Programs", "pluralith", "Pluralith.exe")})
 	case "darwin":
 		runOsCommand([]string{"open", "-a", "Pluralith"})
 	default:
 		runOsCommand([]string{"command", "and", "arguments"})
 	}
+
+	return nil
 }
