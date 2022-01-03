@@ -16,9 +16,33 @@ limitations under the License.
 package main
 
 import (
+	"fmt"
 	"pluralith/cmd"
+	"pluralith/pkg/auxiliary"
+	"pluralith/pkg/dblock"
 )
 
+// Initialize various components of application
+func initApp() {
+	functionName := "initApp"
+
+	dblock.LockInstance.GenerateLock()
+
+	if pathGenErr := auxiliary.PathInstance.GeneratePaths(); pathGenErr != nil {
+		fmt.Printf("generating application paths failed -> %v: %w", functionName, pathGenErr)
+	}
+	if pathInitErr := auxiliary.PathInstance.InitPaths(); pathInitErr != nil {
+		fmt.Printf("initializing application directories failed -> %v: %w", functionName, pathInitErr)
+	}
+	if filterInitErr := auxiliary.FilterInstance.InitFilters(); filterInitErr != nil {
+		fmt.Printf("initializing secret filters failed -> %v: %w", functionName, filterInitErr)
+	}
+	if getConfigErr := auxiliary.FilterInstance.GetSecretConfig(); getConfigErr != nil {
+		fmt.Printf("fetching secret config failed -> %v: %w", functionName, getConfigErr)
+	}
+}
+
 func main() {
+	initApp()
 	cmd.Execute()
 }
