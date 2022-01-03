@@ -32,9 +32,9 @@ func (P *Paths) GeneratePaths() error {
 	// Set path parameters
 	P.HomePath = homeDir
 	P.WorkingPath = workingDir
-	P.PluralithPath = filepath.Join(homeDir, "Pluralith")
+	P.PluralithPath = filepath.Join(homeDir, "Pluralith") 
 	P.ComDBPath = filepath.Join(P.PluralithPath, "pluralithComDB.json")
-	P.LockPath = filepath.Join(P.PluralithPath, "Pluralith", "pluralithLock.json")
+	P.LockPath = filepath.Join(P.PluralithPath, "pluralithLock.json")
 
 	return nil
 }
