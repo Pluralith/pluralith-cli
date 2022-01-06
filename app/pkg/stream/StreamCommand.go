@@ -61,6 +61,7 @@ func StreamCommand(command string, args []string) error {
 	cmdErr := cmd.Start()
 	if cmdErr != nil {
 		streamSpinner.Fail()
+		fmt.Println(errorSink.String())
 		return fmt.Errorf("%v: %w", functionName, cmdErr)
 	}
 

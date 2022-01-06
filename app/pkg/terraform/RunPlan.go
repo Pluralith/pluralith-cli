@@ -55,7 +55,7 @@ func RunPlan(command string) (string, error) {
 	// Run terraform plan
 	if err := cmd.Run(); err != nil {
 		planSpinner.Fail()
-		fmt.Println(errorSink)
+		fmt.Println(errorSink.String())
 		return errorSink.String(), fmt.Errorf("%v: %w", functionName, err)
 	}
 
