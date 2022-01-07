@@ -7,8 +7,9 @@ import (
 
 func PushComDBEvent(message ComDBEvent) error {
 	functionName := "PushComDBEvent"
-
 	var comDB ComDB
+
+	AcquireDBLock()
 
 	// Read DB from disk
 	if readErr := ReadComFile(auxiliary.PathInstance.ComDBPath, &comDB); readErr != nil {
