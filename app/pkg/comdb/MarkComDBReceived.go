@@ -8,8 +8,9 @@ import (
 
 func MarkComDBReceived(event ComDBEvent) error {
 	functionName := "MarkComDBReceived"
-
 	var comDB ComDB
+
+	AcquireDBLock()
 
 	// Read comDB from file
 	if readErr := ReadComFile(auxiliary.PathInstance.ComDBPath, &comDB); readErr != nil {
