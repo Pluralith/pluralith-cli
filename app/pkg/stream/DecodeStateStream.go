@@ -28,8 +28,15 @@ func DecodeStateStream(jsonString string) (DecodedEvent, error) {
 		hook := parsedState["hook"].(map[string]interface{})
 		resource := hook["resource"].(map[string]interface{})
 
+		address := resource["addr"].(string)
+
+		if address != "" {
+			addressParts := strings.Split(address, ".")
+			address = strings.Join(addressParts[len(addressParts)-2:], ".")
+		}
+
 		// Set address and type
-		decodedEvent.Address = resource["addr"].(string)
+		decodedEvent.Address = address
 		decodedEvent.Type = strings.Split(eventType, "_")[1]
 	}
 
