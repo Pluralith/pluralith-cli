@@ -22,13 +22,7 @@ func AcquireDBLock() error {
 			return fmt.Errorf("reading Lock failed -> %v: %w", functionName, readErr)
 		}
 
-		// Unlocking writes for current process if lock in file belongs to current process id
-		if lockObject.Id == dblock.LockInstance.Id {
-			lock = false
-		} else {
-			// Unlocking writes for current process if comDB is not locked
-			lock = lockObject.Lock
-		}
+		lock = lockObject.Lock
 
 		if lock {
 			// Increment retries
