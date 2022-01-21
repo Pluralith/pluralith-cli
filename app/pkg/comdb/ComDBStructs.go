@@ -10,6 +10,7 @@ type ComDBEvent struct {
 	Command   string
 	Type      string
 	Address   string
+	Error     string `json:"Error,omitempty"`
 	Message   string
 	Instances []interface{}
 	Path      string

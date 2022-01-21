@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func DecodeStateStream(jsonString string) (DecodedEvent, error) {
+func DecodeStateStream(jsonString string, command string) (DecodedEvent, error) {
 	functionName := "DecodeStateStream"
 	decodedEvent := DecodedEvent{}
 
@@ -36,6 +36,7 @@ func DecodeStateStream(jsonString string) (DecodedEvent, error) {
 		}
 
 		// Set address and type
+		decodedEvent.Command = command
 		decodedEvent.Address = address
 		decodedEvent.Type = strings.Split(eventType, "_")[1]
 	}
@@ -46,6 +47,7 @@ func DecodeStateStream(jsonString string) (DecodedEvent, error) {
 		diagnostic := parsedState["diagnostic"].(map[string]interface{})
 
 		// Set address and type
+		decodedEvent.Command = "diagnostic"
 		decodedEvent.Address = diagnostic["address"].(string)
 		decodedEvent.Type = parsedState["@level"].(string)
 	}

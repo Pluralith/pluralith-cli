@@ -56,6 +56,17 @@ func RunPlan(command string) (string, error) {
 	if err := cmd.Run(); err != nil {
 		planSpinner.Fail()
 		fmt.Println(errorSink.String())
+
+		comdb.PushComDBEvent(comdb.ComDBEvent{
+			Receiver:  "UI",
+			Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
+			Command:   "plan",
+			Type:      "failed",
+			Error:     errorSink.String(),
+			Path:      auxiliary.PathInstance.WorkingPath,
+			Received:  false,
+		})
+
 		return errorSink.String(), fmt.Errorf("%v: %w", functionName, err)
 	}
 
