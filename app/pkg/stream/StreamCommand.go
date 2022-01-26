@@ -120,7 +120,7 @@ func StreamCommand(command string, args []string) error {
 		Command:   command,
 		Type:      "end",
 		Path:      auxiliary.PathInstance.WorkingPath,
-		State:     latestState["resources"].([]interface{}),
+		State:     latestState,
 		Received:  false,
 	})
 

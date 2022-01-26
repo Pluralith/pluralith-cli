@@ -12,7 +12,7 @@ type ComDBEvent struct {
 	Address   string
 	Error     string `json:"Error,omitempty"`
 	Message   string
-	State     []interface{} `json:"State,omitempty"`
+	State     map[string]interface{} `json:"State,omitempty"`
 	Path      string
 	Received  bool
 	Providers []string `json:"Providers,omitempty"`
