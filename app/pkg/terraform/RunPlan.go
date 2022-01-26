@@ -16,6 +16,10 @@ import (
 func RunPlan(command string) (string, error) {
 	functionName := "RunPlan"
 
+	ux.PrintFormatted("→", []string{"blue", "bold"})
+	ux.PrintFormatted(" Plan", []string{"white", "bold"})
+	fmt.Println("")
+
 	// Constructing execution plan path
 	workingPlan := filepath.Join(auxiliary.PathInstance.WorkingPath, "pluralith.plan")
 
@@ -26,8 +30,8 @@ func RunPlan(command string) (string, error) {
 	}
 
 	// Instantiate spinners
-	planSpinner := ux.NewSpinner("Generating Execution Plan", "Execution Plan Generated", "Couldn't Generate Execution Plan")
-	stripSpinner := ux.NewSpinner("Stripping Secrets", "Secrets Stripped", "Stripping Secrets Failed")
+	planSpinner := ux.NewSpinner("Generating Execution Plan", "Execution Plan Generated", "Couldn't Generate Execution Plan", true)
+	stripSpinner := ux.NewSpinner("Stripping Secrets", "Secrets Stripped", "Stripping Secrets Failed", true)
 
 	planSpinner.Start()
 	// Emit plan begin update to UI

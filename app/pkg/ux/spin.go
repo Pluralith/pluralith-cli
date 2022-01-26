@@ -20,14 +20,19 @@ type Spin struct {
 
 // Defining custom color print functions
 var printBlue = color.New(color.FgHiBlue).SprintFunc()
+var printGreen = color.New(color.FgHiGreen).SprintFunc()
 var printRed = color.New(color.FgHiRed).SprintFunc()
 
 // Method to instantiate customer spinner
-func NewSpinner(spinMsg string, successMsg string, failMsg string) Spin {
+func NewSpinner(spinMsg string, successMsg string, failMsg string, indented bool) Spin {
 	// Creating base spinner instance
 	instance := spinner.New(spinner.CharSets[14], 100*time.Millisecond)
 	// Adding spinning message
 	instance.Suffix = " " + spinMsg
+	// Indenting spinner if given
+	if indented {
+		instance.Prefix = "  "
+	}
 	// Chaning color
 	instance.Color("fgHiBlue")
 
@@ -53,7 +58,7 @@ func (s Spin) Success(customMessage ...string) {
 	// Stopping base spinner
 	s.instance.Stop()
 	// Printing custom success message
-	fmt.Printf("%s %s\n", printBlue("✔"), message)
+	fmt.Printf("%s%s %s\n", s.instance.Prefix, printBlue("✔"), message)
 }
 
 // Method to update spinner state on failure
@@ -68,5 +73,5 @@ func (s Spin) Fail(customMessage ...string) {
 	// Stopping base spinner
 	s.instance.Stop()
 	// Printing custom failure message
-	fmt.Printf("%s %s\n", printRed("✖️"), message)
+	fmt.Printf("%s%s %s\n", s.instance.Prefix, printRed("✖️"), message)
 }

@@ -33,7 +33,7 @@ func loadFileContent(path string) string {
 // Function to fetch files with specified extension in working directory
 func FetchFiles(targetExtension string) map[string]string {
 	// Instantiating new spinner
-	fetchSpinner := ux.NewSpinner("Fetching State Files", "Files Fetched", "Fetching files failed")
+	fetchSpinner := ux.NewSpinner("Fetching State Files", "Files Fetched", "Fetching files failed", true)
 	fetchSpinner.Start()
 	// Initializing empty map to house file string content
 	fileStrings := make(map[string]string)

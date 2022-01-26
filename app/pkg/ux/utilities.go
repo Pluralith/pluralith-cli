@@ -1,6 +1,8 @@
 package ux
 
-import "github.com/fatih/color"
+import (
+	"github.com/fatih/color"
+)
 
 // - - - Collection of UX related functions - - -
 
@@ -17,9 +19,11 @@ func PrintHead() {
 func PrintFormatted(text string, styling []string) {
 	// Creating map with available styles
 	styleMap := map[string]color.Attribute{
-		"blue": color.FgHiBlue,
-		"red":  color.FgHiRed,
-		"bold": color.Bold,
+		"white": color.FgHiWhite,
+		"blue":  color.FgHiBlue,
+		"green": color.FgHiGreen,
+		"red":   color.FgHiRed,
+		"bold":  color.Bold,
 	}
 
 	// Defining new blank color object

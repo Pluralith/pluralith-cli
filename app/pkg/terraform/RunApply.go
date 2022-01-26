@@ -6,11 +6,16 @@ import (
 	"pluralith/pkg/comdb"
 	"pluralith/pkg/stream"
 	"pluralith/pkg/ux"
+	"strings"
 	"time"
 )
 
 func RunApply(command string, args []string) error {
 	functionName := "RunApply"
+
+	ux.PrintFormatted("→", []string{"blue", "bold"})
+	ux.PrintFormatted(strings.Join([]string{" ", strings.Title(command)}, ""), []string{"white", "bold"})
+	fmt.Println("")
 
 	// Get working directory
 	workingDir, workingErr := os.Getwd()
@@ -19,11 +24,7 @@ func RunApply(command string, args []string) error {
 	}
 
 	// Instantiate spinner
-	confirmSpinner := ux.NewSpinner(
-		RunMessages[command].([]string)[1],
-		RunMessages[command].([]string)[2],
-		RunMessages[command].([]string)[3],
-	)
+	confirmSpinner := ux.NewSpinner(RunMessages[command].([]string)[1], RunMessages[command].([]string)[2], RunMessages[command].([]string)[3], true)
 
 	// Emit confirm event
 	comdb.PushComDBEvent(comdb.ComDBEvent{

@@ -55,10 +55,10 @@ func StreamCommand(command string, args []string) error {
 	functionName := "StreamCommand"
 
 	// Instantiate spinners
-	streamSpinner := ux.NewSpinner("Apply Running", "Apply Completed", "Apply Failed")
+	streamSpinner := ux.NewSpinner("Apply Running", "Apply Completed", "Apply Failed", true)
 	// Adapting spinner to destroy command
 	if command == "destroy" {
-		streamSpinner = ux.NewSpinner("Destroy Running", "Destroy Completed", "Destroy Failed")
+		streamSpinner = ux.NewSpinner("Destroy Running", "Destroy Completed", "Destroy Failed", true)
 	}
 
 	// Emit apply begin update to UI
@@ -133,6 +133,8 @@ func StreamCommand(command string, args []string) error {
 	})
 
 	streamSpinner.Success()
+
+	ux.PrintFormatted("\n✔ All Done\n", []string{"green", "bold"})
 
 	return nil
 }

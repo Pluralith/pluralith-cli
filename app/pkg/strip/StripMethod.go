@@ -12,7 +12,7 @@ func StripMethod(args []string) {
 	stateFiles := FetchFiles(".tfstate")
 
 	// Instantiating new strip spinner
-	stripSpinner := ux.NewSpinner("Stripping Secrets", fmt.Sprintf("Secrets Stripped From %d File", len(stateFiles)), "Stripping Secrets Failed")
+	stripSpinner := ux.NewSpinner("Stripping Secrets", fmt.Sprintf("Secrets Stripped From %d File", len(stateFiles)), "Stripping Secrets Failed", true)
 	stripSpinner.Start()
 
 	// Stripping secrets and writing stripped state to disk

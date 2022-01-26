@@ -36,6 +36,8 @@ func RunTerraform(command string, args []string) error {
 		return fmt.Errorf("running terraform plan failed -> %v: %w", functionName, planErr)
 	}
 
+	fmt.Println() // Line separation between plan and apply message prints
+
 	// Add plan path to arguments to run apply on already created execution plan
 	parsedArgs = append(parsedArgs, planPath)
 
