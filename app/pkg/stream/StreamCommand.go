@@ -22,18 +22,6 @@ func handleTerraformOutput(jsonString string, command string) error {
 
 	// If address is given -> Resource event
 	if event.Address != "" {
-		var instances []interface{}
-
-		// If event complete -> Fetch resource instances with attributes
-		if event.Type == "complete" {
-			fetchedState, fetchErr := PullState(event.Address)
-			if fetchErr != nil {
-				return fmt.Errorf("pulling terraform state failed -> %v: %w", functionName, fetchErr)
-			}
-
-			instances = FetchResourceInstances(event.Address, fetchedState)
-		}
-
 		// // Emit current event update to UI
 		comdb.PushComDBEvent(comdb.ComDBEvent{
 			Receiver:  "UI",
@@ -42,7 +30,6 @@ func handleTerraformOutput(jsonString string, command string) error {
 			Type:      event.Type,
 			Address:   event.Address,
 			Message:   event.Message,
-			Instances: instances,
 			Path:      auxiliary.PathInstance.WorkingPath,
 			Received:  false,
 		})
@@ -67,7 +54,6 @@ func StreamCommand(command string, args []string) error {
 		Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
 		Command:   command,
 		Type:      "begin",
-		Instances: make([]interface{}, 0),
 		Path:      auxiliary.PathInstance.WorkingPath,
 		Received:  false,
 	})
@@ -75,7 +61,7 @@ func StreamCommand(command string, args []string) error {
 	streamSpinner.Start()
 
 	// Constructing command to execute
-	cmd := exec.Command("terraform", append([]string{"apply", "-lock=false"}, args...)...)
+	cmd := exec.Command("terraform", append([]string{"apply"}, args...)...)
 
 	// Define sinks for std data
 	var errorSink bytes.Buffer
@@ -121,14 +107,20 @@ func StreamCommand(command string, args []string) error {
 		}
 	}
 
+	// Pull state with latest attributes
+	latestState, pullErr := PullState()
+	if pullErr != nil {
+		return fmt.Errorf("pulling terraform state failed -> %v: %w", functionName, pullErr)
+	}
+
 	// Emit apply end update to UI
 	comdb.PushComDBEvent(comdb.ComDBEvent{
 		Receiver:  "UI",
 		Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
 		Command:   command,
 		Type:      "end",
-		Instances: make([]interface{}, 0),
 		Path:      auxiliary.PathInstance.WorkingPath,
+		State:     latestState["resources"].([]interface{}),
 		Received:  false,
 	})
 

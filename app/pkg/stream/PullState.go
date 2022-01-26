@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"os/exec"
 	"pluralith/pkg/auxiliary"
+	"pluralith/pkg/strip"
 )
 
-func PullState(address string) (map[string]interface{}, error) {
+func PullState() (map[string]interface{}, error) {
 	functionName := "FetchState"
 
 	// Constructing command to execute
@@ -32,6 +33,9 @@ func PullState(address string) (map[string]interface{}, error) {
 	if parseErr != nil {
 		return make(map[string]interface{}), fmt.Errorf("parsing terraform state failed -> %v: %w", functionName, parseErr)
 	}
+
+	// Filter secrets according to config
+	strip.ReplaceSensitive(parsedState)
 
 	return parsedState, nil
 }
