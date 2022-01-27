@@ -8,6 +8,11 @@ import (
 )
 
 func StripMethod(args []string) {
+	// Print running message
+	ux.PrintFormatted("⠿", []string{"blue"})
+	ux.PrintFormatted(" Stripping Secrets", []string{"bold"})
+	fmt.Println()
+
 	// Fetching all state files in current working directory
 	stateFiles := FetchFiles(".tfstate")
 

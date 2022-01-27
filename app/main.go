@@ -29,16 +29,16 @@ func initApp() {
 	dblock.LockInstance.GenerateLock()
 
 	if pathGenErr := auxiliary.PathInstance.GeneratePaths(); pathGenErr != nil {
-		fmt.Printf("generating application paths failed -> %v: %w", functionName, pathGenErr)
+		fmt.Println(fmt.Errorf("generating application paths failed -> %v: %w", functionName, pathGenErr))
 	}
 	if pathInitErr := auxiliary.PathInstance.InitPaths(); pathInitErr != nil {
-		fmt.Printf("initializing application directories failed -> %v: %w", functionName, pathInitErr)
+		fmt.Println(fmt.Errorf("initializing application directories failed -> %v: %w", functionName, pathInitErr))
 	}
 	if filterInitErr := auxiliary.FilterInstance.InitFilters(); filterInitErr != nil {
-		fmt.Printf("initializing secret filters failed -> %v: %w", functionName, filterInitErr)
+		fmt.Println(fmt.Errorf("initializing secret filters failed -> %v: %w", functionName, filterInitErr))
 	}
 	if getConfigErr := auxiliary.FilterInstance.GetSecretConfig(); getConfigErr != nil {
-		fmt.Printf("fetching secret config failed -> %v: %w", functionName, getConfigErr)
+		fmt.Println(fmt.Errorf("fetching secret config failed -> %v: %w", functionName, getConfigErr))
 	}
 }
 

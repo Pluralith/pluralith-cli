@@ -31,9 +31,6 @@ import (
 
 var cfgFile string
 
-// Specifying sensitive keys (will later be done via external config)
-var sensitiveKeys = []string{"tags", "owner_id"}
-
 // Defining custom "Long" message with colored output
 var blueColor = color.New(color.FgBlue).SprintFunc()
 var longText = fmt.Sprintf(`%s
