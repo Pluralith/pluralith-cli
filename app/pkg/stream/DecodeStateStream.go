@@ -31,8 +31,9 @@ func DecodeStateStream(jsonString string, command string) (DecodedEvent, error) 
 		address := resource["addr"].(string)
 
 		if address != "" {
-			addressParts := strings.Split(address, ".")
-			address = strings.Join(addressParts[len(addressParts)-2:], ".")
+			address = strings.Replace(address, "module.", "", 1)
+			address = strings.Replace(address, "[", ".", 1)
+			address = strings.Replace(address, "]", "", 1)
 		}
 
 		// Set address and type
