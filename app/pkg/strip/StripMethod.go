@@ -1,0 +1,33 @@
+package strip
+
+import (
+	"fmt"
+	"io/ioutil"
+
+	"pluralith/pkg/ux"
+)
+
+func StripMethod(args []string) {
+	// Print running message
+	ux.PrintFormatted("⠿", []string{"blue"})
+	ux.PrintFormatted(" Stripping Secrets", []string{"bold"})
+	fmt.Println()
+
+	// Fetching all state files in current working directory
+	stateFiles := FetchFiles(".tfstate")
+
+	// Instantiating new strip spinner
+	stripSpinner := ux.NewSpinner("Stripping Secrets", fmt.Sprintf("Secrets Stripped From %d File", len(stateFiles)), "Stripping Secrets Failed", true)
+	stripSpinner.Start()
+
+	// Stripping secrets and writing stripped state to disk
+	for fileName, fileContent := range stateFiles {
+		strippedFile, err := StripSecrets(fileContent)
+		if err != nil {
+			stripSpinner.Fail("Failed to strip secrets from %s", fileName)
+		} else {
+			ioutil.WriteFile(fmt.Sprintf("%s.state.stripped", fileName), []byte(strippedFile), 0644)
+			stripSpinner.Success()
+		}
+	}
+}

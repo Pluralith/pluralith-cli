@@ -1,0 +1,20 @@
+steps:
+# Build macOS binary
+- name: 'golang'
+  args: ['env', 'GOOS=darwin', 'GOARCH=amd64', 'go', 'build', '-o', 'dist/pluralith_cli_darwin_amd64']
+  dir: 'app'
+# Build Linux binary
+- name: 'golang'
+  args: ['env', 'GOOS=linux', 'GOARCH=amd64', 'go', 'build', '-o', 'dist/pluralith_cli_linux_amd64']
+  dir: 'app'
+# Build Windows binary
+- name: 'golang'
+  args: ['env', 'GOOS=windows', 'GOARCH=amd64', 'go', 'build', '-o', 'dist/pluralith_cli_windows_amd64']
+  dir: 'app'
+# Upload to release GCS bucket
+- name: gcr.io/cloud-builders/gsutil
+  args: ["-m", "rsync", "-r", "-c", "-d", "app/dist/", "gs://pluralith-cli-releases"]
+options:
+  volumes:
+  - name: 'go-modules'
+    path: /go
