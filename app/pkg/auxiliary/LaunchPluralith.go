@@ -49,7 +49,13 @@ func LaunchPluralith() error {
 			return fmt.Errorf("could not run launch command -> %v: %w", functionName, runErr)
 		}
 	default:
-		if runErr := runOsCommand([]string{"command", "and", "arguments"}); runErr != nil {
+		var launchPath string
+		if PathInstance.IsWSL {
+			launchPath = filepath.Join(PathInstance.HomePath, "AppData", "Local", "Programs", "pluralith", "Pluralith.exe")
+		} else {
+			launchPath = filepath.Join(PathInstance.HomePath)
+		}
+		if runErr := runOsCommand([]string{launchPath}); runErr != nil {
 			return fmt.Errorf("could not run launch command -> %v: %w", functionName, runErr)
 		}
 	}
