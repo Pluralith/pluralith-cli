@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 )
 
 type Paths struct {
@@ -12,6 +13,19 @@ type Paths struct {
 	PluralithPath string
 	ComDBPath     string
 	LockPath      string
+}
+
+func (P *Paths) IsWSL() bool {
+	if runtime.GOOS != "windows" && runtime.GOOS != "darwin" {
+		ex, err := os.Executable()
+		if err != nil {
+			panic(err)
+		}
+		exPath := filepath.Dir(ex)
+		fmt.Println(exPath)
+	}
+
+	return false
 }
 
 func (P *Paths) GeneratePaths() error {
@@ -32,7 +46,7 @@ func (P *Paths) GeneratePaths() error {
 	// Set path parameters
 	P.HomePath = homeDir
 	P.WorkingPath = workingDir
-	P.PluralithPath = filepath.Join(homeDir, "Pluralith") 
+	P.PluralithPath = filepath.Join(homeDir, "Pluralith")
 	P.ComDBPath = filepath.Join(P.PluralithPath, "pluralithComDB.json")
 	P.LockPath = filepath.Join(P.PluralithPath, "pluralithLock.json")
 
