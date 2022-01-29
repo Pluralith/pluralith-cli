@@ -3,6 +3,7 @@ package terraform
 import (
 	"fmt"
 	"os"
+	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/comdb"
 	"pluralith/pkg/stream"
 	"pluralith/pkg/ux"
@@ -38,10 +39,20 @@ func RunApply(command string, args []string) error {
 
 	confirmSpinner.Start()
 
+	var confirm bool
+	var watchErr error
+
 	// Watch for updates from UI and wait for confirmation
-	confirm, watchErr := comdb.WatchComDB()
-	if watchErr != nil {
-		return fmt.Errorf("instantiating ComDB watcher failed -> %v: %w", functionName, watchErr)
+	if auxiliary.PathInstance.IsWSL { // Watch ComDB with loop due to missing inotify support in WSL 2
+		confirm, watchErr = comdb.WatchComDBFallback()
+		if watchErr != nil {
+			return fmt.Errorf("instantiating ComDB watcher failed -> %v: %w", functionName, watchErr)
+		}
+	} else { // Use actual file watcher for everything else
+		confirm, watchErr = comdb.WatchComDB()
+		if watchErr != nil {
+			return fmt.Errorf("instantiating ComDB watcher failed -> %v: %w", functionName, watchErr)
+		}
 	}
 
 	// Stream apply command output

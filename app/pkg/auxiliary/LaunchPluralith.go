@@ -55,7 +55,7 @@ func LaunchPluralith() error {
 		} else {
 			launchPath = filepath.Join(PathInstance.HomePath)
 		}
-		if runErr := runOsCommand([]string{launchPath}); runErr != nil {
+		if runErr := runOsCommand([]string{launchPath, "&", "disown"}); runErr != nil {
 			return fmt.Errorf("could not run launch command -> %v: %w", functionName, runErr)
 		}
 	}
