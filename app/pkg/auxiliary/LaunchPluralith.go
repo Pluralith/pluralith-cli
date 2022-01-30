@@ -23,7 +23,7 @@ func runOsCommand(command []string) error {
 
 	// Handling success and failure cases for terminal command
 	// Adding slight delay to debounce for UI to get there
-	if err := cmd.Run(); err != nil {
+	if err := cmd.Start(); err != nil {
 		time.Sleep(200 * time.Millisecond)
 		spinner.Fail()
 		return fmt.Errorf("%v: %w", functionName, err)
