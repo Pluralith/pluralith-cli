@@ -23,7 +23,7 @@ func runOsCommand(command []string) error {
 
 	// Handling success and failure cases for terminal command
 	// Adding slight delay to debounce for UI to get there
-	if err := cmd.Run(); err != nil {
+	if err := cmd.Start(); err != nil {
 		time.Sleep(200 * time.Millisecond)
 		spinner.Fail()
 		return fmt.Errorf("%v: %w", functionName, err)
@@ -49,7 +49,13 @@ func LaunchPluralith() error {
 			return fmt.Errorf("could not run launch command -> %v: %w", functionName, runErr)
 		}
 	default:
-		if runErr := runOsCommand([]string{"command", "and", "arguments"}); runErr != nil {
+		var launchPath string
+		if PathInstance.IsWSL {
+			launchPath = filepath.Join(PathInstance.HomePath, "AppData", "Local", "Programs", "pluralith", "Pluralith.exe")
+		} else {
+			launchPath = filepath.Join(PathInstance.HomePath)
+		}
+		if runErr := runOsCommand([]string{launchPath, "&", "disown"}); runErr != nil {
 			return fmt.Errorf("could not run launch command -> %v: %w", functionName, runErr)
 		}
 	}
