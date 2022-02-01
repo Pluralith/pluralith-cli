@@ -45,7 +45,7 @@ func RunPlan(command string) (string, error) {
 	})
 
 	// Constructing command to execute
-	cmd := exec.Command("terraform", append([]string{"plan"}, planArgs...)...)
+	cmd := exec.Command("terraform", append([]string{"plan", "-input=false"}, planArgs...)...)
 
 	// Defining sinks for std data
 	var outputSink bytes.Buffer
