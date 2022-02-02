@@ -46,11 +46,16 @@ func DecodeStateStream(jsonString string, command string) (DecodedEvent, error) 
 	if eventType == "diagnostic" {
 		// Get address of current resource
 		diagnostic := parsedState["diagnostic"].(map[string]interface{})
+		eventType := parsedState["@level"].(string)
+
+		if eventType == "error" {
+			eventType = "errored"
+		}
 
 		// Set address and type
 		decodedEvent.Command = "diagnostic"
 		decodedEvent.Address = diagnostic["address"].(string)
-		decodedEvent.Type = parsedState["@level"].(string)
+		decodedEvent.Type = eventType
 	}
 
 	return decodedEvent, nil
