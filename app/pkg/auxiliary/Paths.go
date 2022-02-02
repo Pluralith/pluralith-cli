@@ -68,8 +68,8 @@ func (P *Paths) GeneratePaths() error {
 
 	// If it is WSL -> Set homedir to homedir on Windows
 	if P.IsWSL {
-		pathParts := strings.Split(WSLPath, "/")
-		homeDir = strings.Join(pathParts[:5], "/")
+		pathParts := strings.Split(WSLPath, "Pluralith")
+		homeDir = pathParts[0]
 	}
 
 	// Set path parameters
