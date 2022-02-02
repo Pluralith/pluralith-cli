@@ -20,20 +20,27 @@ type Paths struct {
 func (P *Paths) CheckWSL() string {
 	// If OS is some form of Linux
 	if runtime.GOOS != "windows" && runtime.GOOS != "darwin" {
-		// Get executable source directory
-		ex, err := os.Executable()
-		if err != nil {
-			fmt.Println("Could not check for WSL")
+		// Get kernel version
+		versionBytes, versionErr := os.ReadFile("/proc/version")
+		if versionErr != nil {
 			P.IsWSL = false
 			return ""
 		}
 
-		exPath := filepath.Dir(ex)
+		versionString := strings.ToLower(string(versionBytes))
 
-		// If source directory contains "/mnt/" -> assume it is WSL
-		if strings.Contains(exPath, "/mnt/") {
+		// If version string contains microsoft -> Linux running in WSL
+		if strings.Contains(versionString, "microsoft") {
+			// Get executable source directory
+			ex, err := os.Executable()
+			if err != nil {
+				fmt.Println("Could not check for WSL")
+				P.IsWSL = false
+				return ""
+			}
+
 			P.IsWSL = true
-			return exPath
+			return filepath.Dir(ex)
 		}
 	}
 
