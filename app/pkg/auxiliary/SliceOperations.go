@@ -27,3 +27,16 @@ func RemoveFromSlice(element string, slice []string) []string {
 	index := IndexInSlice(element, slice)
 	return append(slice[:index], slice[index+1:]...)
 }
+
+// Function to deduplicate a slice
+func DeduplicateSlice(strSlice []string) []string {
+	allKeys := make(map[string]bool)
+	list := []string{}
+	for _, item := range strSlice {
+		if _, value := allKeys[item]; !value {
+			allKeys[item] = true
+			list = append(list, item)
+		}
+	}
+	return list
+}

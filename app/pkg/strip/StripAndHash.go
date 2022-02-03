@@ -12,7 +12,8 @@ import (
 	"strings"
 )
 
-func hash(value string) uint64 {
+// Function to produce hash digest of given string
+func Hash(value string) uint64 {
 	h := fnv.New64a()
 	h.Write([]byte(value))
 	return h.Sum64()
@@ -24,7 +25,7 @@ func CheckAndBlacklist(currentKey string, currentValue interface{}, keylist []st
 	for _, blackKey := range keylist {
 		if currentKey == blackKey {
 			// fmt.Println(outerKey, blackKey)
-			stringified := fmt.Sprintf("%s", currentValue)
+			stringified := fmt.Sprintf("%s", currentValue) + "*"
 			*blacklist = append(*blacklist, stringified)
 		}
 	}
@@ -45,6 +46,16 @@ func CheckAndHash(planJson map[string]interface{}, currentKey string, blacklist 
 
 	// Check if blacklist contains value at current key
 	for _, blackKey := range blacklist {
+		// Handle keys marked as prefixes (end with "*")
+		if strings.HasSuffix(blackKey, "*") {
+			noSuffixKey := strings.ReplaceAll(blackKey, "*", "")
+
+			if strings.HasPrefix(stringifiedValue, noSuffixKey) {
+				blacklisted = true
+				break
+			}
+		}
+
 		if strings.Contains(blackKey, stringifiedValue) {
 			blacklisted = true
 			break
@@ -55,9 +66,9 @@ func CheckAndHash(planJson map[string]interface{}, currentKey string, blacklist 
 	if !blacklisted {
 		if index > -1 {
 			slice := planJson[currentKey].([]interface{})
-			slice[index] = hash(stringifiedValue)
+			slice[index] = Hash(stringifiedValue)
 		} else {
-			planJson[currentKey] = hash(stringifiedValue)
+			planJson[currentKey] = Hash(stringifiedValue)
 		}
 	}
 }
@@ -160,8 +171,11 @@ func StripAndHash() error {
 
 	// Recursively collect exception values and build a blacklist
 	keyBlacklist := []string{"address", "name", "type", "module_address", "index"}
-	valueBlacklist := []string{}
+	valueBlacklist := []string{"each.key", "count.index", "module.*", "var.*"}
 	BuildBlacklist(planJson, keyBlacklist, &valueBlacklist)
+
+	// Deduplicate value blacklist
+	valueBlacklist = auxiliary.DeduplicateSlice(valueBlacklist)
 
 	// Recursively process state
 	ProcessState(planJson, valueBlacklist)
@@ -185,5 +199,6 @@ func StripAndHash() error {
 	ux.PrintFormatted("pluralith.state.hashed", []string{"blue"})
 	fmt.Println(" file")
 	fmt.Println()
+
 	return nil
 }
