@@ -80,6 +80,15 @@ func (S *StripState) CheckAndHash(currentMap map[string]interface{}, currentKey 
 	if !isBool {
 		// Check if blacklist contains value at current key if not a boolean
 		for _, blackKey := range S.valueBlacklist {
+			// Handle keys marked as prefixes (end with "*")
+			if strings.HasSuffix(blackKey, "*") {
+				noSuffixKey := strings.ReplaceAll(blackKey, "*", "")
+				if strings.HasPrefix(stringifiedValue, noSuffixKey) {
+					blacklisted = true
+					break
+				}
+			}
+
 			if strings.Contains(stringifiedValue, blackKey) {
 				blacklisted = true
 				break
