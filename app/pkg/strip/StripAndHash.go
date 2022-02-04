@@ -9,6 +9,7 @@ import (
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/ux"
 	"reflect"
+	"sort"
 	"strings"
 )
 
@@ -228,6 +229,11 @@ func (S *StripState) StripAndHash() error {
 	// Deduplicate value blacklist and name list
 	S.valueBlacklist = auxiliary.DeduplicateSlice(S.valueBlacklist)
 	S.nameList = auxiliary.DeduplicateSlice(S.nameList)
+
+	// Sort name list by length to avoid erroneous substring matches
+	sort.Slice(S.nameList, func(i, j int) bool {
+		return len(S.nameList[i]) > len(S.nameList[j])
+	})
 
 	// Recursively process state
 	S.ProcessState(S.planJson)
