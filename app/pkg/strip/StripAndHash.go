@@ -40,8 +40,7 @@ func (S *StripState) CheckAndBlacklist(currentKey string, currentValue interface
 	// If any of the keys in the blacklist are present -> add value to blacklist
 	for _, blackKey := range S.keyBlacklist {
 		if currentKey == blackKey {
-			// fmt.Println(outerKey, blackKey)
-			stringified := fmt.Sprintf("%s", currentValue) + "*"
+			stringified := fmt.Sprintf("%s", currentValue) //+ "*"
 			S.valueBlacklist = append(S.valueBlacklist, stringified)
 		}
 	}
@@ -51,32 +50,40 @@ func (S *StripState) CheckAndBlacklist(currentKey string, currentValue interface
 func (S *StripState) CheckAndHash(currentMap map[string]interface{}, currentKey string, index int) {
 	var stringifiedValue string
 	var blacklisted = false
+	var isBool = false
 
 	// Get value based on if array or not
 	if index > -1 {
 		slice := currentMap[currentKey].([]interface{})
+		isBool = reflect.TypeOf(slice[index]).Kind() == reflect.Bool // Check if bool
 		stringifiedValue = fmt.Sprintf("%s", slice[index])
 	} else {
+		isBool = reflect.TypeOf(currentMap[currentKey]).Kind() == reflect.Bool
 		stringifiedValue = fmt.Sprintf("%s", currentMap[currentKey])
 	}
 
-	// Check if blacklist contains value at current key
-	for _, blackKey := range S.valueBlacklist {
-		// Handle keys marked as prefixes (end with "*")
-		if strings.HasSuffix(blackKey, "*") {
-			noSuffixKey := strings.ReplaceAll(blackKey, "*", "")
+	if !isBool {
+		// Check if blacklist contains value at current key if not a boolean
+		for _, blackKey := range S.valueBlacklist {
+			// Handle keys marked as prefixes (end with "*")
+			// if strings.HasSuffix(blackKey, "*") {
+			// 	noSuffixKey := strings.ReplaceAll(blackKey, "*", "")
 
-			if strings.HasPrefix(stringifiedValue, noSuffixKey) {
+			// if strings.HasPrefix(stringifiedValue, blackKey) {
+			// 	blacklisted = true
+			// 	break
+			// }
+			// }
+
+			if strings.Contains(stringifiedValue, blackKey) {
+				fmt.Println("key comp: ", stringifiedValue, blackKey)
 				blacklisted = true
 				break
 			}
 		}
-
-		if strings.Contains(blackKey, stringifiedValue) {
-			blacklisted = true
-			break
-		}
 	}
+
+	// fmt.Println(currentKey, blacklisted)
 
 	// Set value based on if array or not
 	if !blacklisted {
@@ -208,6 +215,8 @@ func (S *StripState) StripAndHash() error {
 
 	// Deduplicate value blacklist
 	S.valueBlacklist = auxiliary.DeduplicateSlice(S.valueBlacklist)
+
+	fmt.Println(S.valueBlacklist)
 
 	// Recursively process state
 	S.ProcessState(S.planJson)
