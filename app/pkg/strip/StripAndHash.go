@@ -89,6 +89,7 @@ func (S *StripState) CheckAndHash(currentMap map[string]interface{}, currentKey 
 					break
 				}
 			}
+
 			if strings.Contains(stringifiedValue, blackKey) {
 				blacklisted = true
 				break
