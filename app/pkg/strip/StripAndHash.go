@@ -9,6 +9,7 @@ import (
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/ux"
 	"reflect"
+	"sort"
 	"strings"
 )
 
@@ -20,10 +21,10 @@ type StripState struct {
 }
 
 // Function to produce hash digest of given string
-func (S *StripState) Hash(value string) uint64 {
+func (S *StripState) Hash(value string) string {
 	h := fnv.New64a()
 	h.Write([]byte(value))
-	return h.Sum64()
+	return "hash_" + fmt.Sprintf("%v", h.Sum64())
 }
 
 // Helper function to build resource name list
@@ -80,6 +81,14 @@ func (S *StripState) CheckAndHash(currentMap map[string]interface{}, currentKey 
 	if !isBool {
 		// Check if blacklist contains value at current key if not a boolean
 		for _, blackKey := range S.valueBlacklist {
+			// Handle keys marked as prefixes (end with "*")
+			if strings.HasSuffix(blackKey, "*") {
+				noSuffixKey := strings.ReplaceAll(blackKey, "*", "")
+				if strings.HasPrefix(stringifiedValue, noSuffixKey) {
+					blacklisted = true
+					break
+				}
+			}
 			if strings.Contains(stringifiedValue, blackKey) {
 				blacklisted = true
 				break
@@ -212,13 +221,18 @@ func (S *StripState) StripAndHash() error {
 	}
 
 	// Recursively collect exception values and build a blacklist
-	S.keyBlacklist = []string{"address", "name", "type", "module_address", "index"}
+	S.keyBlacklist = []string{"address", "name", "type", "module_address", "index", "provider_name"}
 	S.valueBlacklist = []string{"each.key", "count.index", "module.*", "var.*"}
 	S.BuildBlacklist(S.planJson)
 
 	// Deduplicate value blacklist and name list
 	S.valueBlacklist = auxiliary.DeduplicateSlice(S.valueBlacklist)
 	S.nameList = auxiliary.DeduplicateSlice(S.nameList)
+
+	// Sort name list by length to avoid erroneous substring matches
+	sort.Slice(S.nameList, func(i, j int) bool {
+		return len(S.nameList[i]) > len(S.nameList[j])
+	})
 
 	// Recursively process state
 	S.ProcessState(S.planJson)
