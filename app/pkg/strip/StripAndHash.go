@@ -15,6 +15,7 @@ import (
 type StripState struct {
 	keyBlacklist   []string
 	valueBlacklist []string
+	nameList       []string
 	planJson       map[string]interface{}
 }
 
@@ -25,15 +26,29 @@ func (S *StripState) Hash(value string) uint64 {
 	return h.Sum64()
 }
 
-// // Helper function to find and hash all resource names
-// func ReplaceNames(planJson map[string]interface{}) {
-// 	functionName := "ReplaceNames"
+// Helper function to build resource name list
+func (S *StripState) BuildNameList(currentMap map[string]interface{}) {
+	// fmt.Println(key, currentMap["address"])
+	if _, hasAddress := currentMap["address"]; hasAddress {
+		if name, hasName := currentMap["name"]; hasName {
+			S.nameList = append(S.nameList, name.(string))
+		}
+	}
+}
 
-// 	resourceNames := []string{}
-// 	for resource := range planJson["resources"] {
+// Helper function to find and hash all resource names
+func (S *StripState) ReplaceNames(value string) string {
+	// fmt.Println(value)
+	// functionName := "ReplaceNames"
+	for _, name := range S.nameList {
+		if strings.Contains(value, name) {
+			nameHash := fmt.Sprintf("%v", S.Hash(name))
+			return strings.ReplaceAll(value, name, nameHash)
+		}
+	}
 
-// 	}
-// }
+	return value
+}
 
 // Helper function to check if value needs to be blacklisted
 func (S *StripState) CheckAndBlacklist(currentKey string, currentValue interface{}) {
@@ -65,33 +80,31 @@ func (S *StripState) CheckAndHash(currentMap map[string]interface{}, currentKey 
 	if !isBool {
 		// Check if blacklist contains value at current key if not a boolean
 		for _, blackKey := range S.valueBlacklist {
-			// Handle keys marked as prefixes (end with "*")
-			// if strings.HasSuffix(blackKey, "*") {
-			// 	noSuffixKey := strings.ReplaceAll(blackKey, "*", "")
-
-			// if strings.HasPrefix(stringifiedValue, blackKey) {
-			// 	blacklisted = true
-			// 	break
-			// }
-			// }
-
 			if strings.Contains(stringifiedValue, blackKey) {
-				fmt.Println("key comp: ", stringifiedValue, blackKey)
 				blacklisted = true
 				break
 			}
 		}
 	}
 
-	// fmt.Println(currentKey, blacklisted)
-
-	// Set value based on if array or not
+	// Hash entire value if blacklisted
 	if !blacklisted {
+		// Set value based on if array or not
 		if index > -1 {
 			slice := currentMap[currentKey].([]interface{})
 			slice[index] = S.Hash(stringifiedValue)
 		} else {
 			currentMap[currentKey] = S.Hash(stringifiedValue)
+		}
+	}
+
+	// Replace resource names with their hashes in non-blacklisted values
+	if blacklisted {
+		if index > -1 {
+			slice := currentMap[currentKey].([]interface{})
+			slice[index] = S.ReplaceNames(stringifiedValue)
+		} else {
+			currentMap[currentKey] = S.ReplaceNames(stringifiedValue)
 		}
 	}
 }
@@ -109,18 +122,16 @@ func (S *StripState) BuildBlacklist(planMap map[string]interface{}) {
 				currentMap := value.(map[string]interface{})
 				// If value is of type map -> Move on to next recursion level
 				S.BuildBlacklist(currentMap)
-				// Checking for address
-				// if _, hasAddress := currentMap["address"]; hasAddress {
-				// 	if name, hasName := currentMap["name"]; hasName {
-				// 		fmt.Println(name)
-				// 	}
-				// }
+				S.BuildNameList(currentMap)
 
 			case reflect.Array, reflect.Slice:
 				// If value is of type array or slice -> Loop through elements, if maps are found -> Move to next recursion level
 				for _, sliceValue := range value.([]interface{}) {
 					if reflect.TypeOf(sliceValue).Kind() == reflect.Map {
-						S.BuildBlacklist(sliceValue.(map[string]interface{}))
+						currentMap := sliceValue.(map[string]interface{})
+
+						S.BuildBlacklist(currentMap)
+						S.BuildNameList(currentMap)
 					} else {
 						S.CheckAndBlacklist(key, sliceValue)
 					}
@@ -200,23 +211,14 @@ func (S *StripState) StripAndHash() error {
 		return fmt.Errorf("could not parse plan state -> %v: %w", functionName, readErr)
 	}
 
-	// Replace resource names with hashes
-	// var replaceErr error
-	// planJson, replaceErr = ReplaceNames(planJson)
-	// if replaceErr != nil {
-	// 	stripSpinner.Fail("Failed to hash resource names")
-	// 	return fmt.Errorf("could not hash resource names -> %v: %w", functionName, readErr)
-	// }
-
 	// Recursively collect exception values and build a blacklist
 	S.keyBlacklist = []string{"address", "name", "type", "module_address", "index"}
 	S.valueBlacklist = []string{"each.key", "count.index", "module.*", "var.*"}
 	S.BuildBlacklist(S.planJson)
 
-	// Deduplicate value blacklist
+	// Deduplicate value blacklist and name list
 	S.valueBlacklist = auxiliary.DeduplicateSlice(S.valueBlacklist)
-
-	fmt.Println(S.valueBlacklist)
+	S.nameList = auxiliary.DeduplicateSlice(S.nameList)
 
 	// Recursively process state
 	S.ProcessState(S.planJson)
