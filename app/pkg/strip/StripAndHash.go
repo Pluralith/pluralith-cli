@@ -12,40 +12,56 @@ import (
 	"strings"
 )
 
+type StripState struct {
+	keyBlacklist   []string
+	valueBlacklist []string
+	planJson       map[string]interface{}
+}
+
 // Function to produce hash digest of given string
-func Hash(value string) uint64 {
+func (S *StripState) Hash(value string) uint64 {
 	h := fnv.New64a()
 	h.Write([]byte(value))
 	return h.Sum64()
 }
 
+// // Helper function to find and hash all resource names
+// func ReplaceNames(planJson map[string]interface{}) {
+// 	functionName := "ReplaceNames"
+
+// 	resourceNames := []string{}
+// 	for resource := range planJson["resources"] {
+
+// 	}
+// }
+
 // Helper function to check if value needs to be blacklisted
-func CheckAndBlacklist(currentKey string, currentValue interface{}, keylist []string, blacklist *[]string) {
+func (S *StripState) CheckAndBlacklist(currentKey string, currentValue interface{}) {
 	// If any of the keys in the blacklist are present -> add value to blacklist
-	for _, blackKey := range keylist {
+	for _, blackKey := range S.keyBlacklist {
 		if currentKey == blackKey {
 			// fmt.Println(outerKey, blackKey)
 			stringified := fmt.Sprintf("%s", currentValue) + "*"
-			*blacklist = append(*blacklist, stringified)
+			S.valueBlacklist = append(S.valueBlacklist, stringified)
 		}
 	}
 }
 
 // Helper function to hash values (differentiates between array values and object key values)
-func CheckAndHash(planJson map[string]interface{}, currentKey string, blacklist []string, index int) {
+func (S *StripState) CheckAndHash(currentMap map[string]interface{}, currentKey string, index int) {
 	var stringifiedValue string
 	var blacklisted = false
 
 	// Get value based on if array or not
 	if index > -1 {
-		slice := planJson[currentKey].([]interface{})
+		slice := currentMap[currentKey].([]interface{})
 		stringifiedValue = fmt.Sprintf("%s", slice[index])
 	} else {
-		stringifiedValue = fmt.Sprintf("%s", planJson[currentKey])
+		stringifiedValue = fmt.Sprintf("%s", currentMap[currentKey])
 	}
 
 	// Check if blacklist contains value at current key
-	for _, blackKey := range blacklist {
+	for _, blackKey := range S.valueBlacklist {
 		// Handle keys marked as prefixes (end with "*")
 		if strings.HasSuffix(blackKey, "*") {
 			noSuffixKey := strings.ReplaceAll(blackKey, "*", "")
@@ -65,17 +81,17 @@ func CheckAndHash(planJson map[string]interface{}, currentKey string, blacklist 
 	// Set value based on if array or not
 	if !blacklisted {
 		if index > -1 {
-			slice := planJson[currentKey].([]interface{})
-			slice[index] = Hash(stringifiedValue)
+			slice := currentMap[currentKey].([]interface{})
+			slice[index] = S.Hash(stringifiedValue)
 		} else {
-			planJson[currentKey] = Hash(stringifiedValue)
+			currentMap[currentKey] = S.Hash(stringifiedValue)
 		}
 	}
 }
 
 // Function to build a blacklist of values that should not be hashed
-func BuildBlacklist(planJson map[string]interface{}, keylist []string, blacklist *[]string) {
-	for key, value := range planJson {
+func (S *StripState) BuildBlacklist(planMap map[string]interface{}) {
+	for key, value := range planMap {
 		// Check if value at key is given
 		if value != nil {
 			outerValueType := reflect.TypeOf(value)
@@ -83,27 +99,35 @@ func BuildBlacklist(planJson map[string]interface{}, keylist []string, blacklist
 			// Switch between different data types
 			switch outerValueType.Kind() {
 			case reflect.Map:
+				currentMap := value.(map[string]interface{})
 				// If value is of type map -> Move on to next recursion level
-				BuildBlacklist(value.(map[string]interface{}), keylist, blacklist)
+				S.BuildBlacklist(currentMap)
+				// Checking for address
+				// if _, hasAddress := currentMap["address"]; hasAddress {
+				// 	if name, hasName := currentMap["name"]; hasName {
+				// 		fmt.Println(name)
+				// 	}
+				// }
+
 			case reflect.Array, reflect.Slice:
 				// If value is of type array or slice -> Loop through elements, if maps are found -> Move to next recursion level
 				for _, sliceValue := range value.([]interface{}) {
 					if reflect.TypeOf(sliceValue).Kind() == reflect.Map {
-						BuildBlacklist(sliceValue.(map[string]interface{}), keylist, blacklist)
+						S.BuildBlacklist(sliceValue.(map[string]interface{}))
 					} else {
-						CheckAndBlacklist(key, sliceValue, keylist, blacklist)
+						S.CheckAndBlacklist(key, sliceValue)
 					}
 				}
 			default:
-				CheckAndBlacklist(key, value, keylist, blacklist)
+				S.CheckAndBlacklist(key, value)
 			}
 		}
 	}
 }
 
 // Function to process plan state and strip all sensitive data, keeping structure intact for debugging
-func ProcessState(planJson map[string]interface{}, blacklist []string) {
-	for outerKey, outerValue := range planJson {
+func (S *StripState) ProcessState(currentMap map[string]interface{}) {
+	for outerKey, outerValue := range currentMap {
 		// Check if value at key is given
 		if outerValue != nil {
 			outerValueType := reflect.TypeOf(outerValue)
@@ -112,24 +136,24 @@ func ProcessState(planJson map[string]interface{}, blacklist []string) {
 			switch outerValueType.Kind() {
 			case reflect.Map:
 				// If value is of type map -> Move on to next recursion level
-				ProcessState(outerValue.(map[string]interface{}), blacklist)
+				S.ProcessState(outerValue.(map[string]interface{}))
 			case reflect.Array, reflect.Slice:
 				// If value is of type array or slice -> Loop through elements, if maps are found -> Move to next recursion level
 				for innerIndex, innerValue := range outerValue.([]interface{}) {
 					if reflect.TypeOf(innerValue).Kind() == reflect.Map {
-						ProcessState(innerValue.(map[string]interface{}), blacklist)
+						S.ProcessState(innerValue.(map[string]interface{}))
 					} else {
-						CheckAndHash(planJson, outerKey, blacklist, innerIndex)
+						S.CheckAndHash(currentMap, outerKey, innerIndex)
 					}
 				}
 			default:
-				CheckAndHash(planJson, outerKey, blacklist, -1)
+				S.CheckAndHash(currentMap, outerKey, -1)
 			}
 		}
 	}
 }
 
-func StripAndHash() error {
+func (S *StripState) StripAndHash() error {
 	functionName := "StripAndHashState"
 
 	ux.PrintFormatted("⠿", []string{"blue"})
@@ -162,26 +186,34 @@ func StripAndHash() error {
 	}
 
 	// Parse plan state
-	var planJson map[string]interface{}
-	parseErr := json.Unmarshal(planBytes, &planJson)
+	// var planJson map[string]interface{}
+	parseErr := json.Unmarshal(planBytes, &S.planJson)
 	if parseErr != nil {
 		stripSpinner.Fail("Failed to parse plan state")
 		return fmt.Errorf("could not parse plan state -> %v: %w", functionName, readErr)
 	}
 
+	// Replace resource names with hashes
+	// var replaceErr error
+	// planJson, replaceErr = ReplaceNames(planJson)
+	// if replaceErr != nil {
+	// 	stripSpinner.Fail("Failed to hash resource names")
+	// 	return fmt.Errorf("could not hash resource names -> %v: %w", functionName, readErr)
+	// }
+
 	// Recursively collect exception values and build a blacklist
-	keyBlacklist := []string{"address", "name", "type", "module_address", "index"}
-	valueBlacklist := []string{"each.key", "count.index", "module.*", "var.*"}
-	BuildBlacklist(planJson, keyBlacklist, &valueBlacklist)
+	S.keyBlacklist = []string{"address", "name", "type", "module_address", "index"}
+	S.valueBlacklist = []string{"each.key", "count.index", "module.*", "var.*"}
+	S.BuildBlacklist(S.planJson)
 
 	// Deduplicate value blacklist
-	valueBlacklist = auxiliary.DeduplicateSlice(valueBlacklist)
+	S.valueBlacklist = auxiliary.DeduplicateSlice(S.valueBlacklist)
 
 	// Recursively process state
-	ProcessState(planJson, valueBlacklist)
+	S.ProcessState(S.planJson)
 
 	// Turn stripped and hashed state back into string
-	planString, marshalErr := json.MarshalIndent(planJson, "", " ")
+	planString, marshalErr := json.MarshalIndent(S.planJson, "", " ")
 	if marshalErr != nil {
 		stripSpinner.Fail("Failed to stringify stripped plan state")
 		return fmt.Errorf("%v: %w", functionName, marshalErr)
@@ -202,3 +234,5 @@ func StripAndHash() error {
 
 	return nil
 }
+
+var StripInstance = &StripState{}
