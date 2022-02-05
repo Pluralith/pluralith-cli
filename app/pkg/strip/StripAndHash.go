@@ -64,6 +64,7 @@ func (S *StripState) CheckAndBlacklist(currentKey string, currentValue interface
 	// If any of the keys in the blacklist are present -> add value to blacklist
 	for _, blackKey := range S.keyBlacklist {
 		if currentKey == blackKey {
+			stringified := fmt.Sprintf("%v", currentValue) //+ "*"
 			S.valueBlacklist = append(S.valueBlacklist, stringified)
 		}
 	}
@@ -73,18 +74,40 @@ func (S *StripState) CheckAndBlacklist(currentKey string, currentValue interface
 func (S *StripState) CheckAndHash(currentMap map[string]interface{}, currentKey string, index int) {
 	var stringifiedValue string
 	var blacklisted = false
+	// var isBool = false
 
 	// Get value based on if array or not
 	if index > -1 {
 		slice := currentMap[currentKey].([]interface{})
+		// isBool = reflect.TypeOf(slice[index]).Kind() == reflect.Bool // Check if bool
+		stringifiedValue = fmt.Sprintf("%v", slice[index])
 	} else {
+		// isBool = reflect.TypeOf(currentMap[currentKey]).Kind() == reflect.Bool
+		stringifiedValue = fmt.Sprintf("%v", currentMap[currentKey])
 	}
 
+	// var test float64 = 6
+	// fmt.Println(test)
+	// fmt.Println(fmt.Sprintf("%v", test))
+
+	// if !isBool {
+	// Check if blacklist contains value at current key if not a boolean
+	for _, blackKey := range S.valueBlacklist {
+		// Handle keys marked as prefixes (end with "*")
+		if strings.HasSuffix(blackKey, "*") {
+			noSuffixKey := strings.ReplaceAll(blackKey, "*", "")
+			if strings.HasPrefix(stringifiedValue, noSuffixKey) {
 				blacklisted = true
 				break
 			}
 		}
+
+		if strings.Contains(stringifiedValue, blackKey) {
+			blacklisted = true
+			break
+		}
 	}
+	// }
 
 	// Hash entire value if blacklisted
 	if !blacklisted {
@@ -186,6 +209,12 @@ func (S *StripState) StripAndHash() error {
 	stripSpinner := ux.NewSpinner("Stripping and hashing plan state", "Plan state stripped and hashed", "Stripping and hashing plan state failed", false)
 	stripSpinner.Start()
 
+	// Initialize various filter and hash lists
+	S.keyBlacklist = []string{"address", "type", "module_address", "index", "provider_name"}
+	S.keyDeletelist = []string{"tags", "tags_all", "description"}
+	S.valueBlacklist = []string{"each.key", "count.index", "module.*", "var.*"}
+
+	// Initialize relevant paths
 	planPath := filepath.Join(auxiliary.PathInstance.WorkingPath, "pluralith.state.stripped")
 	outPath := filepath.Join(auxiliary.PathInstance.WorkingPath, "pluralith.state.hashed")
 
@@ -205,7 +234,6 @@ func (S *StripState) StripAndHash() error {
 	}
 
 	// Parse plan state
-	// var planJson map[string]interface{}
 	parseErr := json.Unmarshal(planBytes, &S.planJson)
 	if parseErr != nil {
 		stripSpinner.Fail("Failed to parse plan state")
@@ -213,9 +241,6 @@ func (S *StripState) StripAndHash() error {
 	}
 
 	// Recursively collect exception values and build a blacklist
-	S.keyBlacklist = []string{"address", "name", "type", "module_address", "index", "provider_name"}
-	S.keyDeletelist = []string{"tags", "tags_all", "description"}
-	S.valueBlacklist = []string{"each.key", "count.index", "module.*", "var.*"}
 	S.BuildBlacklist(S.planJson)
 
 	// Deduplicate value blacklist and name list
