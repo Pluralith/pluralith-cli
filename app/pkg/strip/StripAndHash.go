@@ -62,7 +62,6 @@ func (S *StripState) ExemptProviderNames(currentMap map[string]interface{}) {
 
 // Helper function to find and hash all resource names
 func (S *StripState) ReplaceNames(value string) string {
-	// functionName := "ReplaceNames"
 	for _, name := range S.nameList {
 		if strings.Contains(value, name) {
 			nameHash := fmt.Sprintf("%v", S.Hash(name))
@@ -97,7 +96,7 @@ func (S *StripState) CheckAndBlacklist(currentKey string, currentValue interface
 	// If any of the keys in the blacklist are present -> add value to blacklist
 	for _, blackKey := range S.keyBlacklist {
 		if currentKey == blackKey {
-			stringified := fmt.Sprintf("%v", currentValue) //+ "*"
+			stringified := fmt.Sprintf("%v", currentValue)
 			S.valueBlacklist = append(S.valueBlacklist, stringified)
 		}
 	}
@@ -107,30 +106,27 @@ func (S *StripState) CheckAndBlacklist(currentKey string, currentValue interface
 func (S *StripState) CheckAndHash(currentMap map[string]interface{}, currentKey string, index int) {
 	var stringifiedValue string
 	var blacklisted = false
-	// var isBool = false
 
 	// Get value based on if array or not
 	if index > -1 {
 		slice := currentMap[currentKey].([]interface{})
-		// isBool = reflect.TypeOf(slice[index]).Kind() == reflect.Bool // Check if bool
 		stringifiedValue = fmt.Sprintf("%v", slice[index])
 	} else {
-		// isBool = reflect.TypeOf(currentMap[currentKey]).Kind() == reflect.Bool
 		stringifiedValue = fmt.Sprintf("%v", currentMap[currentKey])
 	}
 
 	// Check if blacklist contains value at current key if not a boolean
 	for _, blackKey := range S.valueBlacklist {
 		// Handle keys marked as prefixes (end with "*")
-		if strings.HasSuffix(blackKey, "*") {
-			noSuffixKey := strings.ReplaceAll(blackKey, "*", "")
+		if strings.HasSuffix(blackKey, "<value>") {
+			noSuffixKey := strings.ReplaceAll(blackKey, "<value>", "")
 			if strings.HasPrefix(stringifiedValue, noSuffixKey) {
 				blacklisted = true
 				break
 			}
 		}
 
-		if strings.Contains(stringifiedValue, blackKey) {
+		if stringifiedValue == blackKey {
 			blacklisted = true
 			break
 		}
@@ -210,14 +206,14 @@ func (S *StripState) ProcessState(currentMap map[string]interface{}) {
 			switch outerValueType.Kind() {
 			case reflect.Map:
 				// If value is of type map -> Move on to next recursion level
-				S.HashNamesAsKeys(outerValue.(map[string]interface{}))
 				S.ProcessState(outerValue.(map[string]interface{}))
+				S.HashNamesAsKeys(outerValue.(map[string]interface{}))
 			case reflect.Array, reflect.Slice:
 				// If value is of type array or slice -> Loop through elements, if maps are found -> Move to next recursion level
 				for innerIndex, innerValue := range outerValue.([]interface{}) {
 					if reflect.TypeOf(innerValue).Kind() == reflect.Map {
-						S.HashNamesAsKeys(innerValue.(map[string]interface{}))
 						S.ProcessState(innerValue.(map[string]interface{}))
+						S.HashNamesAsKeys(innerValue.(map[string]interface{}))
 					} else {
 						S.CheckAndHash(currentMap, outerKey, innerIndex)
 					}
@@ -245,8 +241,8 @@ func (S *StripState) StripAndHash() error {
 
 	// Initialize various filter and hash lists
 	S.keyBlacklist = []string{"address", "type", "module_address", "index", "provider_name"}
-	S.keyDeletelist = []string{"tags", "tags_all", "description"}
-	S.valueBlacklist = []string{"each.key", "count.index", "module.*", "var.*"}
+	S.keyDeletelist = []string{"tags", "tags_all", "description", "source"}
+	S.valueBlacklist = []string{"each.key", "count.index", "module.<value>", "var.<value>"}
 
 	// Initialize relevant paths
 	planPath := filepath.Join(auxiliary.PathInstance.WorkingPath, "pluralith.state.stripped")
