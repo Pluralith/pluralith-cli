@@ -29,27 +29,52 @@ func (S *StripState) Hash(value string) string {
 }
 
 // Helper function to build resource name list
-func (S *StripState) BuildNameList(currentMap map[string]interface{}) {
-	// fmt.Println(key, currentMap["address"])
+func (S *StripState) BuildNameList(currentKey string, currentMap map[string]interface{}) {
+	// Handle general value case
 	if _, hasAddress := currentMap["address"]; hasAddress {
 		if name, hasName := currentMap["name"]; hasName {
 			S.nameList = append(S.nameList, name.(string))
+		}
+	}
+
+	// Handle special key case for module names
+	if currentKey == "module_calls" {
+		for moduleKey, _ := range currentMap {
+			S.nameList = append(S.nameList, moduleKey)
+		}
+	}
+
+	// Handle special key case for variable names
+	if currentKey == "variables" {
+		for variableKey, _ := range currentMap {
+			S.nameList = append(S.nameList, variableKey)
 		}
 	}
 }
 
 // Helper function to find and hash all resource names
 func (S *StripState) ReplaceNames(value string) string {
-	// fmt.Println(value)
 	// functionName := "ReplaceNames"
 	for _, name := range S.nameList {
 		if strings.Contains(value, name) {
 			nameHash := fmt.Sprintf("%v", S.Hash(name))
-			return strings.ReplaceAll(value, name, nameHash)
+			value = strings.ReplaceAll(value, name, nameHash)
 		}
 	}
 
 	return value
+}
+
+// Helper function to also hash any element in name list if it appears as key rather than value
+func (S *StripState) HashNamesAsKeys(currentMap map[string]interface{}) {
+	for mapKey, mapValue := range currentMap {
+		for _, nameKey := range S.nameList {
+			if mapKey == nameKey {
+				currentMap[S.Hash(mapKey)] = mapValue
+				delete(currentMap, mapKey)
+			}
+		}
+	}
 }
 
 // Helper function to delete irrelevant keys
@@ -86,11 +111,6 @@ func (S *StripState) CheckAndHash(currentMap map[string]interface{}, currentKey 
 		stringifiedValue = fmt.Sprintf("%v", currentMap[currentKey])
 	}
 
-	// var test float64 = 6
-	// fmt.Println(test)
-	// fmt.Println(fmt.Sprintf("%v", test))
-
-	// if !isBool {
 	// Check if blacklist contains value at current key if not a boolean
 	for _, blackKey := range S.valueBlacklist {
 		// Handle keys marked as prefixes (end with "*")
@@ -107,7 +127,6 @@ func (S *StripState) CheckAndHash(currentMap map[string]interface{}, currentKey 
 			break
 		}
 	}
-	// }
 
 	// Hash entire value if blacklisted
 	if !blacklisted {
@@ -144,7 +163,7 @@ func (S *StripState) BuildBlacklist(planMap map[string]interface{}) {
 				currentMap := value.(map[string]interface{})
 				// If value is of type map -> Move on to next recursion level
 				S.BuildBlacklist(currentMap)
-				S.BuildNameList(currentMap)
+				S.BuildNameList(key, currentMap)
 				S.DeleteIrrelevantKeys(currentMap)
 
 			case reflect.Array, reflect.Slice:
@@ -154,7 +173,7 @@ func (S *StripState) BuildBlacklist(planMap map[string]interface{}) {
 						currentMap := sliceValue.(map[string]interface{})
 
 						S.BuildBlacklist(currentMap)
-						S.BuildNameList(currentMap)
+						S.BuildNameList(key, currentMap)
 						S.DeleteIrrelevantKeys(currentMap)
 					} else {
 						S.CheckAndBlacklist(key, sliceValue)
@@ -178,11 +197,13 @@ func (S *StripState) ProcessState(currentMap map[string]interface{}) {
 			switch outerValueType.Kind() {
 			case reflect.Map:
 				// If value is of type map -> Move on to next recursion level
+				S.HashNamesAsKeys(outerValue.(map[string]interface{}))
 				S.ProcessState(outerValue.(map[string]interface{}))
 			case reflect.Array, reflect.Slice:
 				// If value is of type array or slice -> Loop through elements, if maps are found -> Move to next recursion level
 				for innerIndex, innerValue := range outerValue.([]interface{}) {
 					if reflect.TypeOf(innerValue).Kind() == reflect.Map {
+						S.HashNamesAsKeys(innerValue.(map[string]interface{}))
 						S.ProcessState(innerValue.(map[string]interface{}))
 					} else {
 						S.CheckAndHash(currentMap, outerKey, innerIndex)
