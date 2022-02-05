@@ -15,6 +15,7 @@ import (
 
 type StripState struct {
 	keyBlacklist   []string
+	keyDeletelist  []string
 	valueBlacklist []string
 	nameList       []string
 	planJson       map[string]interface{}
@@ -51,12 +52,18 @@ func (S *StripState) ReplaceNames(value string) string {
 	return value
 }
 
+// Helper function to delete irrelevant keys
+func (S *StripState) DeleteIrrelevantKeys(currentMap map[string]interface{}) {
+	for _, irrelevantKey := range S.keyDeletelist {
+		delete(currentMap, irrelevantKey)
+	}
+}
+
 // Helper function to check if value needs to be blacklisted
 func (S *StripState) CheckAndBlacklist(currentKey string, currentValue interface{}) {
 	// If any of the keys in the blacklist are present -> add value to blacklist
 	for _, blackKey := range S.keyBlacklist {
 		if currentKey == blackKey {
-			stringified := fmt.Sprintf("%s", currentValue) //+ "*"
 			S.valueBlacklist = append(S.valueBlacklist, stringified)
 		}
 	}
@@ -66,31 +73,13 @@ func (S *StripState) CheckAndBlacklist(currentKey string, currentValue interface
 func (S *StripState) CheckAndHash(currentMap map[string]interface{}, currentKey string, index int) {
 	var stringifiedValue string
 	var blacklisted = false
-	var isBool = false
 
 	// Get value based on if array or not
 	if index > -1 {
 		slice := currentMap[currentKey].([]interface{})
-		isBool = reflect.TypeOf(slice[index]).Kind() == reflect.Bool // Check if bool
-		stringifiedValue = fmt.Sprintf("%s", slice[index])
 	} else {
-		isBool = reflect.TypeOf(currentMap[currentKey]).Kind() == reflect.Bool
-		stringifiedValue = fmt.Sprintf("%s", currentMap[currentKey])
 	}
 
-	if !isBool {
-		// Check if blacklist contains value at current key if not a boolean
-		for _, blackKey := range S.valueBlacklist {
-			// Handle keys marked as prefixes (end with "*")
-			if strings.HasSuffix(blackKey, "*") {
-				noSuffixKey := strings.ReplaceAll(blackKey, "*", "")
-				if strings.HasPrefix(stringifiedValue, noSuffixKey) {
-					blacklisted = true
-					break
-				}
-			}
-
-			if strings.Contains(stringifiedValue, blackKey) {
 				blacklisted = true
 				break
 			}
@@ -133,6 +122,7 @@ func (S *StripState) BuildBlacklist(planMap map[string]interface{}) {
 				// If value is of type map -> Move on to next recursion level
 				S.BuildBlacklist(currentMap)
 				S.BuildNameList(currentMap)
+				S.DeleteIrrelevantKeys(currentMap)
 
 			case reflect.Array, reflect.Slice:
 				// If value is of type array or slice -> Loop through elements, if maps are found -> Move to next recursion level
@@ -142,6 +132,7 @@ func (S *StripState) BuildBlacklist(planMap map[string]interface{}) {
 
 						S.BuildBlacklist(currentMap)
 						S.BuildNameList(currentMap)
+						S.DeleteIrrelevantKeys(currentMap)
 					} else {
 						S.CheckAndBlacklist(key, sliceValue)
 					}
@@ -223,6 +214,7 @@ func (S *StripState) StripAndHash() error {
 
 	// Recursively collect exception values and build a blacklist
 	S.keyBlacklist = []string{"address", "name", "type", "module_address", "index", "provider_name"}
+	S.keyDeletelist = []string{"tags", "tags_all", "description"}
 	S.valueBlacklist = []string{"each.key", "count.index", "module.*", "var.*"}
 	S.BuildBlacklist(S.planJson)
 
