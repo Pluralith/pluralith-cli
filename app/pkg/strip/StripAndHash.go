@@ -21,7 +21,7 @@ type StripState struct {
 	planJson       map[string]interface{}
 }
 
-// Function to produce hash digest of given string
+// Helper function to produce hash digest of given string
 func (S *StripState) Hash(value string) string {
 	h := fnv.New64a()
 	h.Write([]byte(value))
@@ -49,6 +49,14 @@ func (S *StripState) BuildNameList(currentKey string, currentMap map[string]inte
 		for variableKey, _ := range currentMap {
 			S.nameList = append(S.nameList, variableKey)
 		}
+	}
+}
+
+// Helper function to fetch provider names and exempt them from hashing
+func (S *StripState) ExemptProviderNames(currentMap map[string]interface{}) {
+	for _, providerObject := range currentMap {
+		mapConversion := providerObject.(map[string]interface{})
+		S.valueBlacklist = append(S.valueBlacklist, mapConversion["name"].(string))
 	}
 }
 
@@ -156,6 +164,11 @@ func (S *StripState) BuildBlacklist(planMap map[string]interface{}) {
 		// Check if value at key is given
 		if value != nil {
 			outerValueType := reflect.TypeOf(value)
+
+			// Get provider names to add to value blacklist
+			if key == "provider_config" {
+				S.ExemptProviderNames(value.(map[string]interface{}))
+			}
 
 			// Switch between different data types
 			switch outerValueType.Kind() {
