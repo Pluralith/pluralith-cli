@@ -65,7 +65,16 @@ func (S *StripState) HandleMap(inputKey string, inputMap map[string]interface{})
 	// Handle special key case for variable names
 	if inputKey == "variables" {
 		for variableKey, _ := range inputMap {
-			if variableKey != "name" {
+			exempt := false
+			// Make sure no relevant state object keys which could be used as variable names are added to name list and hashed
+			for _, exemption := range append(S.keyWhitelist, "name", "module") {
+				if variableKey == exemption {
+					exempt = true
+					break
+				}
+			}
+
+			if !exempt {
 				S.names = append(S.names, variableKey)
 			}
 		}
@@ -234,8 +243,8 @@ func (S *StripState) StripAndHash() error {
 		return fmt.Errorf("could not parse plan state -> %v: %w", functionName, readErr)
 	}
 
-	S.keyWhitelist = []string{"address", "type", "module_address", "index", "provider_name"}
-	S.valueWhitelist = []string{"each.key", "count.index"}
+	S.keyWhitelist = []string{"address", "type", "module_address", "index", "provider_name"} // Keys whose values should not be hashed
+	S.valueWhitelist = []string{"each.key", "count.index"}                                   // Values which should not be hashed no matter which key
 	S.deletes = []string{"tags", "tags_all", "description", "source"}
 
 	// Fetch names
