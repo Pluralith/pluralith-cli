@@ -158,6 +158,11 @@ func (S *StripState) HashAppearances(inputMap map[string]interface{}) {
 		if value != nil {
 			valueType := reflect.TypeOf(value).Kind()
 
+			// Delete unwanted keys
+			for _, item := range S.deletes {
+				delete(inputMap, item)
+			}
+
 			switch valueType {
 			case reflect.Map:
 				S.HashAppearances(value.(map[string]interface{}))
