@@ -32,10 +32,11 @@ import (
 // Exceptions:
 // - Provider names
 type StripState struct {
-	planJson  map[string]interface{}
-	names     []string
-	whitelist []string
-	deletes   []string
+	planJson       map[string]interface{}
+	names          []string
+	keyWhitelist   []string
+	valueWhitelist []string
+	deletes        []string
 }
 
 // Helper function to produce hash digest of given string
@@ -64,7 +65,9 @@ func (S *StripState) HandleMap(inputKey string, inputMap map[string]interface{})
 	// Handle special key case for variable names
 	if inputKey == "variables" {
 		for variableKey, _ := range inputMap {
-			S.names = append(S.names, variableKey)
+			if variableKey != "name" {
+				S.names = append(S.names, variableKey)
+			}
 		}
 	}
 
@@ -72,7 +75,7 @@ func (S *StripState) HandleMap(inputKey string, inputMap map[string]interface{})
 	if inputKey == "provider_config" {
 		for _, providerObject := range inputMap {
 			mapConversion := providerObject.(map[string]interface{})
-			S.whitelist = append(S.whitelist, mapConversion["name"].(string))
+			S.valueWhitelist = append(S.valueWhitelist, mapConversion["name"].(string))
 		}
 	}
 }
@@ -107,15 +110,16 @@ func (S *StripState) CheckAndHash(inputMap map[string]interface{}, key string, i
 		stringifiedValue = fmt.Sprintf("%v", inputMap[key].([]interface{})[index])
 	}
 
-	// Handle whitelist items
-	for _, item := range S.whitelist {
-		// Handle values
+	// Handle value whitelist items
+	for _, item := range S.valueWhitelist {
 		if stringifiedValue == item {
 			whitelisted = true
 			break
 		}
+	}
 
-		// Handle keys
+	// Handle key whitelist items
+	for _, item := range S.keyWhitelist {
 		if key == item {
 			whitelisted = true
 			break
@@ -230,7 +234,8 @@ func (S *StripState) StripAndHash() error {
 		return fmt.Errorf("could not parse plan state -> %v: %w", functionName, readErr)
 	}
 
-	S.whitelist = []string{"address", "type", "module_address", "index", "provider_name", "each.key", "count.index"}
+	S.keyWhitelist = []string{"address", "type", "module_address", "index", "provider_name"}
+	S.valueWhitelist = []string{"each.key", "count.index"}
 	S.deletes = []string{"tags", "tags_all", "description", "source"}
 
 	// Fetch names
