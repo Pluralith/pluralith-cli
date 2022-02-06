@@ -109,7 +109,14 @@ func (S *StripState) CheckAndHash(inputMap map[string]interface{}, key string, i
 
 	// Handle whitelist items
 	for _, item := range S.whitelist {
+		// Handle values
 		if stringifiedValue == item {
+			whitelisted = true
+			break
+		}
+
+		// Handle keys
+		if key == item {
 			whitelisted = true
 			break
 		}
