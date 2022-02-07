@@ -13,24 +13,6 @@ import (
 	"strings"
 )
 
-// Need to hash:
-// - Resource names inside strings
-// - - - > If map has address and name -> get name
-// - Variable names inside strings
-// - - - > If current key is "variables" -> get all map keys
-// - Module names inside strings
-// - - - > If current key is "module_calls" -> get all map keys
-
-// CHECK OUTCOME BEFORE PROCEEDING
-
-// - Every other string / number value
-// - Resource names in keys
-// - Variable names in keys
-// - Handle arrays
-// - Handle objects
-
-// Exceptions:
-// - Provider names
 type StripState struct {
 	planJson       map[string]interface{}
 	names          []string
@@ -53,7 +35,7 @@ func (S *StripState) SplitAndReplace(value string, name string) string {
 
 	// Loop over value parts, replace only exact matches, no substrings
 	for index, part := range valueParts {
-		if part == name {
+		if part == name || strings.Contains(part, name+"[") {
 			valueParts[index] = nameHash
 		}
 	}
@@ -83,24 +65,6 @@ func (S *StripState) HandleMap(inputKey string, inputMap map[string]interface{})
 	if inputKey == "module_calls" {
 		for moduleKey, _ := range inputMap {
 			S.names = append(S.names, moduleKey)
-		}
-	}
-
-	// Handle special key case for variable names
-	if inputKey == "variables" {
-		for variableKey, _ := range inputMap {
-			exempt := false
-			// Make sure no relevant state object keys which could be used as variable names are added to name list and hashed
-			for _, exemption := range append(S.keyWhitelist, "name", "module") {
-				if variableKey == exemption {
-					exempt = true
-					break
-				}
-			}
-
-			if !exempt {
-				S.names = append(S.names, variableKey)
-			}
 		}
 	}
 }
@@ -193,16 +157,7 @@ func (S *StripState) HashAppearances(inputMap map[string]interface{}) {
 
 			switch valueType {
 			case reflect.Map:
-				// Handle variable key hashing
-				valueMap := value.(map[string]interface{})
-				if key == "variables" {
-					for variableKey, variableValue := range value.(map[string]interface{}) {
-						valueMap[S.Hash(variableKey)] = variableValue
-						delete(valueMap, variableKey)
-					}
-				}
-
-				S.HashAppearances(valueMap)
+				S.HashAppearances(value.(map[string]interface{}))
 			case reflect.Slice:
 				for index, item := range value.([]interface{}) {
 					if reflect.TypeOf(item).Kind() == reflect.Map {
@@ -215,14 +170,6 @@ func (S *StripState) HashAppearances(inputMap map[string]interface{}) {
 				S.CheckAndHash(inputMap, key, -1)
 			}
 		}
-
-		// Handle key replacement
-		// for _, name := range S.names {
-		// 	if key == name {
-		// 		inputMap[S.Hash(key)] = value
-		// 		delete(inputMap, key)
-		// 	}
-		// }
 	}
 }
 
@@ -268,7 +215,7 @@ func (S *StripState) StripAndHash() error {
 	}
 
 	S.keyWhitelist = []string{"address", "type", "module_address", "index", "provider_name"} // Keys whose values should not be hashed
-	S.valueWhitelist = []string{"each.key", "count.index"}                                   // Values which should not be hashed no matter which key
+	S.valueWhitelist = []string{"each.key", "each.value", "count.index"}                     // Values which should not be hashed no matter which key
 	S.deletes = []string{"tags", "tags_all", "description", "source"}
 
 	// Fetch names
@@ -279,8 +226,6 @@ func (S *StripState) StripAndHash() error {
 	sort.Slice(S.names, func(i, j int) bool {
 		return len(S.names[i]) > len(S.names[j])
 	})
-
-	fmt.Println(S.names)
 
 	// Hash values
 	S.HashAppearances(S.planJson)
