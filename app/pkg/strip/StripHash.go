@@ -9,6 +9,7 @@ import (
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/ux"
 	"reflect"
+	"strconv"
 	"strings"
 )
 
@@ -19,12 +20,19 @@ type StripState struct {
 	moduleNames   []string
 	variableNames []string
 	resourceNames []string
+	outputNames   []string
 }
 
 // Helper function to produce hash digest of given string
 func (S *StripState) Hash(value string) string {
 	h := fnv.New64a()
 	h.Write([]byte(value))
+
+	// Prevent double hashing in recursion
+	if strings.HasPrefix(value, "hash_") {
+		return value
+	}
+
 	return fmt.Sprintf("hash_%v", h.Sum64())
 }
 
@@ -53,9 +61,16 @@ func (S *StripState) CollectNames(inputMap map[string]interface{}) {
 
 		// Module names
 		if key == "module_calls" {
-			valueObject := value.(map[string]interface{})
-			for moduleKey, _ := range valueObject {
+			// Hash module keys and add new keys to module_calls object
+			for moduleKey, _ := range value.(map[string]interface{}) {
 				S.moduleNames = append(S.moduleNames, moduleKey)
+			}
+
+			// Delete old unhashed module keys
+			for _, moduleName := range S.moduleNames {
+				valueObject := value.(map[string]interface{})
+				valueObject[S.Hash(moduleName)] = valueObject[moduleName]
+				delete(value.(map[string]interface{}), moduleName)
 			}
 		}
 
@@ -63,6 +78,35 @@ func (S *StripState) CollectNames(inputMap map[string]interface{}) {
 		if key == "variables" {
 			for variableKey, _ := range value.(map[string]interface{}) {
 				S.variableNames = append(S.variableNames, variableKey)
+			}
+
+			// Delete old unhashed module keys
+			for _, variableName := range S.variableNames {
+				valueObject := value.(map[string]interface{})
+
+				// Check if value object actually has current name
+				if _, hasOutput := valueObject[variableName]; hasOutput {
+					valueObject[S.Hash(variableName)] = valueObject[variableName]
+					delete(value.(map[string]interface{}), variableName)
+				}
+			}
+		}
+
+		// Output names
+		if key == "outputs" {
+			for outputKey, _ := range value.(map[string]interface{}) {
+				S.outputNames = append(S.outputNames, outputKey)
+			}
+
+			// Delete old unhashed module keys
+			for _, outputName := range S.outputNames {
+				valueObject := value.(map[string]interface{})
+
+				// Check if value object actually has current name
+				if _, hasOutput := valueObject[outputName]; hasOutput {
+					valueObject[S.Hash(outputName)] = valueObject[outputName]
+					delete(value.(map[string]interface{}), outputName)
+				}
 			}
 		}
 
@@ -76,6 +120,7 @@ func (S *StripState) CollectNames(inputMap map[string]interface{}) {
 
 // Function to handle name replacements in string values
 func (S *StripState) ReplaceNames(inputValue string) string {
+	replaceMatch := false
 	inputParts := strings.Split(inputValue, ".")
 
 	allNames := append(S.resourceNames, S.moduleNames...)
@@ -84,10 +129,14 @@ func (S *StripState) ReplaceNames(inputValue string) string {
 	for index, part := range inputParts {
 		for _, name := range allNames {
 			if part == name || strings.HasPrefix(part, name+"[") || strings.HasPrefix(part, name+":") {
+				replaceMatch = true
 				inputParts[index] = strings.ReplaceAll(part, name, S.Hash(name)) // Replace only name substring without altering or hashing index
-				return strings.Join(inputParts, ".")
 			}
 		}
+	}
+
+	if replaceMatch {
+		return strings.Join(inputParts, ".")
 	}
 
 	return S.Hash(inputValue)
@@ -144,7 +193,14 @@ func (S *StripState) ProcessSlice(parentKey string, inputSlice []interface{}) {
 			S.ProcessSlice(parentKey, value.([]interface{}))
 		default:
 			stringifiedValue := fmt.Sprintf("%v", value)
-			inputSlice[index] = S.ProcessDefault(parentKey, stringifiedValue)
+			processedValue := S.ProcessDefault(parentKey, stringifiedValue)
+
+			// Converting potential numbers back to numbers if possible
+			if auxiliary.IsNumeric(processedValue) {
+				inputSlice[index], _ = strconv.Atoi(processedValue)
+			} else {
+				inputSlice[index] = processedValue
+			}
 		}
 	}
 }
@@ -165,7 +221,13 @@ func (S *StripState) ProcessMap(parentKey string, inputMap map[string]interface{
 			S.ProcessSlice(key, value.([]interface{}))
 		default:
 			stringifiedValue := fmt.Sprintf("%v", value)
-			inputMap[key] = S.ProcessDefault(key, stringifiedValue)
+			processedValue := S.ProcessDefault(key, stringifiedValue)
+
+			if auxiliary.IsNumeric(processedValue) {
+				inputMap[key], _ = strconv.Atoi(processedValue)
+			} else {
+				inputMap[key] = processedValue
+			}
 		}
 	}
 }
@@ -217,7 +279,7 @@ func (S *StripState) StripAndHash() error {
 	S.moduleNames = auxiliary.DeduplicateSlice(S.moduleNames)
 	S.variableNames = auxiliary.DeduplicateSlice(S.variableNames)
 
-	S.keyWhitelist = []string{"index", "provider_name", "terraform_version"}
+	S.keyWhitelist = []string{"type", "index", "provider_name", "terraform_version"}
 
 	S.ProcessMap("", S.planJson)
 
