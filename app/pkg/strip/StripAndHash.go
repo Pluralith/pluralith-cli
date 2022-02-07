@@ -48,6 +48,14 @@ func (S *StripState) Hash(value string) string {
 
 // Helper function to handle map in recursion
 func (S *StripState) HandleMap(inputKey string, inputMap map[string]interface{}) {
+	// Remove provider names from hash name list
+	if inputKey == "provider_config" {
+		for _, providerObject := range inputMap {
+			mapConversion := providerObject.(map[string]interface{})
+			S.valueWhitelist = append(S.valueWhitelist, mapConversion["name"].(string))
+		}
+	}
+
 	// Handle general value case
 	if _, hasAddress := inputMap["address"]; hasAddress {
 		if name, hasName := inputMap["name"]; hasName {
@@ -77,14 +85,6 @@ func (S *StripState) HandleMap(inputKey string, inputMap map[string]interface{})
 			if !exempt {
 				S.names = append(S.names, variableKey)
 			}
-		}
-	}
-
-	// Remove provider names from hash name list
-	if inputKey == "provider_config" {
-		for _, providerObject := range inputMap {
-			mapConversion := providerObject.(map[string]interface{})
-			S.valueWhitelist = append(S.valueWhitelist, mapConversion["name"].(string))
 		}
 	}
 }
@@ -139,13 +139,12 @@ func (S *StripState) CheckAndHash(inputMap map[string]interface{}, key string, i
 	for _, name := range S.names {
 		if strings.Contains(stringifiedValue, name) {
 			whitelisted = true
-			// fmt.Println(stringifiedValue, "-> contains ->", name)
 			if index > -1 {
 				keyValue := inputMap[key].([]interface{})
-				keyValue[index] = strings.ReplaceAll(stringifiedValue, name, S.Hash(name))
+				keyValue[index] = strings.ReplaceAll(stringifiedValue, "."+name, "."+S.Hash(name))
 				stringifiedValue = keyValue[index].(string)
 			} else {
-				inputMap[key] = strings.ReplaceAll(stringifiedValue, name, S.Hash(name))
+				inputMap[key] = strings.ReplaceAll(stringifiedValue, "."+name, "."+S.Hash(name))
 				stringifiedValue = inputMap[key].(string)
 			}
 
@@ -178,7 +177,16 @@ func (S *StripState) HashAppearances(inputMap map[string]interface{}) {
 
 			switch valueType {
 			case reflect.Map:
-				S.HashAppearances(value.(map[string]interface{}))
+				// Handle variable key hashing
+				valueMap := value.(map[string]interface{})
+				if key == "variables" {
+					for variableKey, variableValue := range value.(map[string]interface{}) {
+						valueMap[S.Hash(variableKey)] = variableValue
+						delete(valueMap, variableKey)
+					}
+				}
+
+				S.HashAppearances(valueMap)
 			case reflect.Slice:
 				for index, item := range value.([]interface{}) {
 					if reflect.TypeOf(item).Kind() == reflect.Map {
@@ -193,12 +201,12 @@ func (S *StripState) HashAppearances(inputMap map[string]interface{}) {
 		}
 
 		// Handle key replacement
-		for _, name := range S.names {
-			if key == name {
-				inputMap[S.Hash(key)] = value
-				delete(inputMap, key)
-			}
-		}
+		// for _, name := range S.names {
+		// 	if key == name {
+		// 		inputMap[S.Hash(key)] = value
+		// 		delete(inputMap, key)
+		// 	}
+		// }
 	}
 }
 
@@ -255,6 +263,8 @@ func (S *StripState) StripAndHash() error {
 	sort.Slice(S.names, func(i, j int) bool {
 		return len(S.names[i]) > len(S.names[j])
 	})
+
+	fmt.Println(S.names)
 
 	// Hash values
 	S.HashAppearances(S.planJson)
