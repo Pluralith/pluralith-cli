@@ -63,14 +63,14 @@ func (S *StripState) HandleMap(inputKey string, inputMap map[string]interface{})
 
 	// Handle special key case for module names
 	if inputKey == "module_calls" {
-		for moduleKey, _ := range inputMap {
-			S.names = append(S.names, moduleKey)
-		}
+		// for moduleKey, _ := range inputMap {
+		// 	S.names = append(S.names, moduleKey)
+		// }
 
 		// Hash module_calls keys (needs separate loop to not extend previous loop)
-		for moduleKey, moduleValue := range inputMap {
-			inputMap[S.Hash(moduleKey)] = moduleValue
-		}
+		// for moduleKey, moduleValue := range inputMap {
+		// 	inputMap[S.Hash(moduleKey)] = moduleValue
+		// }
 	}
 }
 
