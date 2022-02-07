@@ -46,6 +46,22 @@ func (S *StripState) Hash(value string) string {
 	return fmt.Sprintf("hash_%v", h.Sum64())
 }
 
+// Helper function to split addresses and replace only exact matches
+func (S *StripState) SplitAndReplace(value string, name string) string {
+	valueParts := strings.Split(value, ".") // Split string by .
+	nameHash := S.Hash(name)                // Compute name hash
+
+	// Loop over value parts, replace only exact matches, no substrings
+	for index, part := range valueParts {
+		if part == name {
+			valueParts[index] = nameHash
+		}
+	}
+
+	// Return joined string of replaced and original parts
+	return strings.Join(valueParts, ".")
+}
+
 // Helper function to handle map in recursion
 func (S *StripState) HandleMap(inputKey string, inputMap map[string]interface{}) {
 	// Remove provider names from hash name list
@@ -141,10 +157,10 @@ func (S *StripState) CheckAndHash(inputMap map[string]interface{}, key string, i
 			whitelisted = true
 			if index > -1 {
 				keyValue := inputMap[key].([]interface{})
-				keyValue[index] = strings.ReplaceAll(stringifiedValue, "."+name, "."+S.Hash(name))
+				keyValue[index] = S.SplitAndReplace(stringifiedValue, name)
 				stringifiedValue = keyValue[index].(string)
 			} else {
-				inputMap[key] = strings.ReplaceAll(stringifiedValue, "."+name, "."+S.Hash(name))
+				inputMap[key] = S.SplitAndReplace(stringifiedValue, name)
 				stringifiedValue = inputMap[key].(string)
 			}
 
