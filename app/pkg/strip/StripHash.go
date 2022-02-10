@@ -13,10 +13,6 @@ import (
 	"strings"
 )
 
-// TODO:
-// DONE - Remove tags, tags_all, description, source
-// - Handle sensitive stuff in index (if not a number, just hash)
-
 type StripState struct {
 	planJson         map[string]interface{}
 	keyWhitelist     []string
