@@ -272,6 +272,29 @@ func (S *StripState) ProcessSlice(parentKey string, inputSlice []interface{}) {
 	}
 }
 
+// Function to handle hashing of special keys
+func (S *StripState) HashSpecialKeys(parentKey string, inputKey string, inputMap map[string]interface{}) {
+	// Hash variable value keys in module calls
+	if parentKey == "constant_value" {
+		for _, indexName := range S.indexNames {
+			if inputKey == indexName {
+				inputMap[S.Hash(inputKey)] = inputMap[inputKey]
+				delete(inputMap, inputKey)
+			}
+		}
+	}
+
+	// Hash variable names in module calls
+	if parentKey == "expressions" {
+		for _, variableName := range S.variableNames {
+			if inputKey == variableName {
+				inputMap[S.Hash(inputKey)] = inputMap[inputKey]
+				delete(inputMap, inputKey)
+			}
+		}
+	}
+}
+
 // Function to recursively process maps
 func (S *StripState) ProcessMap(parentKey string, inputMap map[string]interface{}) {
 	// Delete unwanted keys
@@ -284,8 +307,9 @@ func (S *StripState) ProcessMap(parentKey string, inputMap map[string]interface{
 			continue
 		}
 
-		valueType := reflect.TypeOf(value).Kind()
+		S.HashSpecialKeys(parentKey, key, inputMap)
 
+		valueType := reflect.TypeOf(value).Kind()
 		switch valueType {
 		case reflect.Map:
 			S.ProcessMap(key, value.(map[string]interface{}))
