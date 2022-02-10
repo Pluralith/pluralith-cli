@@ -13,6 +13,10 @@ import (
 	"strings"
 )
 
+// TODO:
+// - Remove tags, tags_all, description, source
+// - Hanlde sensitive stuff in index (if not a number, just hash)
+
 type StripState struct {
 	planJson      map[string]interface{}
 	keyWhitelist  []string
@@ -21,6 +25,7 @@ type StripState struct {
 	variableNames []string
 	resourceNames []string
 	outputNames   []string
+	deletes       []string
 }
 
 // Helper function to produce hash digest of given string
@@ -207,6 +212,11 @@ func (S *StripState) ProcessSlice(parentKey string, inputSlice []interface{}) {
 
 // Function to recursively process maps
 func (S *StripState) ProcessMap(parentKey string, inputMap map[string]interface{}) {
+	// Delete unwanted keys
+	for _, item := range S.deletes {
+		delete(inputMap, item)
+	}
+
 	for key, value := range inputMap {
 		if value == nil {
 			continue
@@ -280,6 +290,7 @@ func (S *StripState) StripAndHash() error {
 	S.variableNames = auxiliary.DeduplicateSlice(S.variableNames)
 
 	S.keyWhitelist = []string{"type", "index", "provider_name", "terraform_version"}
+	S.deletes = []string{"tags", "tags_all", "description", "source"}
 
 	S.ProcessMap("", S.planJson)
 
