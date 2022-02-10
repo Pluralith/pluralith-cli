@@ -14,18 +14,21 @@ import (
 )
 
 // TODO:
-// - Remove tags, tags_all, description, source
-// - Hanlde sensitive stuff in index (if not a number, just hash)
+// DONE - Remove tags, tags_all, description, source
+// - Handle sensitive stuff in index (if not a number, just hash)
 
 type StripState struct {
-	planJson      map[string]interface{}
-	keyWhitelist  []string
-	providers     []string
+	planJson         map[string]interface{}
+	keyWhitelist     []string
+	providers        []string
+	deletes          []string
+	hashedKeyParents []string // Parent keys within which to look for keys that need to be hashed
+
 	moduleNames   []string
 	variableNames []string
 	resourceNames []string
 	outputNames   []string
-	deletes       []string
+	indexNames    []string
 }
 
 // Helper function to produce hash digest of given string
@@ -39,6 +42,32 @@ func (S *StripState) Hash(value string) string {
 	}
 
 	return fmt.Sprintf("hash_%v", h.Sum64())
+}
+
+func (S *StripState) HashOutputKeys(outputObject map[string]interface{}) map[string]interface{} {
+	if outputValue, hasValue := outputObject["value"]; hasValue {
+		if outputValue == nil {
+			return outputObject
+		}
+
+		if reflect.TypeOf(outputValue).Kind() != reflect.Map {
+			return outputObject // If value object is not a map -> no key hashing to be done
+		}
+
+		valueObject := outputObject["value"].(map[string]interface{})
+		originalOutputValues := []string{}
+
+		for valueKey, _ := range valueObject {
+			originalOutputValues = append(originalOutputValues, valueKey)
+		}
+
+		for _, originalkey := range originalOutputValues {
+			valueObject[S.Hash(originalkey)] = valueObject[originalkey]
+			delete(valueObject, originalkey)
+		}
+	}
+
+	return outputObject
 }
 
 // Function to handle name replacements in string values
@@ -109,7 +138,10 @@ func (S *StripState) CollectNames(inputMap map[string]interface{}) {
 
 				// Check if value object actually has current name
 				if _, hasOutput := valueObject[outputName]; hasOutput {
-					valueObject[S.Hash(outputName)] = valueObject[outputName]
+					outputObject := valueObject[outputName].(map[string]interface{})
+					outputObject = S.HashOutputKeys(outputObject)
+
+					valueObject[S.Hash(outputName)] = outputObject
 					delete(value.(map[string]interface{}), outputName)
 				}
 			}
@@ -291,6 +323,7 @@ func (S *StripState) StripAndHash() error {
 
 	S.keyWhitelist = []string{"type", "index", "provider_name", "terraform_version"}
 	S.deletes = []string{"tags", "tags_all", "description", "source"}
+	S.hashedKeyParents = []string{"value", "constant_value"}
 
 	S.ProcessMap("", S.planJson)
 
