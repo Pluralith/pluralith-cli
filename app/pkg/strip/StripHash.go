@@ -44,6 +44,7 @@ func (S *StripState) Hash(value string) string {
 	return fmt.Sprintf("hash_%v", h.Sum64())
 }
 
+// Function to hash ouput value keys if output value is an object
 func (S *StripState) HashOutputKeys(outputObject map[string]interface{}) map[string]interface{} {
 	if outputValue, hasValue := outputObject["value"]; hasValue {
 		if outputValue == nil {
@@ -86,10 +87,24 @@ func (S *StripState) CollectNames(inputMap map[string]interface{}) {
 		}
 
 		// Resource names
-		if key == "resources" {
+		if key == "resources" && reflect.TypeOf(value).Kind() == reflect.Slice {
 			for _, resourceValue := range value.([]interface{}) {
+				if reflect.TypeOf(resourceValue).Kind() != reflect.Map {
+					continue
+				}
+
 				resourceObject := resourceValue.(map[string]interface{})
 				S.resourceNames = append(S.resourceNames, resourceObject["name"].(string))
+
+				if indexValue, hasIndex := resourceObject["index"]; hasIndex {
+					if indexValue == nil {
+						continue
+					}
+
+					if reflect.TypeOf(indexValue).Kind() == reflect.String {
+						S.indexNames = append(S.indexNames, indexValue.(string))
+					}
+				}
 			}
 		}
 
@@ -151,6 +166,15 @@ func (S *StripState) CollectNames(inputMap map[string]interface{}) {
 		if reflect.TypeOf(value).Kind() == reflect.Map {
 			S.CollectNames(value.(map[string]interface{}))
 		}
+
+		// If value is a slice -> iterate over slice items and proceed further down with recursion on items that are maps
+		if reflect.TypeOf(value).Kind() == reflect.Slice {
+			for _, valueItem := range value.([]interface{}) {
+				if reflect.TypeOf(valueItem).Kind() == reflect.Map {
+					S.CollectNames(valueItem.(map[string]interface{}))
+				}
+			}
+		}
 	}
 
 }
@@ -163,12 +187,18 @@ func (S *StripState) ReplaceNames(inputValue string) string {
 	allNames := append(S.resourceNames, S.moduleNames...)
 	allNames = append(allNames, S.variableNames...)
 
-	for index, part := range inputParts {
+	for inputIndex, part := range inputParts {
+		// Hash names
 		for _, name := range allNames {
 			if part == name || strings.HasPrefix(part, name+"[") || strings.HasPrefix(part, name+":") {
 				replaceMatch = true
-				inputParts[index] = strings.ReplaceAll(part, name, S.Hash(name)) // Replace only name substring without altering or hashing index
+				inputParts[inputIndex] = strings.ReplaceAll(part, name, S.Hash(name)) // Replace only name substring without altering or hashing index
 			}
+		}
+
+		// Hash indices
+		for _, index := range S.indexNames {
+			inputParts[inputIndex] = strings.ReplaceAll(inputParts[inputIndex], "[\""+index+"\"]", "[\""+S.Hash(index)+"\"]")
 		}
 	}
 
@@ -320,10 +350,13 @@ func (S *StripState) StripAndHash() error {
 	S.resourceNames = auxiliary.DeduplicateSlice(S.resourceNames)
 	S.moduleNames = auxiliary.DeduplicateSlice(S.moduleNames)
 	S.variableNames = auxiliary.DeduplicateSlice(S.variableNames)
+	S.indexNames = auxiliary.DeduplicateSlice(S.indexNames)
 
-	S.keyWhitelist = []string{"type", "index", "provider_name", "terraform_version"}
+	S.keyWhitelist = []string{"type", "provider_name", "terraform_version"}
 	S.deletes = []string{"tags", "tags_all", "description", "source"}
 	S.hashedKeyParents = []string{"value", "constant_value"}
+
+	// fmt.Println(S.indexNames)
 
 	S.ProcessMap("", S.planJson)
 
