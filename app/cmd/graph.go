@@ -16,11 +16,9 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-	"pluralith/pkg/auxiliary"
+	"pluralith/pkg/graph"
 
 	"github.com/spf13/cobra"
-	v8 "rogchap.com/v8go"
 )
 
 // stripCmd represents the strip command
@@ -34,10 +32,11 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		jsContext := v8.NewContext()
-		jsContext.RunScript(auxiliary.StateInstance.EmbeddedJS, "index.js")
-		test, _ := jsContext.RunScript("result", "index.js")
-		fmt.Println(test)
+		// jsContext := v8.NewContext()
+		// jsContext.RunScript(auxiliary.StateInstance.EmbeddedJS, "index.js")
+		// test, _ := jsContext.RunScript("result", "index.js")
+		// fmt.Println(test)
+		graph.GetAlgorithm()
 	},
 }
 
