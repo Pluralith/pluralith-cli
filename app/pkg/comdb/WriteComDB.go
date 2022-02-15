@@ -18,7 +18,7 @@ func WriteComDB(updatedDB ComDB) error {
 	}
 
 	// Write to Pluralith UI bus file (WriteFile replaces all file contents)
-	if writeErr := os.WriteFile(auxiliary.PathInstance.ComDBPath, updatedDBString, 0700); writeErr != nil {
+	if writeErr := os.WriteFile(auxiliary.StateInstance.ComDBPath, updatedDBString, 0700); writeErr != nil {
 		return fmt.Errorf("%v: %w", functionName, writeErr)
 	}
 

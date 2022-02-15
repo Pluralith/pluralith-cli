@@ -13,7 +13,7 @@ func MarkComDBReceived(event ComDBEvent) error {
 	AcquireDBLock()
 
 	// Read comDB from file
-	if readErr := ReadComFile(auxiliary.PathInstance.ComDBPath, &comDB); readErr != nil {
+	if readErr := ReadComFile(auxiliary.StateInstance.ComDBPath, &comDB); readErr != nil {
 		return fmt.Errorf("reading ComDB failed -> %v: %w", functionName, readErr)
 	}
 

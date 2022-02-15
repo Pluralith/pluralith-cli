@@ -18,7 +18,7 @@ func AcquireDBLock() error {
 	for lock && writeRetries <= 10 {
 		var lockObject dblock.Lock
 
-		if readErr := ReadComFile(auxiliary.PathInstance.LockPath, &lockObject); readErr != nil {
+		if readErr := ReadComFile(auxiliary.StateInstance.LockPath, &lockObject); readErr != nil {
 			return fmt.Errorf("reading Lock failed -> %v: %w", functionName, readErr)
 		}
 

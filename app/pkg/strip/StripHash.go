@@ -340,8 +340,8 @@ func (S *StripState) StripAndHash() error {
 	stripSpinner.Start()
 
 	// Initialize relevant paths
-	planPath := filepath.Join(auxiliary.PathInstance.WorkingPath, "pluralith.state.stripped")
-	outPath := filepath.Join(auxiliary.PathInstance.WorkingPath, "pluralith.state.hashed")
+	planPath := filepath.Join(auxiliary.StateInstance.WorkingPath, "pluralith.state.stripped")
+	outPath := filepath.Join(auxiliary.StateInstance.WorkingPath, "pluralith.state.hashed")
 
 	// Check if plan state exists -> if not, alert and return
 	if _, existErr := os.Stat(planPath); existErr != nil {

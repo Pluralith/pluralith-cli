@@ -17,18 +17,16 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 	"pluralith/pkg/auxiliary"
-	"pluralith/pkg/ux"
 
 	"github.com/spf13/cobra"
+	v8 "rogchap.com/v8go"
 )
 
 // stripCmd represents the strip command
-var loginCmd = &cobra.Command{
-	Use:   "login",
-	Short: "Set credentials for communication with the Pluralith API",
+var graphCmd = &cobra.Command{
+	Use:   "graph",
+	Short: "Strip a given state file of secrets according to config",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
@@ -36,23 +34,13 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		ux.PrintHead()
-
-		fmt.Println("Welcome to Pluralith!")
-		fmt.Print("Enter API Key: ")
-
-		var APIKey string
-		fmt.Scanln(&APIKey)
-
-		auxiliary.StateInstance.APIKey = APIKey
-		credentialsPath := filepath.Join(auxiliary.StateInstance.PluralithPath, "credentials")
-
-		if err := os.WriteFile(credentialsPath, []byte(APIKey), 0700); err != nil {
-			fmt.Println(fmt.Errorf("failed to write API key to config -> %w", err))
-		}
+		jsContext := v8.NewContext()
+		jsContext.RunScript(auxiliary.StateInstance.EmbeddedJS, "index.js")
+		test, _ := jsContext.RunScript("result", "index.js")
+		fmt.Println(test)
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(loginCmd)
+	rootCmd.AddCommand(graphCmd)
 }

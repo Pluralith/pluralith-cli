@@ -8,16 +8,18 @@ import (
 	"strings"
 )
 
-type Paths struct {
+type State struct {
 	HomePath      string
 	WorkingPath   string
 	PluralithPath string
 	ComDBPath     string
 	LockPath      string
 	IsWSL         bool
+	APIKey        string
+	EmbeddedJS    string
 }
 
-func (P *Paths) CheckWSL() string {
+func (P *State) CheckWSL() string {
 	// If OS is some form of Linux
 	if runtime.GOOS != "windows" && runtime.GOOS != "darwin" {
 		// Get kernel version
@@ -48,7 +50,7 @@ func (P *Paths) CheckWSL() string {
 	return ""
 }
 
-func (P *Paths) GeneratePaths() error {
+func (P *State) GeneratePaths() error {
 	functionName := "GeneratePaths"
 
 	// Check for WSL
@@ -82,7 +84,7 @@ func (P *Paths) GeneratePaths() error {
 	return nil
 }
 
-func (P *Paths) InitPaths() error {
+func (P *State) InitPaths() error {
 	functionName := "InitPaths"
 
 	// Create parent directories for path if they don't exist yet
@@ -93,4 +95,18 @@ func (P *Paths) InitPaths() error {
 	return nil
 }
 
-var PathInstance = &Paths{}
+func (P *State) SetAPIKey() error {
+	functionName := "SetAPIKey"
+	credentialsPath := filepath.Join(P.PluralithPath, "credentials")
+
+	keyValue, readErr := os.ReadFile(credentialsPath)
+	if readErr != nil {
+		return fmt.Errorf("%v: %w", functionName, readErr)
+	}
+
+	P.APIKey = string(keyValue)
+
+	return nil
+}
+
+var StateInstance = &State{}

@@ -12,7 +12,7 @@ func PushComDBEvent(message ComDBEvent) error {
 	AcquireDBLock()
 
 	// Read DB from disk
-	if readErr := ReadComFile(auxiliary.PathInstance.ComDBPath, &comDB); readErr != nil {
+	if readErr := ReadComFile(auxiliary.StateInstance.ComDBPath, &comDB); readErr != nil {
 		return fmt.Errorf("reading ComDB failed -> %v: %w", functionName, readErr)
 	}
 

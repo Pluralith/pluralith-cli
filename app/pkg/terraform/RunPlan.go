@@ -21,7 +21,7 @@ func RunPlan(command string) (string, error) {
 	fmt.Println("")
 
 	// Constructing execution plan path
-	workingPlan := filepath.Join(auxiliary.PathInstance.WorkingPath, "pluralith.plan")
+	workingPlan := filepath.Join(auxiliary.StateInstance.WorkingPath, "pluralith.plan")
 
 	// Initialize variables
 	planArgs := []string{"-out", workingPlan}
@@ -40,7 +40,7 @@ func RunPlan(command string) (string, error) {
 		Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
 		Command:   "plan",
 		Type:      "begin",
-		Path:      auxiliary.PathInstance.WorkingPath,
+		Path:      auxiliary.StateInstance.WorkingPath,
 		Received:  false,
 	})
 
@@ -67,7 +67,7 @@ func RunPlan(command string) (string, error) {
 			Command:   "plan",
 			Type:      "failed",
 			Error:     errorSink.String(),
-			Path:      auxiliary.PathInstance.WorkingPath,
+			Path:      auxiliary.StateInstance.WorkingPath,
 			Received:  false,
 		})
 
@@ -89,7 +89,7 @@ func RunPlan(command string) (string, error) {
 		Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
 		Command:   "plan",
 		Type:      "end",
-		Path:      auxiliary.PathInstance.WorkingPath,
+		Path:      auxiliary.StateInstance.WorkingPath,
 		Received:  false,
 		Providers: providers,
 	})
