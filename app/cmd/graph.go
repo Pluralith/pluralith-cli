@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	"pluralith/pkg/graph"
 
 	"github.com/spf13/cobra"
@@ -36,7 +37,11 @@ to quickly create a Cobra application.`,
 		// jsContext.RunScript(auxiliary.StateInstance.EmbeddedJS, "index.js")
 		// test, _ := jsContext.RunScript("result", "index.js")
 		// fmt.Println(test)
-		graph.GetAlgorithm()
+		_, getErr := graph.GetAlgorithm()
+		if getErr != nil {
+			fmt.Println(getErr)
+		}
+
 	},
 }
 
