@@ -40,15 +40,15 @@ to quickly create a Cobra application.`,
 		fmt.Print("Current Version: ")
 		ux.PrintFormatted(auxiliary.StateInstance.CLIVersion+"\n\n", []string{"bold", "blue"})
 
-		newVersion, shouldUpdate, checkErr := update.CheckForUpdate()
+		updateUrl, shouldUpdate, checkErr := update.CheckForUpdate()
 		if checkErr != nil {
 			fmt.Println(checkErr)
 		}
 
 		if shouldUpdate {
-			ux.PrintFormatted("⠿ ", []string{"blue"})
-			fmt.Print(auxiliary.StateInstance.CLIVersion + " → ")
-			ux.PrintFormatted(newVersion+"\n\n", []string{"blue", "bold"})
+			if downloadErr := update.DownloadUpdate(updateUrl); downloadErr != nil {
+				fmt.Println(downloadErr)
+			}
 		}
 
 	},

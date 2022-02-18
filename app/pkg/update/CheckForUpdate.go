@@ -52,9 +52,14 @@ func CheckForUpdate() (string, bool, error) {
 	if currentVersion.LessThan(latestVersion) {
 		// fmt.Printf("%s is less than %s\n", currentVersion, latestVersion)
 		checkSpinner.Success("A new version is available!")
-		return latestVersion.Original(), true, nil
+
+		ux.PrintFormatted("⠿ ", []string{"blue"})
+		fmt.Print(auxiliary.StateInstance.CLIVersion + " → ")
+		ux.PrintFormatted(latestVersion.Original()+"\n\n", []string{"blue", "bold"})
+
+		return versionData["url"].(string), true, nil
 	}
 
 	checkSpinner.Success("You are on the latest version\n")
-	return currentVersion.Original(), false, nil
+	return "", false, nil
 }
