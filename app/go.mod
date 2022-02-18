@@ -18,5 +18,4 @@ require (
 	golang.org/x/sys v0.0.0-20211107104306-e0b2ad06fe42 // indirect
 	golang.org/x/text v0.3.6 // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect
-	rogchap.com/v8go v0.7.0 // indirect
 )
