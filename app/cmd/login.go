@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 	"pluralith/pkg/auxiliary"
@@ -38,17 +39,47 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		ux.PrintHead()
 
-		fmt.Println("Welcome to Pluralith!")
-		fmt.Print("Enter API Key: ")
+		fmt.Print("Welcome to ")
+		ux.PrintFormatted("Pluralith!\n\n", []string{"blue"})
 
+		verificationSpinner := ux.NewSpinner("Verifying your API key", "Your API key is valid, you are logged in!\n", "API key verification failed\n", false)
+
+		ux.PrintFormatted("→", []string{"blue", "bold"})
+		fmt.Print(" Enter API Key: ")
+
+		// Capture user input
 		var APIKey string
 		fmt.Scanln(&APIKey)
 
-		auxiliary.StateInstance.APIKey = APIKey
-		credentialsPath := filepath.Join(auxiliary.StateInstance.PluralithPath, "credentials")
+		verificationSpinner.Start()
 
-		if err := os.WriteFile(credentialsPath, []byte(APIKey), 0700); err != nil {
-			fmt.Println(fmt.Errorf("failed to write API key to config -> %w", err))
+		// Construct key verification request
+		request, _ := http.NewRequest("GET", "http://localhost:8080/v1/auth/key/verify", nil)
+		request.Header.Add("Authorization", "Bearer "+APIKey)
+
+		// Execute key verification request
+		client := &http.Client{}
+		response, responseErr := client.Do(request)
+
+		if responseErr != nil {
+			verificationSpinner.Fail("Failed to verify API key\n")
+			fmt.Println(fmt.Errorf("%w", responseErr))
+		}
+
+		// Hande verification response
+		if response.StatusCode == 200 {
+			auxiliary.StateInstance.APIKey = APIKey
+			credentialsPath := filepath.Join(auxiliary.StateInstance.PluralithPath, "credentials")
+
+			// Write api key to credentials file
+			if writeErr := os.WriteFile(credentialsPath, []byte(APIKey), 0700); writeErr != nil {
+				verificationSpinner.Fail("Failed to write API key to config try again!\n")
+				fmt.Println(fmt.Errorf("%w", writeErr))
+			}
+
+			verificationSpinner.Success()
+		} else {
+			verificationSpinner.Fail("The passed API key is invalid, try again!\n")
 		}
 	},
 }

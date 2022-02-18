@@ -16,15 +16,11 @@ limitations under the License.
 package main
 
 import (
-	"embed"
 	"fmt"
 	"pluralith/cmd"
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/dblock"
 )
-
-// go:embed js/index.js
-var f embed.FS
 
 // Initialize various components of application
 func initApp() {
