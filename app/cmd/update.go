@@ -17,9 +17,11 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"pluralith/pkg/auxiliary"
-	"pluralith/pkg/update"
+	"pluralith/pkg/install"
 	"pluralith/pkg/ux"
+	"runtime"
 
 	"github.com/spf13/cobra"
 )
@@ -40,13 +42,24 @@ to quickly create a Cobra application.`,
 		fmt.Print("Current Version: ")
 		ux.PrintFormatted(auxiliary.StateInstance.CLIVersion+"\n\n", []string{"bold", "blue"})
 
-		updateUrl, shouldUpdate, checkErr := update.CheckForUpdate()
+		checkSpinner := ux.NewSpinner("Checking for update", "You are on the latest version!\n", "Checking for update failed, try again!\n", false)
+		checkSpinner.Start()
+
+		url := "http://localhost:8080/v1/dist/download/cli"
+		params := map[string]string{"os": runtime.GOOS, "arch": runtime.GOARCH}
+
+		updateUrl, shouldUpdate, checkErr := install.GetGitHubRelease(url, params, auxiliary.StateInstance.CLIVersion)
 		if checkErr != nil {
 			fmt.Println(checkErr)
 		}
 
+		CLIPath, pathErr := os.Executable()
+		if pathErr != nil {
+			fmt.Println(pathErr)
+		}
+
 		if shouldUpdate {
-			if downloadErr := update.DownloadUpdate(updateUrl); downloadErr != nil {
+			if downloadErr := install.DownloadGitHubRelease("Pluralith CLI", updateUrl, CLIPath); downloadErr != nil {
 				fmt.Println(downloadErr)
 			}
 		}

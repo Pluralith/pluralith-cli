@@ -17,7 +17,7 @@ func DownloadGitHubRelease(name string, url string, installPath string) error {
 	newFile, createErr := os.Create(installPath)
 	if createErr != nil {
 		newFile.Close()
-		return fmt.Errorf("fetching latest version failed -> %v: %w", functionName, createErr)
+		return fmt.Errorf("fetching latest "+name+" version failed -> %v: %w", functionName, createErr)
 	}
 
 	defer newFile.Close()
@@ -26,7 +26,7 @@ func DownloadGitHubRelease(name string, url string, installPath string) error {
 	response, getErr := http.Get(url)
 	if getErr != nil {
 		response.Body.Close()
-		return fmt.Errorf("getting latest version failed -> %v: %w", functionName, getErr)
+		return fmt.Errorf("getting latest "+name+" version failed -> %v: %w", functionName, getErr)
 	}
 
 	defer response.Body.Close()
@@ -47,12 +47,12 @@ func DownloadGitHubRelease(name string, url string, installPath string) error {
 
 	// Write to file and progress bar
 	if _, writeErr := io.Copy(io.MultiWriter(newFile, downloadBar), response.Body); writeErr != nil {
-		return fmt.Errorf("downloading latest version failed -> %v: %w", functionName, getErr)
+		return fmt.Errorf("downloading latest "+name+" version failed -> %v: %w", functionName, getErr)
 	}
 
 	chmodErr := os.Chmod(installPath, 0700)
 	if chmodErr != nil {
-		return fmt.Errorf("chmod on executable failed -> %v: %w", functionName, getErr)
+		return fmt.Errorf("making "+name+" binary executable failed -> %v: %w", functionName, getErr)
 	}
 
 	ux.PrintFormatted("\n\n✔ "+name+" updated!\n\n", []string{"green", "bold"})
