@@ -9,6 +9,7 @@ import (
 )
 
 type State struct {
+	CLIVersion    string
 	HomePath      string
 	WorkingPath   string
 	PluralithPath string
