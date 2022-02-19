@@ -13,11 +13,11 @@ type State struct {
 	HomePath      string
 	WorkingPath   string
 	PluralithPath string
+	BinPath       string
 	ComDBPath     string
 	LockPath      string
 	IsWSL         bool
 	APIKey        string
-	EmbeddedJS    string
 }
 
 func (P *State) CheckWSL() string {
@@ -79,6 +79,7 @@ func (P *State) GeneratePaths() error {
 	P.HomePath = homeDir
 	P.WorkingPath = workingDir
 	P.PluralithPath = filepath.Join(homeDir, "Pluralith")
+	P.BinPath = filepath.Join(P.PluralithPath, "bin")
 	P.ComDBPath = filepath.Join(P.PluralithPath, "pluralithComDB.json")
 	P.LockPath = filepath.Join(P.PluralithPath, "pluralithLock.json")
 
@@ -89,7 +90,7 @@ func (P *State) InitPaths() error {
 	functionName := "InitPaths"
 
 	// Create parent directories for path if they don't exist yet
-	if mkErr := os.MkdirAll(P.PluralithPath, 0700); mkErr != nil {
+	if mkErr := os.MkdirAll(P.BinPath, 0700); mkErr != nil {
 		return fmt.Errorf("%v: %w", functionName, mkErr)
 	}
 

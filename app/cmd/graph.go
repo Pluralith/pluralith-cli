@@ -16,9 +16,6 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-	"pluralith/pkg/graph"
-
 	"github.com/spf13/cobra"
 )
 
@@ -33,14 +30,6 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// jsContext := v8.NewContext()
-		// jsContext.RunScript(auxiliary.StateInstance.EmbeddedJS, "index.js")
-		// test, _ := jsContext.RunScript("result", "index.js")
-		// fmt.Println(test)
-		_, getErr := graph.GetAlgorithm()
-		if getErr != nil {
-			fmt.Println(getErr)
-		}
 
 	},
 }

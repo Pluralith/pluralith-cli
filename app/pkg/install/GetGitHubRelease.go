@@ -1,4 +1,4 @@
-package update
+package install
 
 import (
 	"encoding/json"
@@ -7,23 +7,24 @@ import (
 	"net/http"
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/ux"
-	"runtime"
 
 	"github.com/hashicorp/go-version"
 )
 
-func CheckForUpdate() (string, bool, error) {
-	functionName := "CheckForUpdate"
+func GetGitHubRelease(url string, params map[string]string, currentVersionString string) (string, bool, error) {
+	functionName := "InstallGraphModule"
 
 	checkSpinner := ux.NewSpinner("Checking for update", "You are on the latest version!\n", "Checking for update failed, try again!\n", false)
 	checkSpinner.Start()
 
-	request, _ := http.NewRequest("GET", "http://localhost:8080/v1/dist/download/cli", nil)
+	// request, _ := http.NewRequest("GET", "http://localhost:8080/v1/dist/download/cli", nil)
+	request, _ := http.NewRequest("GET", url, nil)
 	request.Header.Add("Authorization", "Bearer "+auxiliary.StateInstance.APIKey)
 
 	queryString := request.URL.Query()
-	queryString.Add("os", runtime.GOOS)
-	queryString.Add("arch", runtime.GOARCH)
+	for paramKey, paramValue := range params {
+		queryString.Add(paramKey, paramValue)
+	}
 	request.URL.RawQuery = queryString.Encode()
 
 	// Execute get version request
@@ -46,7 +47,15 @@ func CheckForUpdate() (string, bool, error) {
 
 	versionData := bodyObject["data"].(map[string]interface{})
 
-	currentVersion, _ := version.NewVersion(auxiliary.StateInstance.CLIVersion)
+	var currentVersion *version.Version
+
+	if len(currentVersionString) > 0 {
+		currentVersion, _ = version.NewVersion(currentVersionString)
+	} else {
+		currentVersion, _ = version.NewVersion("0.0.0")
+		currentVersionString = "Not Installed"
+	}
+
 	latestVersion, _ := version.NewVersion(versionData["version"].(string))
 
 	if currentVersion.LessThan(latestVersion) {
@@ -54,14 +63,15 @@ func CheckForUpdate() (string, bool, error) {
 		checkSpinner.Success("A new version is available!")
 
 		ux.PrintFormatted("⠿ ", []string{"blue"})
-		fmt.Print(auxiliary.StateInstance.CLIVersion + " → ")
+		fmt.Print(currentVersionString + " → ")
 		ux.PrintFormatted(latestVersion.Original()+"\n\n", []string{"blue", "bold"})
 
 		return versionData["url"].(string), true, nil
 	}
 
-	checkSpinner.Success("You are on the latest version\n")
-	fmt.Println("Version: ")
-	ux.PrintFormatted(currentVersion.Original(), []string{"bold", "blue"})
+	checkSpinner.Success("You are on the latest version")
+	ux.PrintFormatted("⠿ ", []string{"bold", "blue"})
+	fmt.Print("Version: ")
+	ux.PrintFormatted(currentVersion.Original()+"\n\n", []string{"bold", "blue"})
 	return "", false, nil
 }
