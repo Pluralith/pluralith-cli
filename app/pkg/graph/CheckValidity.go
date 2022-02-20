@@ -21,7 +21,7 @@ func CheckValidity(version string, payload string) (bool, error) {
 	var bodyObject map[string]interface{}
 
 	// Submit checksum for validation check
-	request, _ := http.NewRequest("GET", "http://localhost:8080/v1/graph/validate/"+version, nil)
+	request, _ := http.NewRequest("GET", "https://api.pluralith.com/v1/graph/validate/"+version, nil)
 	request.Header.Add("Authorization", "Bearer "+os.Getenv("PluralithDevApiKey"))
 
 	queryString := request.URL.Query()

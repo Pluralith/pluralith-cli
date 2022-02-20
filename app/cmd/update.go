@@ -43,10 +43,7 @@ to quickly create a Cobra application.`,
 		fmt.Print("Current Version: ")
 		ux.PrintFormatted(auxiliary.StateInstance.CLIVersion+"\n\n", []string{"bold", "blue"})
 
-		checkSpinner := ux.NewSpinner("Checking for update", "You are on the latest version!\n", "Checking for update failed, try again!\n", false)
-		checkSpinner.Start()
-
-		url := "http://localhost:8080/v1/dist/download/cli"
+		url := "https://api.pluralith.com/v1/dist/download/cli"
 		params := map[string]string{"os": runtime.GOOS, "arch": runtime.GOARCH}
 
 		updateUrl, shouldUpdate, checkErr := install.GetGitHubRelease(url, params, auxiliary.StateInstance.CLIVersion)

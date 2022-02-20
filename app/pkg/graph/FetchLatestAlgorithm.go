@@ -16,7 +16,7 @@ func FetchLatestAlgorithm(cachePath string) (map[string]interface{}, error) {
 
 	var bodyObject map[string]interface{}
 
-	request, _ := http.NewRequest("GET", "http://localhost:8080/v1/graph/get/"+version, nil)
+	request, _ := http.NewRequest("GET", "https://api.pluralith.com/v1/graph/get/"+version, nil)
 	request.Header.Add("Authorization", "Bearer "+os.Getenv("PluralithDevApiKey"))
 
 	queryString := request.URL.Query()

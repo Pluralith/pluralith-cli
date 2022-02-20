@@ -12,12 +12,11 @@ import (
 )
 
 func GetGitHubRelease(url string, params map[string]string, currentVersionString string) (string, bool, error) {
-	functionName := "InstallGraphModule"
+	functionName := "GetGitHubRelease"
 
 	checkSpinner := ux.NewSpinner("Checking for update", "You are on the latest version!\n", "Checking for update failed, try again!\n", false)
 	checkSpinner.Start()
 
-	// request, _ := http.NewRequest("GET", "http://localhost:8080/v1/dist/download/cli", nil)
 	request, _ := http.NewRequest("GET", url, nil)
 	request.Header.Add("Authorization", "Bearer "+auxiliary.StateInstance.APIKey)
 
@@ -49,6 +48,7 @@ func GetGitHubRelease(url string, params map[string]string, currentVersionString
 
 	var currentVersion *version.Version
 
+	// Handle non-existent version
 	if len(currentVersionString) > 0 {
 		currentVersion, _ = version.NewVersion(currentVersionString)
 	} else {
@@ -58,8 +58,8 @@ func GetGitHubRelease(url string, params map[string]string, currentVersionString
 
 	latestVersion, _ := version.NewVersion(versionData["version"].(string))
 
+	// Handle case if newer version is available
 	if currentVersion.LessThan(latestVersion) {
-		// fmt.Printf("%s is less than %s\n", currentVersion, latestVersion)
 		checkSpinner.Success("A new version is available!")
 
 		ux.PrintFormatted("⠿ ", []string{"blue"})
@@ -69,9 +69,12 @@ func GetGitHubRelease(url string, params map[string]string, currentVersionString
 		return versionData["url"].(string), true, nil
 	}
 
+	// Else show that latest version is installed
 	checkSpinner.Success("You are on the latest version")
+
 	ux.PrintFormatted("⠿ ", []string{"bold", "blue"})
 	fmt.Print("Version: ")
 	ux.PrintFormatted(currentVersion.Original()+"\n\n", []string{"bold", "blue"})
+
 	return "", false, nil
 }

@@ -54,7 +54,7 @@ to quickly create a Cobra application.`,
 		verificationSpinner.Start()
 
 		// Construct key verification request
-		request, _ := http.NewRequest("GET", "http://localhost:8080/v1/auth/key/verify", nil)
+		request, _ := http.NewRequest("GET", "https://api.pluralith.com/v1/auth/key/verify", nil)
 		request.Header.Add("Authorization", "Bearer "+APIKey)
 
 		// Execute key verification request

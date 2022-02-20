@@ -18,7 +18,7 @@ func GraphModule() {
 	ux.PrintFormatted("Graph Module\n\n", []string{"bold", "blue"})
 
 	// Construct url
-	url := "http://localhost:8080/v1/dist/download/cli/graphing"
+	url := "https://api.pluralith.com/v1/dist/download/cli/graphing"
 	params := map[string]string{"os": runtime.GOOS, "arch": runtime.GOARCH}
 
 	// Generate install path
