@@ -30,7 +30,7 @@ func handleTerraformOutput(jsonString string, command string) error {
 			Type:      event.Type,
 			Address:   event.Address,
 			Message:   event.Message,
-			Path:      auxiliary.PathInstance.WorkingPath,
+			Path:      auxiliary.StateInstance.WorkingPath,
 			Received:  false,
 		})
 	}
@@ -54,7 +54,7 @@ func StreamCommand(command string, args []string) error {
 		Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
 		Command:   command,
 		Type:      "begin",
-		Path:      auxiliary.PathInstance.WorkingPath,
+		Path:      auxiliary.StateInstance.WorkingPath,
 		Received:  false,
 	})
 
@@ -88,7 +88,7 @@ func StreamCommand(command string, args []string) error {
 			Command:   command,
 			Type:      "failed",
 			Error:     errorSink.String(),
-			Path:      auxiliary.PathInstance.WorkingPath,
+			Path:      auxiliary.StateInstance.WorkingPath,
 			Received:  false,
 		})
 
@@ -119,7 +119,7 @@ func StreamCommand(command string, args []string) error {
 		Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
 		Command:   command,
 		Type:      "end",
-		Path:      auxiliary.PathInstance.WorkingPath,
+		Path:      auxiliary.StateInstance.WorkingPath,
 		State:     latestState,
 		Received:  false,
 	})

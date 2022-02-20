@@ -41,7 +41,7 @@ func LaunchPluralith() error {
 	// Running terminal command to launch application based on current OS
 	switch os := runtime.GOOS; os {
 	case "windows":
-		if runErr := runOsCommand([]string{filepath.Join(PathInstance.HomePath, "AppData", "Local", "Programs", "pluralith", "Pluralith.exe")}); runErr != nil {
+		if runErr := runOsCommand([]string{filepath.Join(StateInstance.HomePath, "AppData", "Local", "Programs", "pluralith", "Pluralith.exe")}); runErr != nil {
 			return fmt.Errorf("could not run launch command -> %v: %w", functionName, runErr)
 		}
 	case "darwin":
@@ -50,10 +50,10 @@ func LaunchPluralith() error {
 		}
 	default:
 		var launchPath string
-		if PathInstance.IsWSL {
-			launchPath = filepath.Join(PathInstance.HomePath, "AppData", "Local", "Programs", "pluralith", "Pluralith.exe")
+		if StateInstance.IsWSL {
+			launchPath = filepath.Join(StateInstance.HomePath, "AppData", "Local", "Programs", "pluralith", "Pluralith.exe")
 		} else {
-			launchPath = filepath.Join(PathInstance.HomePath)
+			launchPath = filepath.Join(StateInstance.HomePath)
 		}
 
 		if runErr := runOsCommand([]string{launchPath}); runErr != nil {

@@ -43,7 +43,7 @@ func RunApply(command string, args []string) error {
 	var watchErr error
 
 	// Watch for updates from UI and wait for confirmation
-	if auxiliary.PathInstance.IsWSL { // Watch ComDB with loop due to missing inotify support in WSL 2
+	if auxiliary.StateInstance.IsWSL { // Watch ComDB with loop due to missing inotify support in WSL 2
 		confirm, watchErr = comdb.WatchComDBFallback()
 		if watchErr != nil {
 			return fmt.Errorf("instantiating ComDB watcher failed -> %v: %w", functionName, watchErr)

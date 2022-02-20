@@ -15,7 +15,7 @@ func UpdateDBLock(lock bool) error {
 	}
 
 	// Write lock string to lock file
-	if writeErr := os.WriteFile(auxiliary.PathInstance.LockPath, []byte(lockString), 0700); writeErr != nil {
+	if writeErr := os.WriteFile(auxiliary.StateInstance.LockPath, []byte(lockString), 0700); writeErr != nil {
 		return fmt.Errorf("%v: %w", functionName, writeErr)
 	}
 

@@ -8,16 +8,19 @@ import (
 	"strings"
 )
 
-type Paths struct {
+type State struct {
+	CLIVersion    string
 	HomePath      string
 	WorkingPath   string
 	PluralithPath string
+	BinPath       string
 	ComDBPath     string
 	LockPath      string
 	IsWSL         bool
+	APIKey        string
 }
 
-func (P *Paths) CheckWSL() string {
+func (P *State) CheckWSL() string {
 	// If OS is some form of Linux
 	if runtime.GOOS != "windows" && runtime.GOOS != "darwin" {
 		// Get kernel version
@@ -48,7 +51,7 @@ func (P *Paths) CheckWSL() string {
 	return ""
 }
 
-func (P *Paths) GeneratePaths() error {
+func (P *State) GeneratePaths() error {
 	functionName := "GeneratePaths"
 
 	// Check for WSL
@@ -76,21 +79,36 @@ func (P *Paths) GeneratePaths() error {
 	P.HomePath = homeDir
 	P.WorkingPath = workingDir
 	P.PluralithPath = filepath.Join(homeDir, "Pluralith")
+	P.BinPath = filepath.Join(P.PluralithPath, "bin")
 	P.ComDBPath = filepath.Join(P.PluralithPath, "pluralithComDB.json")
 	P.LockPath = filepath.Join(P.PluralithPath, "pluralithLock.json")
 
 	return nil
 }
 
-func (P *Paths) InitPaths() error {
+func (P *State) InitPaths() error {
 	functionName := "InitPaths"
 
 	// Create parent directories for path if they don't exist yet
-	if mkErr := os.MkdirAll(P.PluralithPath, 0700); mkErr != nil {
+	if mkErr := os.MkdirAll(P.BinPath, 0700); mkErr != nil {
 		return fmt.Errorf("%v: %w", functionName, mkErr)
 	}
 
 	return nil
 }
 
-var PathInstance = &Paths{}
+func (P *State) SetAPIKey() error {
+	functionName := "SetAPIKey"
+	credentialsPath := filepath.Join(P.PluralithPath, "credentials")
+
+	keyValue, readErr := os.ReadFile(credentialsPath)
+	if readErr != nil {
+		return fmt.Errorf("%v: %w", functionName, readErr)
+	}
+
+	P.APIKey = string(keyValue)
+
+	return nil
+}
+
+var StateInstance = &State{}

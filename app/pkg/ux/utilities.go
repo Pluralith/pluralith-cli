@@ -8,7 +8,11 @@ import (
 
 // Function to print Pluralith head art
 func PrintHead() {
-	color.HiBlue(` _
+	style := color.New()
+	style.Add(color.FgHiBlue)
+	style.Add(color.Bold)
+
+	style.Printf(` _
 |_)|    _ _ |._|_|_ 
 |  ||_|| (_||| | | |
 

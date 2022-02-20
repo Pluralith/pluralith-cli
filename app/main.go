@@ -27,13 +27,18 @@ func initApp() {
 	functionName := "initApp"
 
 	dblock.LockInstance.GenerateLock()
+	auxiliary.StateInstance.CLIVersion = "0.1.1"
 
-	if pathGenErr := auxiliary.PathInstance.GeneratePaths(); pathGenErr != nil {
+	if pathGenErr := auxiliary.StateInstance.GeneratePaths(); pathGenErr != nil {
 		fmt.Println(fmt.Errorf("generating application paths failed -> %v: %w", functionName, pathGenErr))
 	}
-	if pathInitErr := auxiliary.PathInstance.InitPaths(); pathInitErr != nil {
+	if pathInitErr := auxiliary.StateInstance.InitPaths(); pathInitErr != nil {
 		fmt.Println(fmt.Errorf("initializing application directories failed -> %v: %w", functionName, pathInitErr))
 	}
+	if setAPIKeyErr := auxiliary.StateInstance.SetAPIKey(); setAPIKeyErr != nil {
+		fmt.Println(fmt.Errorf("setting API key failed -> %v: %w", functionName, setAPIKeyErr))
+	}
+
 	if filterInitErr := auxiliary.FilterInstance.InitFilters(); filterInitErr != nil {
 		fmt.Println(fmt.Errorf("initializing secret filters failed -> %v: %w", functionName, filterInitErr))
 	}
