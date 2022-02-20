@@ -20,6 +20,7 @@ import (
 	"os"
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/install"
+	"pluralith/pkg/install/components"
 	"pluralith/pkg/ux"
 	"runtime"
 
@@ -66,6 +67,22 @@ to quickly create a Cobra application.`,
 	},
 }
 
+// Graph module
+var updateGraphModule = &cobra.Command{
+	Use:   "graph-module",
+	Short: "Strip a given state file of secrets according to config",
+	Long: `A longer description that spans multiple lines and likely contains examples
+and usage of using your command. For example:
+
+Cobra is a CLI library for Go that empowers applications.
+This application is a tool to generate the needed files
+to quickly create a Cobra application.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		components.GraphModule()
+	},
+}
+
 func init() {
+	updateCmd.AddCommand(updateGraphModule)
 	rootCmd.AddCommand(updateCmd)
 }

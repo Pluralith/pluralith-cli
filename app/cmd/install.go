@@ -17,13 +17,8 @@ package cmd
 
 import (
 	"fmt"
-	"os/exec"
-	"path/filepath"
-	"pluralith/pkg/auxiliary"
-	"pluralith/pkg/install"
+	"pluralith/pkg/install/components"
 	"pluralith/pkg/ux"
-	"runtime"
-	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -51,6 +46,7 @@ to quickly create a Cobra application.`,
 	},
 }
 
+// Graph module
 var installGraphModule = &cobra.Command{
 	Use:   "graph-module",
 	Short: "Strip a given state file of secrets according to config",
@@ -61,39 +57,7 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		ux.PrintHead()
-
-		fmt.Print("Installing Latest ")
-		ux.PrintFormatted("Graph Module\n\n", []string{"bold", "blue"})
-
-		// Construct url
-		url := "http://localhost:8080/v1/dist/download/cli/graphing"
-		params := map[string]string{"os": runtime.GOOS, "arch": runtime.GOARCH}
-
-		// Generate install path
-		installPath := filepath.Join(auxiliary.StateInstance.BinPath, "pluralith-cli-graphing")
-
-		// Get current version
-		var currentVersion string
-		currentVersionByte, versionErr := exec.Command(installPath, "version").Output()
-		if versionErr != nil {
-			currentVersion = ""
-		} else {
-			currentVersion = strings.TrimSpace(string(currentVersionByte))
-		}
-
-		// Get Github release
-		downloadUrl, shouldDownload, checkErr := install.GetGitHubRelease(url, params, currentVersion)
-		if checkErr != nil {
-			fmt.Println(checkErr)
-		}
-
-		// Handle download
-		if shouldDownload {
-			if downloadErr := install.DownloadGitHubRelease("Graph Module", downloadUrl, installPath); downloadErr != nil {
-				fmt.Println(downloadErr)
-			}
-		}
+		components.GraphModule()
 	},
 }
 
