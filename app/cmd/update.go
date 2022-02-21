@@ -18,6 +18,8 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/install"
 	"pluralith/pkg/install/components"
@@ -26,6 +28,10 @@ import (
 
 	"github.com/spf13/cobra"
 )
+
+var winUpdateHelper string = `TIMEOUT 3
+DEL pluralith.exe
+REN pluralith_update.exe pluralith.exe`
 
 // planOldCmd represents the planOld command
 var updateCmd = &cobra.Command{
@@ -48,17 +54,39 @@ to quickly create a Cobra application.`,
 
 		updateUrl, shouldUpdate, checkErr := install.GetGitHubRelease(url, params, auxiliary.StateInstance.CLIVersion)
 		if checkErr != nil {
-			fmt.Println(checkErr)
+			fmt.Println(fmt.Errorf("failed to get latest release -> %w", checkErr))
 		}
 
-		CLIPath, pathErr := os.Executable()
+		// Get source path of current executable to download update to
+		UpdatePath, pathErr := os.Executable()
 		if pathErr != nil {
-			fmt.Println(pathErr)
+			fmt.Println(fmt.Errorf("failed to get CLI binary source path -> %w", pathErr))
+		}
+
+		// Add special condition where windows cannot override currently executed binary
+		// 1) Write to separate update file
+		// 2) Ensure update helper batch script exists
+		// 2) Execute batch script with delay that renames and replaces current binary with updated binary
+		if runtime.GOOS == "windows" {
+			UpdatePath = filepath.Join(auxiliary.StateInstance.BinPath, "pluralith_update.exe")
+			UpdateHelperPath := filepath.Join(auxiliary.StateInstance.BinPath, "update.bat")
+			helperWriteErr := os.WriteFile(UpdateHelperPath, []byte(winUpdateHelper), 0700)
+			if helperWriteErr != nil {
+				fmt.Println(fmt.Errorf("failed to create update helper -> %w", helperWriteErr))
+			}
 		}
 
 		if shouldUpdate {
-			if downloadErr := install.DownloadGitHubRelease("Pluralith CLI", updateUrl, CLIPath); downloadErr != nil {
-				fmt.Println(downloadErr)
+			if downloadErr := install.DownloadGitHubRelease("Pluralith CLI", updateUrl, UpdatePath); downloadErr != nil {
+				fmt.Println(fmt.Errorf("failed to download latest version -> %w", downloadErr))
+			}
+
+			// Execute batch script to replace binary after CLI terminates
+			if runtime.GOOS == "windows" {
+				replaceCmd := exec.Command(filepath.Join(auxiliary.StateInstance.BinPath, "update.bat"))
+				if replaceErr := replaceCmd.Start(); replaceErr != nil {
+					fmt.Println(fmt.Errorf("failed to run update helper -> %w", replaceErr))
+				}
 			}
 		}
 	},
