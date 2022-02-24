@@ -1,6 +1,7 @@
 package auxiliary
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -101,13 +102,18 @@ func (P *State) SetAPIKey() error {
 	functionName := "SetAPIKey"
 	credentialsPath := filepath.Join(P.PluralithPath, "credentials")
 
+	// Check if credentials file exists
+	if _, pathErr := os.Stat(credentialsPath); errors.Is(pathErr, os.ErrNotExist) {
+		P.APIKey = ""
+		return nil
+	}
+
 	keyValue, readErr := os.ReadFile(credentialsPath)
 	if readErr != nil {
 		return fmt.Errorf("%v: %w", functionName, readErr)
 	}
 
 	P.APIKey = string(keyValue)
-
 	return nil
 }
 

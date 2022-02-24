@@ -24,7 +24,13 @@ func RunTerraform(command string, args []string) error {
 		parsedArgs = append(parsedArgs, "-json")
 	}
 
-	// Launching Pluralith
+	// Remove old Pluralith state
+	removeErr := auxiliary.RemoveOldState()
+	if removeErr != nil {
+		return fmt.Errorf("deleting old Pluralith state failed -> %v: %w", functionName, removeErr)
+	}
+
+	// Launch Pluralith
 	launchErr := auxiliary.LaunchPluralith()
 	if launchErr != nil {
 		return fmt.Errorf("launching Pluralith failed -> %v: %w", functionName, launchErr)

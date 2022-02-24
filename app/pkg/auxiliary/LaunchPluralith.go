@@ -53,7 +53,7 @@ func LaunchPluralith() error {
 		if StateInstance.IsWSL {
 			launchPath = filepath.Join(StateInstance.HomePath, "AppData", "Local", "Programs", "pluralith", "Pluralith.exe")
 		} else {
-			launchPath = filepath.Join(StateInstance.HomePath)
+			launchPath = filepath.Join(StateInstance.BinPath, "Pluralith.AppImage")
 		}
 
 		if runErr := runOsCommand([]string{launchPath}); runErr != nil {

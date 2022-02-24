@@ -16,6 +16,7 @@ import (
 type StripState struct {
 	planJson         map[string]interface{}
 	keyWhitelist     []string
+	valueWhitelist   []string
 	providers        []string
 	deletes          []string
 	hashedKeyParents []string // Parent keys within which to look for keys that need to be hashed
@@ -221,11 +222,19 @@ func (S *StripState) ProcessDefault(parentKey string, inputValue string) string 
 		}
 	}
 
+	// Whitelist special values relevant for dependencies
+	for _, whitelistedValue := range S.valueWhitelist {
+		if inputValue == whitelistedValue {
+			return inputValue
+		}
+	}
+
 	whitelisted := false
 
 	allNames := append(S.resourceNames, S.moduleNames...)
 	allNames = append(allNames, S.variableNames...)
 
+	// Whitelist values containing names (will be hashed partially later)
 	for _, nameValue := range allNames {
 		if strings.Contains(inputValue, nameValue) {
 			whitelisted = true
@@ -373,6 +382,7 @@ func (S *StripState) StripAndHash() error {
 	S.indexNames = auxiliary.DeduplicateSlice(S.indexNames)
 
 	S.keyWhitelist = []string{"type", "provider_name", "terraform_version"}
+	S.valueWhitelist = []string{"for.each", "count.index"}
 	S.deletes = []string{"tags", "tags_all", "description", "source"}
 	S.hashedKeyParents = []string{"value", "constant_value"}
 
