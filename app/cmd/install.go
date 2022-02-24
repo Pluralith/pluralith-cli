@@ -36,16 +36,13 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		ux.PrintHead()
 
-		// ux.PrintFormatted("⠿ ", []string{"blue"})
-		// fmt.Println("Pass a component to install:\n")
-
-		// ux.PrintFormatted("→", []string{"blue", "bold"})
-		// fmt.Println(" graph-module")
-		// ux.PrintFormatted("→", []string{"blue", "bold"})
-		// fmt.Println(" ui\n")
+		ux.PrintFormatted("⠿ ", []string{"blue"})
+		fmt.Println("Pass a component to install:\n")
 
 		ux.PrintFormatted("→", []string{"blue", "bold"})
-		fmt.Println(" Coming soon\n")
+		fmt.Println(" graph-module")
+		ux.PrintFormatted("→", []string{"blue", "bold"})
+		fmt.Println(" ui\n")
 	},
 }
 

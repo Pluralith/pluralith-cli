@@ -17,9 +17,10 @@ package cmd
 
 import (
 	"fmt"
-	"pluralith/pkg/ux"
 
 	"github.com/spf13/cobra"
+
+	"pluralith/pkg/graph"
 )
 
 // stripCmd represents the strip command
@@ -33,13 +34,19 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		ux.PrintHead()
 
-		ux.PrintFormatted("→", []string{"blue", "bold"})
-		fmt.Println(" Coming soon\n")
+		diagramValues, valueErr := graph.GetDiagramValues(cmd.Flags())
+		if valueErr != nil {
+			fmt.Println(fmt.Errorf("getting diagram values failed -> %w", valueErr))
+		}
+
+		fmt.Println("from main entry point: ", diagramValues)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(graphCmd)
+	graphCmd.PersistentFlags().String("title", "", "The title for your diagram, will be displayed in the PDF output")
+	graphCmd.PersistentFlags().String("author", "", "The author/creator of the diagram, will be displayed in the PDF output")
+	graphCmd.PersistentFlags().String("version", "", "The diagram version, will be displayed in the PDF output")
 }
