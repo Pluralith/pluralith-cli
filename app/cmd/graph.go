@@ -40,7 +40,9 @@ to quickly create a Cobra application.`,
 			fmt.Println(fmt.Errorf("getting diagram values failed -> %w", valueErr))
 		}
 
-		fmt.Println("from main entry point: ", diagramValues)
+		if exportErr := graph.ExportDiagram(diagramValues); exportErr != nil {
+			fmt.Println(fmt.Errorf("exporting diagram failed -> %w", exportErr))
+		}
 	},
 }
 
@@ -49,4 +51,6 @@ func init() {
 	graphCmd.PersistentFlags().String("title", "", "The title for your diagram, will be displayed in the PDF output")
 	graphCmd.PersistentFlags().String("author", "", "The author/creator of the diagram, will be displayed in the PDF output")
 	graphCmd.PersistentFlags().String("version", "", "The diagram version, will be displayed in the PDF output")
+	graphCmd.PersistentFlags().String("out-dir", "", "The directory the diagram should be exported to")
+	graphCmd.PersistentFlags().String("file-name", "", "The name of the exported PDF")
 }

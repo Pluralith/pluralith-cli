@@ -42,7 +42,7 @@ to quickly create a Cobra application.`,
 		ux.PrintFormatted("→", []string{"blue", "bold"})
 		fmt.Println(" graph-module")
 		ux.PrintFormatted("→", []string{"blue", "bold"})
-		fmt.Println(" ui\n")
+		fmt.Println(" ui (coming soon)\n")
 	},
 }
 
@@ -62,6 +62,6 @@ to quickly create a Cobra application.`,
 }
 
 func init() {
-	// installCmd.AddCommand(installGraphModule)
+	installCmd.AddCommand(installGraphModule)
 	rootCmd.AddCommand(installCmd)
 }

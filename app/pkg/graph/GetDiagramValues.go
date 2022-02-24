@@ -4,7 +4,9 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/ux"
+	"strings"
 
 	"github.com/spf13/pflag"
 )
@@ -14,7 +16,7 @@ func GetDiagramValues(flags *pflag.FlagSet) (map[string]string, error) {
 
 	diagramValues := make(map[string]string)
 
-	// Get variable values from flags if present
+	// Get variable values that are relevant for input
 	diagramValues["Title"], _ = flags.GetString("title")
 	diagramValues["Author"], _ = flags.GetString("author")
 	diagramValues["Version"], _ = flags.GetString("version")
@@ -43,6 +45,22 @@ func GetDiagramValues(flags *pflag.FlagSet) (map[string]string, error) {
 			}
 		}
 	}
+
+	// Get remaining diagram values that don't require potential user input
+	diagramValues["OutDir"], _ = flags.GetString("out-dir")
+	diagramValues["FileName"], _ = flags.GetString("file-name")
+
+	// If no explicit output directory given -> Write to current working directory
+	if diagramValues["OutDir"] == "" {
+		diagramValues["OutDir"] = auxiliary.StateInstance.WorkingPath
+	}
+
+	// If no explicit file name given -> use title with spaces removed
+	if diagramValues["FileName"] == "" { //, ".pdf", ""))
+		diagramValues["FileName"] = strings.ReplaceAll(strings.ReplaceAll(diagramValues["Title"], " ", ""), ".pdf", "") // Remove .pdf endings to avoid double file extensions
+	}
+
+	fmt.Println()
 
 	return diagramValues, nil
 }
