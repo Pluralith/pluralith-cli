@@ -10,7 +10,7 @@ import (
 	"pluralith/pkg/ux"
 )
 
-func ExportDiagram(diagramValues map[string]string) error {
+func ExportDiagram(diagramValues map[string]interface{}) error {
 	functionName := "ExportDiagram"
 
 	graphModulePath := filepath.Join(auxiliary.StateInstance.BinPath, "pluralith-cli-graphing")
@@ -22,11 +22,12 @@ func ExportDiagram(diagramValues map[string]string) error {
 		graphModulePath,
 		"graph",
 		"--apiKey", auxiliary.StateInstance.APIKey,
-		"--title", diagramValues["Title"],
-		"--author", diagramValues["Author"],
-		"--ver", diagramValues["Version"],
-		"--fileName", diagramValues["FileName"],
-		"--outDir", diagramValues["OutDir"],
+		"--title", diagramValues["Title"].(string),
+		"--author", diagramValues["Author"].(string),
+		"--ver", diagramValues["Version"].(string),
+		"--fileName", diagramValues["FileName"].(string),
+		"--outDir", diagramValues["OutDir"].(string),
+		"--planState", diagramValues["PlanState"].(string),
 	)
 
 	// Defining sinks for std data
@@ -47,7 +48,7 @@ func ExportDiagram(diagramValues map[string]string) error {
 	exportSpinner.Success()
 	ux.PrintFormatted("→ ", []string{"blue"})
 	fmt.Print("Diagram exported to: ")
-	ux.PrintFormatted(filepath.Join(diagramValues["OutDir"], diagramValues["FileName"])+".pdf", []string{"blue"})
+	ux.PrintFormatted(filepath.Join(diagramValues["OutDir"].(string), diagramValues["FileName"].(string))+".pdf", []string{"blue"})
 	fmt.Println("\n")
 
 	return nil

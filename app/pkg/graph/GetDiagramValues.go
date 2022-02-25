@@ -11,10 +11,10 @@ import (
 	"github.com/spf13/pflag"
 )
 
-func GetDiagramValues(flags *pflag.FlagSet) (map[string]string, error) {
+func GetDiagramValues(flags *pflag.FlagSet) (map[string]interface{}, error) {
 	functionName := "GetDiagramValues"
 
-	diagramValues := make(map[string]string)
+	diagramValues := make(map[string]interface{})
 
 	// Get variable values that are relevant for input
 	diagramValues["Title"], _ = flags.GetString("title")
@@ -49,6 +49,7 @@ func GetDiagramValues(flags *pflag.FlagSet) (map[string]string, error) {
 	// Get remaining diagram values that don't require potential user input
 	diagramValues["OutDir"], _ = flags.GetString("out-dir")
 	diagramValues["FileName"], _ = flags.GetString("file-name")
+	diagramValues["SkipPlan"], _ = flags.GetBool("skip-plan")
 
 	// If no explicit output directory given -> Write to current working directory
 	if diagramValues["OutDir"] == "" {
@@ -57,7 +58,7 @@ func GetDiagramValues(flags *pflag.FlagSet) (map[string]string, error) {
 
 	// If no explicit file name given -> use title with spaces removed
 	if diagramValues["FileName"] == "" { //, ".pdf", ""))
-		diagramValues["FileName"] = strings.ReplaceAll(strings.ReplaceAll(diagramValues["Title"], " ", ""), ".pdf", "") // Remove .pdf endings to avoid double file extensions
+		diagramValues["FileName"] = strings.ReplaceAll(strings.ReplaceAll(diagramValues["Title"].(string), " ", ""), ".pdf", "") // Remove .pdf endings to avoid double file extensions
 	}
 
 	fmt.Println()

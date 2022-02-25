@@ -16,17 +16,23 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 
+	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/graph"
+	"pluralith/pkg/terraform"
+	"pluralith/pkg/ux"
 )
 
 // stripCmd represents the strip command
 var graphCmd = &cobra.Command{
 	Use:   "graph",
-	Short: "Strip a given state file of secrets according to config",
+	Short: "Generate and export diagram of the current plan state as a PDF",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
@@ -34,12 +40,50 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-
+		// Parse flag values
 		diagramValues, valueErr := graph.GetDiagramValues(cmd.Flags())
 		if valueErr != nil {
 			fmt.Println(fmt.Errorf("getting diagram values failed -> %w", valueErr))
 		}
 
+		// Run terraform plan to create execution plan if not specified otherwise by user
+		if diagramValues["SkipPlan"] == false {
+			_, planErr := terraform.RunPlan("plan")
+			if planErr != nil {
+				fmt.Println(fmt.Errorf("running terraform plan failed -> %w", planErr))
+			}
+		} else {
+			ux.PrintFormatted("→ ", []string{"bold", "blue"})
+			ux.PrintFormatted("Plan\n", []string{"bold", "white"})
+			ux.PrintFormatted("  -", []string{"blue", "bold"})
+			fmt.Println(" Skipped")
+		}
+
+		fmt.Println()
+
+		// Construct plan state path
+		planStatePath := filepath.Join(auxiliary.StateInstance.WorkingPath, "pluralith.state.stripped")
+
+		// Check if plan state exists
+		_, existErr := os.Stat(planStatePath)    // Check if old state exists
+		if errors.Is(existErr, os.ErrNotExist) { // If it exists -> delete
+			ux.PrintFormatted("✖️", []string{"bold", "red"})
+			fmt.Print(" No plan state found ")
+			ux.PrintFormatted("→", []string{"bold", "red"})
+			fmt.Println(" Run pluralith graph again without --skip-plan")
+			return
+		}
+
+		// Read plan state json
+		planStateString, readErr := os.ReadFile(planStatePath)
+		if readErr != nil {
+			fmt.Println(fmt.Errorf("running terraform plan failed -> %w", readErr))
+		}
+
+		// Pass plan state on to graphing module
+		diagramValues["PlanState"] = string(planStateString)
+
+		// Generate diagram through graphing module
 		if exportErr := graph.ExportDiagram(diagramValues); exportErr != nil {
 			fmt.Println(fmt.Errorf("exporting diagram failed -> %w", exportErr))
 		}
@@ -53,4 +97,5 @@ func init() {
 	graphCmd.PersistentFlags().String("version", "", "The diagram version, will be displayed in the PDF output")
 	graphCmd.PersistentFlags().String("out-dir", "", "The directory the diagram should be exported to")
 	graphCmd.PersistentFlags().String("file-name", "", "The name of the exported PDF")
+	graphCmd.PersistentFlags().Bool("skip-plan", false, "Generates a diagram without running plan again (needs pluralith state from previous plan run)")
 }
