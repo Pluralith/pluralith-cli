@@ -13,9 +13,12 @@ import (
 func ExportDiagram(diagramValues map[string]interface{}) error {
 	functionName := "ExportDiagram"
 
+	ux.PrintFormatted("→", []string{"blue", "bold"})
+	ux.PrintFormatted(" Export\n", []string{"white", "bold"})
+
 	graphModulePath := filepath.Join(auxiliary.StateInstance.BinPath, "pluralith-cli-graphing")
 
-	exportSpinner := ux.NewSpinner("Generating Diagram PDF", "PDF Export successful!", "PDF Export failed", false)
+	exportSpinner := ux.NewSpinner("Generating Diagram PDF", "PDF Export Successful!", "PDF Export Failed", true)
 	exportSpinner.Start()
 
 	cmd := exec.Command(
@@ -46,7 +49,7 @@ func ExportDiagram(diagramValues map[string]interface{}) error {
 	}
 
 	exportSpinner.Success()
-	ux.PrintFormatted("→ ", []string{"blue"})
+	ux.PrintFormatted("  → ", []string{"blue"})
 	fmt.Print("Diagram exported to: ")
 	ux.PrintFormatted(filepath.Join(diagramValues["OutDir"].(string), diagramValues["FileName"].(string))+".pdf", []string{"blue"})
 	fmt.Println("\n")
