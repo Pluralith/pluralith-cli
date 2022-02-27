@@ -29,7 +29,7 @@ builds:
     # hooks:
     #   post: gon gon-config.json
 signs:
-  - signature: "${artifact}.dmg"
+  - signature: "${artifact}"
     ids:
       - pluralith-mac
     cmd: gon
