@@ -4,8 +4,6 @@ before:
   hooks:
     # You may remove this if you don't use go modules.
     - cd app && go mod tidy
-checksum:
-  disable: true
 release:
   github:
     owner: Pluralith
@@ -47,7 +45,7 @@ signs:
       - gon-config.json
     artifacts: all
 archives:
-- name_template: "pluralith_cli_{{ .Os }}_{{ .Arch }}_{{ .Tag }}"
+  - name_template: "pluralith_cli_{{ .Os }}_{{ .Arch }}_{{ .Tag }}"
 # - replacements:
 #     darwin: Darwin
 #     linux: Linux
@@ -55,7 +53,7 @@ archives:
 #     386: i386
 #     amd64: x86_64
 checksum:
-  name_template: "checksums.txt"
+  disable: true
 snapshot:
   name_template: "{{ incpatch .Version }}"
 changelog:
