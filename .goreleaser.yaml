@@ -46,7 +46,9 @@ signs:
   - signature: "${artifact}"
     ids:
       - darwin
-    cmd: ./scripts/signMac.sh
+    cmd: bash
+    args:
+      - ./scripts/signMac.sh
     artifacts: all
     output: true
 archives:
