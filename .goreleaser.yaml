@@ -4,6 +4,14 @@ before:
   hooks:
     # You may remove this if you don't use go modules.
     - cd app && go mod tidy
+release:
+  github:
+    owner: Pluralith
+    name: pluralith-homebrew-tap
+
+  # If set to true, will not auto-publish the release.
+  # Default is false.
+  draft: true
 builds:
   # macOS
   - binary: pluralith
