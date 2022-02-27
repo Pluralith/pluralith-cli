@@ -46,9 +46,7 @@ signs:
   - signature: "${artifact}"
     ids:
       - darwin
-    cmd: gon
-    args:
-      - gon-config.json
+    cmd: ./scripts/signMac.sh
     artifacts: all
     output: true
 archives:
@@ -60,6 +58,7 @@ archives:
       - "windows"
     format: binary
   - id: archives
+    name_template: "pluralith_cli_tap_{{ .Os }}_{{ .Arch }}_{{ .Tag }}"
     builds:
       - "linux"
       - "darwin"
