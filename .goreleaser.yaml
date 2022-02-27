@@ -37,13 +37,13 @@ builds:
     # hooks:
     #   post: gon gon-config.json
 signs:
-  - signature: "${artifact}"
-    ids:
+  - ids:
       - pluralith-mac
     cmd: gon
     args:
       - gon-config.json
     artifacts: all
+    output: true
 archives:
   - name_template: "pluralith_cli_{{ .Os }}_{{ .Arch }}_{{ .Tag }}"
 # - replacements:
