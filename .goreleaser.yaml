@@ -82,6 +82,8 @@ brews:
     commit_author:
       name: Daniel Putzer
       email: danielputzer.work@gmail.com
+    ids:
+      - archives
     homepage: "https://pluralith.com"
     description: "Testing"
     test: |
