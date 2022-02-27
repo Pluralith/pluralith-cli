@@ -17,8 +17,7 @@ func RunPlan(command string) (string, error) {
 	functionName := "RunPlan"
 
 	ux.PrintFormatted("→", []string{"blue", "bold"})
-	ux.PrintFormatted(" Plan", []string{"white", "bold"})
-	fmt.Println()
+	ux.PrintFormatted(" Plan\n", []string{"white", "bold"})
 
 	// Constructing execution plan path
 	workingPlan := filepath.Join(auxiliary.StateInstance.WorkingPath, "pluralith.plan")
