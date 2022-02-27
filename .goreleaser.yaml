@@ -1,0 +1,67 @@
+# This is an example .goreleaser.yml file with some sensible defaults.
+# Make sure to check the documentation at https://goreleaser.com
+before:
+  hooks:
+    # You may remove this if you don't use go modules.
+    - cd app && go mod tidy
+builds:
+  # macOS
+  - binary: pluralith
+    id: pluralith
+    dir: ./app
+    goos:
+      - linux
+      - windows
+    goarch:
+      - amd64
+    env:
+      - CGO_ENABLED=0
+
+  - binary: pluralith
+    id: pluralith-mac
+    dir: ./app
+    goos:
+      - darwin
+    goarch:
+      - amd64
+    env:
+      - CGO_ENABLED=0
+    # hooks:
+    #   post: gon gon-config.json
+signs:
+  - signature: "${artifact}.dmg"
+    ids:
+      - pluralith-mac
+    cmd: gon
+    args:
+      - gon-config.json
+    artifacts: all
+# archives:
+# - name_template: "pluralith_cli_{{ .Os }}_{{ .Arch }}_{{ .Tag }}"
+# - replacements:
+#     darwin: Darwin
+#     linux: Linux
+#     windows: Windows
+#     386: i386
+#     amd64: x86_64
+checksum:
+  name_template: "checksums.txt"
+snapshot:
+  name_template: "{{ incpatch .Version }}"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+brews:
+  - tap:
+      owner: Pluralith
+      name: pluralith-homebrew-tap
+    commit_author:
+      name: Daniel Putzer
+      email: danielputzer.work@gmail.com
+    homepage: "https://pluralith.com"
+    description: "Testing"
+    test: |
+      system "#{bin}/pluralith version"
