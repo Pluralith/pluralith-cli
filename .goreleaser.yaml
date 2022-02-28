@@ -77,7 +77,8 @@ changelog:
       - "^docs:"
       - "^test:"
 brews:
-  - tap:
+  - name: pluralith
+    tap:
       owner: Pluralith
       name: pluralith-homebrew-tap
     commit_author:
