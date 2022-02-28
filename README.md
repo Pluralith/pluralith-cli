@@ -2,10 +2,12 @@
 
 A CLI tool written in GO to properly integrate Pluralith with Terraform and ship other useful little features.
 
-Pluralith is still in **Private Alpha**.
-Looking to become a tester or talk about the project?
-- Sign up for the alpha over on our [website](https://www.pluralith.com)
-- Join our [subreddit](https://www.reddit.com/r/Pluralith/)
+`Pluralith is currently in Private Alpha`
+
+&nbsp;
+
+## Looking to become a tester or talk about the project?
+- Sign up for the `alpha` over on our [website](https://www.pluralith.com)
 - Check out our [roadmap](https://roadmap.pluralith.com) and upvote features you'd like to see
 - Or just shoot us a message on Linkedin:
   -  [Dan's Linkedin](https://www.linkedin.com/in/danielputzer/)
@@ -15,5 +17,6 @@ Looking to become a tester or talk about the project?
 
 &nbsp;
 
-![Logo](https://user-images.githubusercontent.com/25454503/104286033-c7ed5b80-54b4-11eb-91ca-edd94b0703ab.png)  
-<https://pluralith.com>
+![GitHub Badge](https://user-images.githubusercontent.com/25454503/156019514-e36729f1-b281-49e0-adcc-5a56bc49afcf.svg)  
+
+![Subreddit subscribers](https://img.shields.io/reddit/subreddit-subscribers/pluralith?style=social)
