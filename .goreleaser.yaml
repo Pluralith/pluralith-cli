@@ -86,6 +86,6 @@ brews:
     ids:
       - archives
     homepage: "https://pluralith.com"
-    description: "Testing"
+    description: "Pluralith is a tool for Terraform state visualisation and automated infrastructure documentation"
     test: |
       system "#{bin}/pluralith version"
