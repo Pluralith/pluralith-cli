@@ -90,3 +90,5 @@ brews:
     description: "Pluralith is a tool for Terraform state visualisation and automated infrastructure documentation"
     test: |
       system "#{bin}/pluralith version"
+    install: |
+      bin.install "pluralith"
