@@ -23,6 +23,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"pluralith/pkg/auth"
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/graph"
 	"pluralith/pkg/terraform"
@@ -40,10 +41,25 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		// Verify API key with backend
+		isValid, verifyErr := auth.VerifyAPIKey(auxiliary.StateInstance.APIKey)
+		if verifyErr != nil {
+			fmt.Println(fmt.Errorf("verifying API key failed -> %w", verifyErr))
+			return
+		}
+		if !isValid {
+			ux.PrintFormatted("\n✖️", []string{"red", "bold"})
+			fmt.Print(" Invalid API key → Run ")
+			ux.PrintFormatted("pluralith login", []string{"blue"})
+			fmt.Println(" again\n")
+			return
+		}
+
 		// Parse flag values
 		diagramValues, valueErr := graph.GetDiagramValues(cmd.Flags())
 		if valueErr != nil {
 			fmt.Println(fmt.Errorf("getting diagram values failed -> %w", valueErr))
+			return
 		}
 
 		// Run terraform plan to create execution plan if not specified otherwise by user
@@ -51,6 +67,7 @@ to quickly create a Cobra application.`,
 			_, planErr := terraform.RunPlan("plan")
 			if planErr != nil {
 				fmt.Println(fmt.Errorf("running terraform plan failed -> %w", planErr))
+				return
 			}
 		} else {
 			ux.PrintFormatted("→ ", []string{"bold", "blue"})
@@ -78,6 +95,7 @@ to quickly create a Cobra application.`,
 		planStateString, readErr := os.ReadFile(planStatePath)
 		if readErr != nil {
 			fmt.Println(fmt.Errorf("running terraform plan failed -> %w", readErr))
+			return
 		}
 
 		// Pass plan state on to graphing module
@@ -86,6 +104,7 @@ to quickly create a Cobra application.`,
 		// Generate diagram through graphing module
 		if exportErr := graph.ExportDiagram(diagramValues); exportErr != nil {
 			fmt.Println(fmt.Errorf("exporting diagram failed -> %w", exportErr))
+			return
 		}
 	},
 }

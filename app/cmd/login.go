@@ -53,6 +53,7 @@ to quickly create a Cobra application.`,
 		isValid, verifyErr := auth.VerifyAPIKey(APIKey)
 		if verifyErr != nil {
 			fmt.Println(fmt.Errorf("verifying API key failed -> %w", verifyErr))
+			return
 		}
 
 		if isValid {
@@ -61,6 +62,7 @@ to quickly create a Cobra application.`,
 			if setErr != nil {
 				verificationSpinner.Fail("Could not write to credentials file\n")
 				fmt.Println(fmt.Errorf("setting API key in credentials file failed -> %w", setErr))
+				return
 			}
 			verificationSpinner.Success()
 		} else {

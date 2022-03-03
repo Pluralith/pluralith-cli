@@ -55,12 +55,14 @@ to quickly create a Cobra application.`,
 		updateUrl, shouldUpdate, checkErr := install.GetGitHubRelease(url, params, auxiliary.StateInstance.CLIVersion)
 		if checkErr != nil {
 			fmt.Println(fmt.Errorf("failed to get latest release -> %w", checkErr))
+			return
 		}
 
 		// Get source path of current executable to download update to
 		UpdatePath, pathErr := os.Executable()
 		if pathErr != nil {
 			fmt.Println(fmt.Errorf("failed to get CLI binary source path -> %w", pathErr))
+			return
 		}
 
 		// Add special condition where windows cannot override currently executed binary
@@ -73,12 +75,14 @@ to quickly create a Cobra application.`,
 			helperWriteErr := os.WriteFile(UpdateHelperPath, []byte(winUpdateHelper), 0700)
 			if helperWriteErr != nil {
 				fmt.Println(fmt.Errorf("failed to create update helper -> %w", helperWriteErr))
+				return
 			}
 		}
 
 		if shouldUpdate {
 			if downloadErr := install.DownloadGitHubRelease("Pluralith CLI", updateUrl, UpdatePath); downloadErr != nil {
 				fmt.Println(fmt.Errorf("failed to download latest version -> %w", downloadErr))
+				return
 			}
 
 			// Execute batch script to replace binary after CLI terminates
@@ -86,6 +90,7 @@ to quickly create a Cobra application.`,
 				replaceCmd := exec.Command(filepath.Join(auxiliary.StateInstance.BinPath, "update.bat"))
 				if replaceErr := replaceCmd.Start(); replaceErr != nil {
 					fmt.Println(fmt.Errorf("failed to run update helper -> %w", replaceErr))
+					return
 				}
 			}
 		}
