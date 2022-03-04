@@ -7,7 +7,7 @@ before:
 release:
   github:
     owner: Pluralith
-    name: pluralith-homebrew-tap
+    name: pluralith-cli
 
   # If set to true, will not auto-publish the release.
   # Default is false.
