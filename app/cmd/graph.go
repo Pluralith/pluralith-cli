@@ -61,10 +61,8 @@ var graphCmd = &cobra.Command{
 			ux.PrintFormatted("→ ", []string{"bold", "blue"})
 			ux.PrintFormatted("Plan\n", []string{"bold", "white"})
 			ux.PrintFormatted("  -", []string{"blue", "bold"})
-			fmt.Println(" Skipped")
+			fmt.Println(" Skipped\n")
 		}
-
-		fmt.Println()
 
 		// Construct plan state path
 		planStatePath := filepath.Join(auxiliary.StateInstance.WorkingPath, "pluralith.state.stripped")
