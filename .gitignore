@@ -28,3 +28,5 @@ release.sh
 
 # Pluralith
 pluralith.*
+
+dist/

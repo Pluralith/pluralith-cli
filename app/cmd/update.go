@@ -1,18 +1,3 @@
-/*
-Copyright © 2021 NAME HERE <EMAIL ADDRESS>
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
 package cmd
 
 import (
@@ -36,13 +21,8 @@ REN pluralith_update.exe pluralith.exe`
 // planOldCmd represents the planOld command
 var updateCmd = &cobra.Command{
 	Use:   "update",
-	Short: "Check for and install updates for the Pluralith CLI",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Check for and install updates for the Pluralith CLI and its modules",
+	Long:  `Check for and install updates for the Pluralith CLI and its modules`,
 	Run: func(cmd *cobra.Command, args []string) {
 		ux.PrintHead()
 
@@ -55,12 +35,14 @@ to quickly create a Cobra application.`,
 		updateUrl, shouldUpdate, checkErr := install.GetGitHubRelease(url, params, auxiliary.StateInstance.CLIVersion)
 		if checkErr != nil {
 			fmt.Println(fmt.Errorf("failed to get latest release -> %w", checkErr))
+			return
 		}
 
 		// Get source path of current executable to download update to
 		UpdatePath, pathErr := os.Executable()
 		if pathErr != nil {
 			fmt.Println(fmt.Errorf("failed to get CLI binary source path -> %w", pathErr))
+			return
 		}
 
 		// Add special condition where windows cannot override currently executed binary
@@ -73,12 +55,14 @@ to quickly create a Cobra application.`,
 			helperWriteErr := os.WriteFile(UpdateHelperPath, []byte(winUpdateHelper), 0700)
 			if helperWriteErr != nil {
 				fmt.Println(fmt.Errorf("failed to create update helper -> %w", helperWriteErr))
+				return
 			}
 		}
 
 		if shouldUpdate {
 			if downloadErr := install.DownloadGitHubRelease("Pluralith CLI", updateUrl, UpdatePath); downloadErr != nil {
 				fmt.Println(fmt.Errorf("failed to download latest version -> %w", downloadErr))
+				return
 			}
 
 			// Execute batch script to replace binary after CLI terminates
@@ -86,6 +70,7 @@ to quickly create a Cobra application.`,
 				replaceCmd := exec.Command(filepath.Join(auxiliary.StateInstance.BinPath, "update.bat"))
 				if replaceErr := replaceCmd.Start(); replaceErr != nil {
 					fmt.Println(fmt.Errorf("failed to run update helper -> %w", replaceErr))
+					return
 				}
 			}
 		}
@@ -95,14 +80,14 @@ to quickly create a Cobra application.`,
 // Graph module
 var updateGraphModule = &cobra.Command{
 	Use:   "graph-module",
-	Short: "Strip a given state file of secrets according to config",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Install the latest graph module for the Pluralith CLI",
+	Long:  `Install the latest graph module for the Pluralith CLI`,
 	Run: func(cmd *cobra.Command, args []string) {
+		ux.PrintHead()
+
+		fmt.Print("Installing Latest ")
+		ux.PrintFormatted("Graph Module\n\n", []string{"bold", "blue"})
+
 		components.GraphModule()
 	},
 }

@@ -1,0 +1,94 @@
+# This is an example .goreleaser.yml file with some sensible defaults.
+# Make sure to check the documentation at https://goreleaser.com
+before:
+  hooks:
+    # You may remove this if you don't use go modules.
+    - cd app && go mod tidy
+release:
+  github:
+    owner: Pluralith
+    name: pluralith-homebrew-tap
+
+  # If set to true, will not auto-publish the release.
+  # Default is false.
+  draft: true
+builds:
+  - binary: pluralith
+    id: linux
+    dir: ./app
+    goos:
+      - linux
+    goarch:
+      - amd64
+    env:
+      - CGO_ENABLED=0
+
+  - binary: pluralith
+    id: windows
+    dir: ./app
+    goos:
+      - windows
+    goarch:
+      - amd64
+    env:
+      - CGO_ENABLED=0
+
+  - binary: pluralith
+    id: darwin
+    dir: ./app
+    goos:
+      - darwin
+    goarch:
+      - amd64
+    env:
+      - CGO_ENABLED=0
+signs:
+  - signature: "${artifact}"
+    ids:
+      - darwin
+    cmd: bash
+    args:
+      - ./scripts/signMac.sh
+    artifacts: all
+    output: true
+archives:
+  - id: binaries
+    name_template: "pluralith_cli_{{ .Os }}_{{ .Arch }}_{{ .Tag }}"
+    builds:
+      - "linux"
+      - "darwin"
+      - "windows"
+    format: binary
+  - id: archives
+    name_template: "pluralith_cli_tap_{{ .Os }}_{{ .Arch }}_{{ .Tag }}"
+    builds:
+      - "linux"
+      - "darwin"
+      - "windows"
+    format_overrides:
+      - goos: windows
+        format: zip
+checksum:
+  name_template: "checksums.txt"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+brews:
+  - name: pluralith
+    tap:
+      owner: Pluralith
+      name: pluralith-homebrew-tap
+    commit_author:
+      name: Daniel Putzer
+      email: danielputzer.work@gmail.com
+    ids:
+      - archives
+    homepage: "https://pluralith.com"
+    description: "Pluralith is a tool for Terraform state visualisation and automated infrastructure documentation"
+    test: |
+      system "#{bin}/pluralith version"
+    install: |
+      bin.install "pluralith"
