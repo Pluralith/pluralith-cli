@@ -17,7 +17,7 @@ func DownloadGitHubRelease(name string, url string, installPath string) error {
 	newFile, createErr := os.Create(installPath)
 	if createErr != nil {
 		newFile.Close()
-		return fmt.Errorf("fetching latest "+name+" version failed -> %v: %w", functionName, createErr)
+		return fmt.Errorf("creating "+name+" file on disk failed -> %v: %w", functionName, createErr)
 	}
 
 	defer newFile.Close()
@@ -26,7 +26,7 @@ func DownloadGitHubRelease(name string, url string, installPath string) error {
 	response, getErr := http.Get(url)
 	if getErr != nil {
 		response.Body.Close()
-		return fmt.Errorf("getting latest "+name+" version failed -> %v: %w", functionName, getErr)
+		return fmt.Errorf("downloading latest "+name+" version failed -> %v: %w", functionName, getErr)
 	}
 
 	defer response.Body.Close()

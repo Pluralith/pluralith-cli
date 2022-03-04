@@ -6,17 +6,11 @@ import (
 	"path/filepath"
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/install"
-	"pluralith/pkg/ux"
 	"runtime"
 	"strings"
 )
 
 func GraphModule() {
-	ux.PrintHead()
-
-	fmt.Print("Installing Latest ")
-	ux.PrintFormatted("Graph Module\n\n", []string{"bold", "blue"})
-
 	// Construct url
 	url := "https://api.pluralith.com/v1/dist/download/cli/graphing"
 	params := map[string]string{"os": runtime.GOOS, "arch": runtime.GOARCH}
