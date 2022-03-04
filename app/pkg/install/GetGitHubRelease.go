@@ -47,20 +47,23 @@ func GetGitHubRelease(url string, params map[string]string, currentVersionString
 	versionData := bodyObject["data"].(map[string]interface{})
 
 	var currentVersion *version.Version
+	var successMessage string
 
 	// Handle non-existent version
 	if len(currentVersionString) > 0 {
 		currentVersion, _ = version.NewVersion(currentVersionString)
+		successMessage = "A new version is available!"
 	} else {
 		currentVersion, _ = version.NewVersion("0.0.0")
-		currentVersionString = "Not Installed"
+		currentVersionString = "None"
+		successMessage = "No graph module installed, found latest release"
 	}
 
 	latestVersion, _ := version.NewVersion(versionData["version"].(string))
 
 	// Handle case if newer version is available
 	if currentVersion.LessThan(latestVersion) {
-		checkSpinner.Success("A new version is available!")
+		checkSpinner.Success(successMessage)
 
 		ux.PrintFormatted("⠿ ", []string{"blue"})
 		fmt.Print(currentVersionString + " → ")

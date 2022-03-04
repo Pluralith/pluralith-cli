@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
@@ -11,6 +12,7 @@ import (
 	"pluralith/pkg/auth"
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/graph"
+	"pluralith/pkg/install/components"
 	"pluralith/pkg/terraform"
 	"pluralith/pkg/ux"
 )
@@ -33,6 +35,12 @@ var graphCmd = &cobra.Command{
 			ux.PrintFormatted("pluralith login", []string{"blue"})
 			fmt.Println(" again\n")
 			return
+		}
+
+		// Check if graph module installed, if not -> install
+		_, versionErr := exec.Command(filepath.Join(auxiliary.StateInstance.BinPath, "pluralith-cli-graphing"), "version").Output()
+		if versionErr != nil {
+			components.GraphModule()
 		}
 
 		// Parse flag values

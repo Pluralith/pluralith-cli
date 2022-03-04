@@ -32,6 +32,11 @@ var installGraphModule = &cobra.Command{
 	Short: "Install the latest graph module for the Pluralith CLI",
 	Long:  `Install the latest graph module for the Pluralith CLI`,
 	Run: func(cmd *cobra.Command, args []string) {
+		ux.PrintHead()
+
+		fmt.Print("Installing Latest ")
+		ux.PrintFormatted("Graph Module\n\n", []string{"bold", "blue"})
+
 		components.GraphModule()
 	},
 }
