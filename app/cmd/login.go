@@ -19,12 +19,21 @@ var loginCmd = &cobra.Command{
 		fmt.Print("Welcome to ")
 		ux.PrintFormatted("Pluralith!\n\n", []string{"blue"})
 
-		ux.PrintFormatted("→", []string{"blue", "bold"})
-		fmt.Print(" Enter API Key: ")
+		APIKey, flagError := cmd.Flags().GetString("api-key")
+		if flagError != nil {
+			fmt.Println(fmt.Errorf("reading flag failed -> %w", flagError))
+			return
+		}
 
-		// Capture user input
-		var APIKey string
-		fmt.Scanln(&APIKey)
+		// If no API key given via flag -> Prompt user for input
+		if APIKey == "" {
+			ux.PrintFormatted("→", []string{"blue", "bold"})
+			fmt.Print(" Enter API Key: ")
+
+			// Capture user input
+			// var APIKey string
+			fmt.Scanln(&APIKey)
+		}
 
 		verificationSpinner := ux.NewSpinner("Verifying your API key", "Your API key is valid, you are logged in!\n", "API key verification failed\n", false)
 		verificationSpinner.Start()
@@ -53,4 +62,5 @@ var loginCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(loginCmd)
+	loginCmd.PersistentFlags().String("api-key", "", "The Pluralith API key passed directly, skips user prompt (for automation)")
 }
