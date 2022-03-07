@@ -77,15 +77,8 @@ var graphCmd = &cobra.Command{
 			return
 		}
 
-		// Read plan state json
-		planStateString, readErr := os.ReadFile(planStatePath)
-		if readErr != nil {
-			fmt.Println(fmt.Errorf("running terraform plan failed -> %w", readErr))
-			return
-		}
-
 		// Pass plan state on to graphing module
-		diagramValues["PlanState"] = string(planStateString)
+		diagramValues["PlanStatePath"] = planStatePath
 
 		// Generate diagram through graphing module
 		if exportErr := graph.ExportDiagram(diagramValues); exportErr != nil {
