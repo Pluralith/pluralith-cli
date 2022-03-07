@@ -83,8 +83,9 @@ The **Pluralith CLI** works with modules under the hood to extend its functional
 &nbsp;
 
 ## 👩‍🚀 Looking to become a tester or talk about the project?
-- Sign up for the `alpha` over on our [website](https://www.pluralith.com)
-- Check out our [roadmap](https://roadmap.pluralith.com) and upvote features you'd like to see
+- Sign up for the `alpha` over on our **[Website](https://www.pluralith.com)**
+- Join our **[Subreddit](https://www.reddit.com/r/Pluralith/)**
+- Check out our **[Roadmap](https://roadmap.pluralith.com)** and upvote features you'd like to see
 - Or just shoot us a message on Linkedin:
   -  [Dan's Linkedin](https://www.linkedin.com/in/danielputzer/)
   -  [Phi's Linkedin](https://www.linkedin.com/in/philipp-weber-a8517b231/)
