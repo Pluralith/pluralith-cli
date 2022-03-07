@@ -17,6 +17,9 @@ func GraphModule() {
 
 	// Generate install path
 	installPath := filepath.Join(auxiliary.StateInstance.BinPath, "pluralith-cli-graphing")
+	if runtime.GOOS == "windows" {
+		installPath = installPath + ".exe"
+	}
 
 	// Get current version
 	var currentVersion string
