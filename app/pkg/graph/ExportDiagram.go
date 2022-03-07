@@ -30,7 +30,7 @@ func ExportDiagram(diagramValues map[string]interface{}) error {
 		"--ver", diagramValues["Version"].(string),
 		"--fileName", diagramValues["FileName"].(string),
 		"--outDir", diagramValues["OutDir"].(string),
-		"--planState", diagramValues["PlanState"].(string),
+		"--planStatePath", diagramValues["PlanStatePath"].(string),
 	)
 
 	// Defining sinks for std data
