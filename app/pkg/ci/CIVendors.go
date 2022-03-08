@@ -7,6 +7,14 @@ type Vendor struct {
 	Pr       interface{} //`json:"pr,omitempty"`
 }
 
+var GeneralEnvVars = []string{
+	"CI", // Travis CI, CircleCI, Cirrus CI, Gitlab CI, Appveyor, CodeShip, dsari
+	"CI_NAME",
+	"CONTINUOUS_INTEGRATION", // Travis CI, Cirrus CI
+	"BUILD_NUMBER",           // Jenkins, TeamCity
+	"RUN_ID",
+}
+
 var CIVendors = []Vendor{
 	{
 		Name:     "AppVeyor",

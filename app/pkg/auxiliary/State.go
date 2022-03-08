@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"pluralith/pkg/ci"
 	"runtime"
 	"strings"
 )
@@ -17,39 +18,9 @@ type State struct {
 	BinPath       string
 	ComDBPath     string
 	LockPath      string
-	IsWSL         bool
 	APIKey        string
-}
-
-func (P *State) CheckWSL() string {
-	// If OS is some form of Linux
-	if runtime.GOOS != "windows" && runtime.GOOS != "darwin" {
-		// Get kernel version
-		versionBytes, versionErr := os.ReadFile("/proc/version")
-		if versionErr != nil {
-			P.IsWSL = false
-			return ""
-		}
-
-		versionString := strings.ToLower(string(versionBytes))
-
-		// If version string contains microsoft -> Linux running in WSL
-		if strings.Contains(versionString, "microsoft") {
-			// Get executable source directory
-			ex, err := os.Executable()
-			if err != nil {
-				fmt.Println("Could not check for WSL")
-				P.IsWSL = false
-				return ""
-			}
-
-			P.IsWSL = true
-			return filepath.Dir(ex)
-		}
-	}
-
-	P.IsWSL = false
-	return ""
+	IsWSL         bool
+	IsCI          bool
 }
 
 func (P *State) GeneratePaths() error {
@@ -115,6 +86,61 @@ func (P *State) SetAPIKey() error {
 
 	P.APIKey = string(keyValue)
 	return nil
+}
+
+func (P *State) CheckWSL() string {
+	// If OS is some form of Linux
+	if runtime.GOOS != "windows" && runtime.GOOS != "darwin" {
+		// Get kernel version
+		versionBytes, versionErr := os.ReadFile("/proc/version")
+		if versionErr != nil {
+			P.IsWSL = false
+			return ""
+		}
+
+		versionString := strings.ToLower(string(versionBytes))
+
+		// If version string contains microsoft -> Linux running in WSL
+		if strings.Contains(versionString, "microsoft") {
+			// Get executable source directory
+			ex, err := os.Executable()
+			if err != nil {
+				fmt.Println("Could not check for WSL")
+				P.IsWSL = false
+				return ""
+			}
+
+			P.IsWSL = true
+			return filepath.Dir(ex)
+		}
+	}
+
+	P.IsWSL = false
+	return ""
+}
+
+func (P *State) CheckCI() {
+	// Check for general matches
+	for _, env := range ci.GeneralEnvVars {
+		if _, found := os.LookupEnv(env); found {
+			P.IsCI = true
+			return
+		}
+	}
+
+	// If no general match -> Check for vendor-specific matches
+	for _, vendor := range ci.CIVendors {
+		for _, env := range vendor.Env {
+			if _, found := os.LookupEnv(env); found {
+				P.IsCI = true
+				return
+			}
+		}
+	}
+
+	// If no match found -> Not running in CI
+	P.IsCI = false
+	return
 }
 
 var StateInstance = &State{}
