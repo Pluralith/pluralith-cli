@@ -120,27 +120,17 @@ func (P *State) CheckWSL() string {
 }
 
 func (P *State) CheckCI() {
-	// Check for general matches
-	for _, env := range ci.GeneralEnvVars {
-		if _, found := os.LookupEnv(env); found {
-			P.IsCI = true
-			return
-		}
+	if isCI := ci.CheckEnvVars(); isCI {
+		P.IsCI = true
+		return
 	}
 
-	// If no general match -> Check for vendor-specific matches
-	for _, vendor := range ci.CIVendors {
-		for _, env := range vendor.Env {
-			if _, found := os.LookupEnv(env); found {
-				P.IsCI = true
-				return
-			}
-		}
+	if isCI := ci.CheckDocker(); isCI {
+		P.IsCI = true
+		return
 	}
 
-	// If no match found -> Not running in CI
 	P.IsCI = false
-	return
 }
 
 var StateInstance = &State{}
