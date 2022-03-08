@@ -52,7 +52,7 @@ var graphCmd = &cobra.Command{
 
 		// Run terraform plan to create execution plan if not specified otherwise by user
 		if diagramValues["SkipPlan"] == false {
-			_, planErr := terraform.RunPlan("plan")
+			_, planErr := terraform.RunPlan("plan", true)
 			if planErr != nil {
 				fmt.Println(fmt.Errorf("running terraform plan failed -> %w", planErr))
 				return
