@@ -48,10 +48,13 @@ func ExportDiagram(diagramValues map[string]interface{}) error {
 		return fmt.Errorf("running CLI command failed -> %v: %w", functionName, runErr)
 	}
 
+	exportPath := filepath.Join(diagramValues["OutDir"].(string), diagramValues["FileName"].(string)) + ".pdf"
+	LogExport(exportPath)
+
 	exportSpinner.Success()
 	ux.PrintFormatted("  → ", []string{"blue"})
 	fmt.Print("Diagram exported to: ")
-	ux.PrintFormatted(filepath.Join(diagramValues["OutDir"].(string), diagramValues["FileName"].(string))+".pdf", []string{"blue"})
+	ux.PrintFormatted(exportPath, []string{"blue"})
 	fmt.Println("\n")
 
 	return nil
