@@ -1,57 +1,57 @@
 package ci
 
-type CIVendorStruct struct {
+type Vendor struct {
 	Name     string      //`json:Name`
 	Constant string      //`json:Constant`
-	Env      interface{} //`json:Env`
+	Env      []string    //`json:Env`
 	Pr       interface{} //`json:"pr,omitempty"`
 }
 
-var CIVendors = []CIVendorStruct{
+var CIVendors = []Vendor{
 	{
 		Name:     "AppVeyor",
 		Constant: "APPVEYOR",
-		Env:      "APPVEYOR",
+		Env:      []string{"APPVEYOR"},
 		Pr:       "APPVEYOR_PULL_REQUEST_NUMBER",
 	},
 	{
 		Name:     "Azure Pipelines",
 		Constant: "AZURE_PIPELINES",
-		Env:      "SYSTEM_TEAMFOUNDATIONCOLLECTIONURI",
+		Env:      []string{"SYSTEM_TEAMFOUNDATIONCOLLECTIONURI"},
 		Pr:       "SYSTEM_PULLREQUEST_PULLREQUESTID",
 	},
 	{
 		Name:     "Appcircle",
 		Constant: "APPCIRCLE",
-		Env:      "AC_APPCIRCLE",
+		Env:      []string{"AC_APPCIRCLE"},
 	},
 	{
 		Name:     "Bamboo",
 		Constant: "BAMBOO",
-		Env:      "bamboo_planKey",
+		Env:      []string{"bamboo_planKey"},
 	},
 	{
 		Name:     "Bitbucket Pipelines",
 		Constant: "BITBUCKET",
-		Env:      "BITBUCKET_COMMIT",
+		Env:      []string{"BITBUCKET_COMMIT"},
 		Pr:       "BITBUCKET_PR_ID",
 	},
 	{
 		Name:     "Bitrise",
 		Constant: "BITRISE",
-		Env:      "BITRISE_IO",
+		Env:      []string{"BITRISE_IO"},
 		Pr:       "BITRISE_PULL_REQUEST",
 	},
 	{
 		Name:     "Buddy",
 		Constant: "BUDDY",
-		Env:      "BUDDY_WORKSPACE_ID",
+		Env:      []string{"BUDDY_WORKSPACE_ID"},
 		Pr:       "BUDDY_EXECUTION_PULL_REQUEST_ID",
 	},
 	{
 		Name:     "Buildkite",
 		Constant: "BUILDKITE",
-		Env:      "BUILDKITE",
+		Env:      []string{"BUILDKITE"},
 		Pr: map[string]interface{}{
 			"env": "BUILDKITE_PULL_REQUEST",
 			"ne":  "false",
@@ -60,24 +60,24 @@ var CIVendors = []CIVendorStruct{
 	{
 		Name:     "CircleCI",
 		Constant: "CIRCLE",
-		Env:      "CIRCLECI",
+		Env:      []string{"CIRCLECI"},
 		Pr:       "CIRCLE_PULL_REQUEST",
 	},
 	{
 		Name:     "Cirrus CI",
 		Constant: "CIRRUS",
-		Env:      "CIRRUS_CI",
+		Env:      []string{"CIRRUS_CI"},
 		Pr:       "CIRRUS_PR",
 	},
 	{
 		Name:     "AWS CodeBuild",
 		Constant: "CODEBUILD",
-		Env:      "CODEBUILD_BUILD_ARN",
+		Env:      []string{"CODEBUILD_BUILD_ARN"},
 	},
 	{
 		Name:     "Codefresh",
 		Constant: "CODEFRESH",
-		Env:      "CF_BUILD_ID",
+		Env:      []string{"CF_BUILD_ID"},
 		Pr: map[string]interface{}{
 			"any": []interface{}{
 				"CF_PULL_REQUEST_NUMBER",
@@ -88,14 +88,12 @@ var CIVendors = []CIVendorStruct{
 	{
 		Name:     "Codeship",
 		Constant: "CODESHIP",
-		Env: map[string]interface{}{
-			"CI_NAME": "codeship",
-		},
+		Env:      []string{"codeship"},
 	},
 	{
 		Name:     "Drone",
 		Constant: "DRONE",
-		Env:      "DRONE",
+		Env:      []string{"DRONE"},
 		Pr: map[string]interface{}{
 			"DRONE_BUILD_EVENT": "pull_request",
 		},
@@ -103,17 +101,17 @@ var CIVendors = []CIVendorStruct{
 	{
 		Name:     "dsari",
 		Constant: "DSARI",
-		Env:      "DSARI",
+		Env:      []string{"DSARI"},
 	},
 	{
 		Name:     "Expo Application Services",
 		Constant: "EAS",
-		Env:      "EAS_BUILD",
+		Env:      []string{"EAS_BUILD"},
 	},
 	{
 		Name:     "GitHub Actions",
 		Constant: "GITHUB_ACTIONS",
-		Env:      "GITHUB_ACTIONS",
+		Env:      []string{"GITHUB_ACTIONS"},
 		Pr: map[string]interface{}{
 			"GITHUB_EVENT_NAME": "pull_request",
 		},
@@ -121,29 +119,29 @@ var CIVendors = []CIVendorStruct{
 	{
 		Name:     "GitLab CI",
 		Constant: "GITLAB",
-		Env:      "GITLAB_CI",
+		Env:      []string{"GITLAB_CI"},
 		Pr:       "CI_MERGE_REQUEST_ID",
 	},
 	{
 		Name:     "GoCD",
 		Constant: "GOCD",
-		Env:      "GO_PIPELINE_LABEL",
+		Env:      []string{"GO_PIPELINE_LABEL"},
 	},
 	{
 		Name:     "LayerCI",
 		Constant: "LAYERCI",
-		Env:      "LAYERCI",
+		Env:      []string{"LAYERCI"},
 		Pr:       "LAYERCI_PULL_REQUEST",
 	},
 	{
 		Name:     "Hudson",
 		Constant: "HUDSON",
-		Env:      "HUDSON_URL",
+		Env:      []string{"HUDSON_URL"},
 	},
 	{
 		Name:     "Jenkins",
 		Constant: "JENKINS",
-		Env: []interface{}{
+		Env: []string{
 			"JENKINS_URL",
 			"BUILD_ID",
 		},
@@ -157,12 +155,12 @@ var CIVendors = []CIVendorStruct{
 	{
 		Name:     "Magnum CI",
 		Constant: "MAGNUM",
-		Env:      "MAGNUM",
+		Env:      []string{"MAGNUM"},
 	},
 	{
 		Name:     "Netlify CI",
 		Constant: "NETLIFY",
-		Env:      "NETLIFY",
+		Env:      []string{"NETLIFY"},
 		Pr: map[string]interface{}{
 			"env": "PULL_REQUEST",
 			"ne":  "false",
@@ -171,7 +169,7 @@ var CIVendors = []CIVendorStruct{
 	{
 		Name:     "Nevercode",
 		Constant: "NEVERCODE",
-		Env:      "NEVERCODE",
+		Env:      []string{"NEVERCODE"},
 		Pr: map[string]interface{}{
 			"env": "NEVERCODE_PULL_REQUEST",
 			"ne":  "false",
@@ -180,7 +178,7 @@ var CIVendors = []CIVendorStruct{
 	{
 		Name:     "Render",
 		Constant: "RENDER",
-		Env:      "RENDER",
+		Env:      []string{"RENDER"},
 		Pr: map[string]interface{}{
 			"IS_PULL_REQUEST": "true",
 		},
@@ -188,19 +186,19 @@ var CIVendors = []CIVendorStruct{
 	{
 		Name:     "Sail CI",
 		Constant: "SAIL",
-		Env:      "SAILCI",
+		Env:      []string{"SAILCI"},
 		Pr:       "SAIL_PULL_REQUEST_NUMBER",
 	},
 	{
 		Name:     "Semaphore",
 		Constant: "SEMAPHORE",
-		Env:      "SEMAPHORE",
+		Env:      []string{"SEMAPHORE"},
 		Pr:       "PULL_REQUEST_NUMBER",
 	},
 	{
 		Name:     "Screwdriver",
 		Constant: "SCREWDRIVER",
-		Env:      "SCREWDRIVER",
+		Env:      []string{"SCREWDRIVER"},
 		Pr: map[string]interface{}{
 			"env": "SD_PULL_REQUEST",
 			"ne":  "false",
@@ -209,7 +207,7 @@ var CIVendors = []CIVendorStruct{
 	{
 		Name:     "Shippable",
 		Constant: "SHIPPABLE",
-		Env:      "SHIPPABLE",
+		Env:      []string{"SHIPPABLE"},
 		Pr: map[string]interface{}{
 			"IS_PULL_REQUEST": "true",
 		},
@@ -217,18 +215,18 @@ var CIVendors = []CIVendorStruct{
 	{
 		Name:     "Solano CI",
 		Constant: "SOLANO",
-		Env:      "TDDIUM",
+		Env:      []string{"TDDIUM"},
 		Pr:       "TDDIUM_PR_ID",
 	},
 	{
 		Name:     "Strider CD",
 		Constant: "STRIDER",
-		Env:      "STRIDER",
+		Env:      []string{"STRIDER"},
 	},
 	{
 		Name:     "TaskCluster",
 		Constant: "TASKCLUSTER",
-		Env: []interface{}{
+		Env: []string{
 			"TASK_ID",
 			"RUN_ID",
 		},
@@ -236,12 +234,12 @@ var CIVendors = []CIVendorStruct{
 	{
 		Name:     "TeamCity",
 		Constant: "TEAMCITY",
-		Env:      "TEAMCITY_VERSION",
+		Env:      []string{"TEAMCITY_VERSION"},
 	},
 	{
 		Name:     "Travis CI",
 		Constant: "TRAVIS",
-		Env:      "TRAVIS",
+		Env:      []string{"TRAVIS"},
 		Pr: map[string]interface{}{
 			"env": "TRAVIS_PULL_REQUEST",
 			"ne":  "false",
@@ -250,11 +248,11 @@ var CIVendors = []CIVendorStruct{
 	{
 		Name:     "Vercel",
 		Constant: "VERCEL",
-		Env:      "NOW_BUILDER",
+		Env:      []string{"NOW_BUILDER"},
 	},
 	{
 		Name:     "Visual Studio App Center",
 		Constant: "APPCENTER",
-		Env:      "APPCENTER_BUILD_ID",
+		Env:      []string{"APPCENTER_BUILD_ID"},
 	},
 }
