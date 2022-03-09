@@ -54,7 +54,7 @@ func HostExport(formFile string) (map[string]string, error) {
 	uploadWriter.Close()
 
 	// Construct request
-	request, _ := http.NewRequest("POST", "https://pluralith-api-dev-r3vxinfd2a-lm.a.run.app/v1/user/export/publish", uploadBody)
+	request, _ := http.NewRequest("POST", "https://api.pluralith.com/v1/user/export/publish", uploadBody)
 	request.Header.Add("Authorization", "Bearer "+auxiliary.StateInstance.APIKey)
 	request.Header.Add("Content-Type", uploadWriter.FormDataContentType())
 
