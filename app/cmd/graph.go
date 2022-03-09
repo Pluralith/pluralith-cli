@@ -52,7 +52,7 @@ var graphCmd = &cobra.Command{
 
 		// Run terraform plan to create execution plan if not specified otherwise by user
 		if diagramValues["SkipPlan"] == false {
-			_, planErr := terraform.RunPlan("plan")
+			_, planErr := terraform.RunPlan("plan", true)
 			if planErr != nil {
 				fmt.Println(fmt.Errorf("running terraform plan failed -> %w", planErr))
 				return
@@ -96,4 +96,5 @@ func init() {
 	graphCmd.PersistentFlags().String("out-dir", "", "The directory the diagram should be exported to")
 	graphCmd.PersistentFlags().String("file-name", "", "The name of the exported PDF")
 	graphCmd.PersistentFlags().Bool("skip-plan", false, "Generates a diagram without running plan again (needs pluralith state from previous plan run)")
+	graphCmd.PersistentFlags().Bool("generate-md", false, "Generate markdown output with exported PDF link and preview image for pull request comments")
 }

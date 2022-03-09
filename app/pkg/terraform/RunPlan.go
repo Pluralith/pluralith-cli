@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-func RunPlan(command string) (string, error) {
+func RunPlan(command string, silent bool) (string, error) {
 	functionName := "RunPlan"
 
 	ux.PrintFormatted("→", []string{"blue", "bold"})
@@ -34,14 +34,16 @@ func RunPlan(command string) (string, error) {
 
 	planSpinner.Start()
 	// Emit plan begin update to UI
-	comdb.PushComDBEvent(comdb.ComDBEvent{
-		Receiver:  "UI",
-		Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
-		Command:   "plan",
-		Type:      "begin",
-		Path:      auxiliary.StateInstance.WorkingPath,
-		Received:  false,
-	})
+	if !silent {
+		comdb.PushComDBEvent(comdb.ComDBEvent{
+			Receiver:  "UI",
+			Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
+			Command:   "plan",
+			Type:      "begin",
+			Path:      auxiliary.StateInstance.WorkingPath,
+			Received:  false,
+		})
+	}
 
 	// Constructing command to execute
 	cmd := exec.Command("terraform", append([]string{"plan", "-input=false"}, planArgs...)...)
@@ -60,15 +62,17 @@ func RunPlan(command string) (string, error) {
 		planSpinner.Fail()
 		fmt.Println(errorSink.String())
 
-		comdb.PushComDBEvent(comdb.ComDBEvent{
-			Receiver:  "UI",
-			Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
-			Command:   "plan",
-			Type:      "failed",
-			Error:     errorSink.String(),
-			Path:      auxiliary.StateInstance.WorkingPath,
-			Received:  false,
-		})
+		if !silent {
+			comdb.PushComDBEvent(comdb.ComDBEvent{
+				Receiver:  "UI",
+				Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
+				Command:   "plan",
+				Type:      "failed",
+				Error:     errorSink.String(),
+				Path:      auxiliary.StateInstance.WorkingPath,
+				Received:  false,
+			})
+		}
 
 		return errorSink.String(), fmt.Errorf("%v: %w", functionName, err)
 	}
@@ -83,15 +87,17 @@ func RunPlan(command string) (string, error) {
 	}
 
 	// Emit plan end update to UI
-	comdb.PushComDBEvent(comdb.ComDBEvent{
-		Receiver:  "UI",
-		Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
-		Command:   "plan",
-		Type:      "end",
-		Path:      auxiliary.StateInstance.WorkingPath,
-		Received:  false,
-		Providers: providers,
-	})
+	if !silent {
+		comdb.PushComDBEvent(comdb.ComDBEvent{
+			Receiver:  "UI",
+			Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
+			Command:   "plan",
+			Type:      "end",
+			Path:      auxiliary.StateInstance.WorkingPath,
+			Received:  false,
+			Providers: providers,
+		})
+	}
 
 	stripSpinner.Success()
 

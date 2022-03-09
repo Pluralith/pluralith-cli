@@ -37,7 +37,7 @@ func RunTerraform(command string, args []string) error {
 	}
 
 	// Run terraform plan to create execution plan
-	planPath, planErr := RunPlan(command)
+	planPath, planErr := RunPlan(command, false)
 	if planErr != nil {
 		return fmt.Errorf("running terraform plan failed -> %v: %w", functionName, planErr)
 	}
