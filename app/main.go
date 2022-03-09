@@ -39,6 +39,8 @@ func initApp() {
 		fmt.Println(fmt.Errorf("setting API key failed -> %v: %w", functionName, setAPIKeyErr))
 	}
 
+	auxiliary.StateInstance.CheckCI()
+
 	if filterInitErr := auxiliary.FilterInstance.InitFilters(); filterInitErr != nil {
 		fmt.Println(fmt.Errorf("initializing secret filters failed -> %v: %w", functionName, filterInitErr))
 	}

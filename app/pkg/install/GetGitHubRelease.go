@@ -41,7 +41,7 @@ func GetGitHubRelease(url string, params map[string]string, currentVersionString
 	parseErr := json.Unmarshal(bodyBytes, &bodyObject)
 	if parseErr != nil {
 		checkSpinner.Fail("Parsing request result failed")
-		return "", false, fmt.Errorf("parsing request result failed -> %v: %w", functionName, responseErr)
+		return "", false, fmt.Errorf("parsing response failed -> %v: %w", functionName, responseErr)
 	}
 
 	versionData := bodyObject["data"].(map[string]interface{})

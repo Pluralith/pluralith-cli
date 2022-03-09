@@ -7,8 +7,34 @@ import (
 	"os/exec"
 	"path/filepath"
 	"pluralith/pkg/auxiliary"
+	"pluralith/pkg/ci"
 	"pluralith/pkg/ux"
 )
+
+func GenerateComment(diagramPath string) error {
+	functionName := "preparePRComment"
+
+	// Upload diagram to storage for pull request comment hosting
+	urls, hostErr := HostExport(diagramPath)
+	if hostErr != nil {
+		return fmt.Errorf("hosting diagram for PR comment failed -> %v: %w", functionName, hostErr)
+	}
+
+	// Generate pull request comment markdown
+	commentMD, commentErr := ci.GenerateMD(urls)
+	if commentErr != nil {
+		return fmt.Errorf("generating PR comment markdown failed -> %v: %w", functionName, hostErr)
+	}
+
+	// Write markdown to file system for usage by pipeline
+	commentPath := filepath.Join(filepath.Dir(diagramPath), "comment.md")
+	fmt.Println(commentPath)
+	if writeErr := os.WriteFile(commentPath, []byte(commentMD), 0700); writeErr != nil {
+		return fmt.Errorf("writing PR comment markdown to filesystem failed -> %v: %w", functionName, hostErr)
+	}
+
+	return nil
+}
 
 func ExportDiagram(diagramValues map[string]interface{}) error {
 	functionName := "ExportDiagram"
@@ -48,10 +74,23 @@ func ExportDiagram(diagramValues map[string]interface{}) error {
 		return fmt.Errorf("running CLI command failed -> %v: %w", functionName, runErr)
 	}
 
+	exportPath := filepath.Join(diagramValues["OutDir"].(string), diagramValues["FileName"].(string)) + ".pdf"
+
+	// If environment is CI or --generate-md is set -> Host exported diagram and generate PR comment markdown
+	if auxiliary.StateInstance.IsCI || diagramValues["GenerateMd"].(bool) {
+		if prErr := GenerateComment(exportPath); prErr != nil {
+			return fmt.Errorf("handling pull request update failed -> %v: %w", functionName, prErr)
+		}
+	} else {
+		if logErr := LogExport(); logErr != nil {
+			return fmt.Errorf("logging diagram export failed -> %v: %w", functionName, logErr)
+		}
+	}
+
 	exportSpinner.Success()
 	ux.PrintFormatted("  → ", []string{"blue"})
 	fmt.Print("Diagram exported to: ")
-	ux.PrintFormatted(filepath.Join(diagramValues["OutDir"].(string), diagramValues["FileName"].(string))+".pdf", []string{"blue"})
+	ux.PrintFormatted(exportPath, []string{"blue"})
 	fmt.Println("\n")
 
 	return nil
