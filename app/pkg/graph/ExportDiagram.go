@@ -27,7 +27,9 @@ func GenerateComment(diagramPath string) error {
 	}
 
 	// Write markdown to file system for usage by pipeline
-	if writeErr := os.WriteFile("commend.md", []byte(commentMD), 0700); writeErr != nil {
+	commentPath := filepath.Join(filepath.Dir(diagramPath), "comment.md")
+	fmt.Println(commentPath)
+	if writeErr := os.WriteFile(commentPath, []byte(commentMD), 0700); writeErr != nil {
 		return fmt.Errorf("writing PR comment markdown to filesystem failed -> %v: %w", functionName, hostErr)
 	}
 
