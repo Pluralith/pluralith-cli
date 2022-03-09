@@ -11,7 +11,7 @@ import (
 	"pluralith/pkg/ux"
 )
 
-func HandlePRUpdate(diagramPath string) error {
+func GenerateComment(diagramPath string) error {
 	functionName := "preparePRComment"
 
 	// Upload diagram to storage for pull request comment hosting
@@ -21,17 +21,15 @@ func HandlePRUpdate(diagramPath string) error {
 	}
 
 	// Generate pull request comment markdown
-	commentMD, commentErr := ci.GeneratePRComment(urls)
+	commentMD, commentErr := ci.GenerateMD(urls)
 	if commentErr != nil {
-		return fmt.Errorf("hosting diagram for PR comment failed -> %v: %w", functionName, hostErr)
+		return fmt.Errorf("generating PR comment markdown failed -> %v: %w", functionName, hostErr)
 	}
 
-	fmt.Println(commentMD)
-
 	// Write markdown to file system for usage by pipeline
-	// if writeErr := os.WriteFile("commend.md", []byte(commentMD), 0700); writeErr != nil {
-	// 	return fmt.Errorf("writing PR comment markdown to filesystem failed -> %v: %w", functionName, hostErr)
-	// }
+	if writeErr := os.WriteFile("commend.md", []byte(commentMD), 0700); writeErr != nil {
+		return fmt.Errorf("writing PR comment markdown to filesystem failed -> %v: %w", functionName, hostErr)
+	}
 
 	return nil
 }
@@ -76,8 +74,9 @@ func ExportDiagram(diagramValues map[string]interface{}) error {
 
 	exportPath := filepath.Join(diagramValues["OutDir"].(string), diagramValues["FileName"].(string)) + ".pdf"
 
-	if auxiliary.StateInstance.IsCI {
-		if prErr := HandlePRUpdate(exportPath); prErr != nil {
+	// If environment is CI or --generate-md is set -> Host exported diagram and generate PR comment markdown
+	if auxiliary.StateInstance.IsCI || diagramValues["GenerateMd"].(bool) {
+		if prErr := GenerateComment(exportPath); prErr != nil {
 			return fmt.Errorf("handling pull request update failed -> %v: %w", functionName, prErr)
 		}
 	} else {

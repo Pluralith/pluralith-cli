@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func GeneratePRComment(urls map[string]string) (string, error) {
+func GenerateMD(urls map[string]string) (string, error) {
 	var comment string = ""
 
 	// Generate Head
