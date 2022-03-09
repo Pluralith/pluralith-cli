@@ -12,15 +12,10 @@ import (
 	"pluralith/pkg/auxiliary"
 )
 
-type ExportURLs struct {
-	pdf string
-	png string
-}
-
-func HostExport(formFile string) (ExportURLs, error) {
+func HostExport(formFile string) (map[string]string, error) {
 	functionName := "LogExport"
 
-	var urls = ExportURLs{}
+	var urls = make(map[string]string)
 
 	// Open form file
 	diagramExport, openErr := os.Open(formFile)
@@ -86,6 +81,9 @@ func HostExport(formFile string) (ExportURLs, error) {
 		return urls, fmt.Errorf("parsing response failed -> %v: %w", functionName, responseErr)
 	}
 
-	urls = bodyObject["data"].(ExportURLs)
+	dataObject := bodyObject["data"].(map[string]interface{})
+
+	urls["PDF"] = dataObject["pdfURL"].(string) // = bodyObject["data"].(structs.ExportURLs)
+	urls["PNG"] = dataObject["pngURL"].(string)
 	return urls, nil
 }
