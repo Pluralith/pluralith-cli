@@ -1,4 +1,4 @@
-![GitHub Badge](https://user-images.githubusercontent.com/25454503/156019514-e36729f1-b281-49e0-adcc-5a56bc49afcf.svg)  
+![GitHub Badge Blue](https://user-images.githubusercontent.com/25454503/157903512-a9be0f7b-9255-4f88-9b00-9d50539dd901.svg)
 # Pluralith CLI
 
 Pluralith is a tool to visualize your Terraform state and automate infrastructure documentation. The **Pluralith CLI** is a tool written in **`go`** to:
