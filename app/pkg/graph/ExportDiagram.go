@@ -1,7 +1,9 @@
 package graph
 
 import (
+	"bufio"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -9,9 +11,10 @@ import (
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/ci"
 	"pluralith/pkg/ux"
+	"strings"
 )
 
-func GenerateComment(diagramPath string) error {
+func GenerateComment(diagramPath string, changeActions map[string]interface{}) error {
 	functionName := "preparePRComment"
 
 	// Upload diagram to storage for pull request comment hosting
@@ -21,7 +24,7 @@ func GenerateComment(diagramPath string) error {
 	}
 
 	// Generate pull request comment markdown
-	commentMD, commentErr := ci.GenerateMD(urls)
+	commentMD, commentErr := ci.GenerateMD(urls, changeActions)
 	if commentErr != nil {
 		return fmt.Errorf("generating PR comment markdown failed -> %v: %w", functionName, hostErr)
 	}
@@ -74,11 +77,26 @@ func ExportDiagram(diagramValues map[string]interface{}) error {
 		return fmt.Errorf("running CLI command failed -> %v: %w", functionName, runErr)
 	}
 
+	// Capture change actions from Stdout
+	var changeActions map[string]interface{}
+
+	scanner := bufio.NewScanner(&outputSink)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.Contains(line, "CHANGEACTIONS") {
+			actionString := strings.ReplaceAll(line, "CHANGEACTIONS:", "")
+
+			if unmarshalErr := json.Unmarshal([]byte(actionString), &changeActions); unmarshalErr != nil {
+				return fmt.Errorf("parsing change actions failed -> %v: %w", functionName, unmarshalErr)
+			}
+		}
+	}
+
 	exportPath := filepath.Join(diagramValues["OutDir"].(string), diagramValues["FileName"].(string)) + ".pdf"
 
 	// If environment is CI or --generate-md is set -> Host exported diagram and generate PR comment markdown
 	if auxiliary.StateInstance.IsCI || diagramValues["GenerateMd"].(bool) {
-		if prErr := GenerateComment(exportPath); prErr != nil {
+		if prErr := GenerateComment(exportPath, changeActions); prErr != nil {
 			return fmt.Errorf("handling pull request update failed -> %v: %w", functionName, prErr)
 		}
 	} else {
