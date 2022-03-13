@@ -11,6 +11,7 @@ import (
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/ci"
 	"pluralith/pkg/ux"
+	"strconv"
 	"strings"
 )
 
@@ -50,6 +51,8 @@ func ExportDiagram(diagramValues map[string]interface{}) error {
 	exportSpinner := ux.NewSpinner("Generating Diagram PDF", "PDF Export Successful!", "PDF Export Failed", true)
 	exportSpinner.Start()
 
+	fmt.Println(strconv.FormatBool(diagramValues["ShowChanges"].(bool)))
+
 	cmd := exec.Command(
 		graphModulePath,
 		"graph",
@@ -60,6 +63,7 @@ func ExportDiagram(diagramValues map[string]interface{}) error {
 		"--fileName", diagramValues["FileName"].(string),
 		"--outDir", diagramValues["OutDir"].(string),
 		"--planStatePath", diagramValues["PlanStatePath"].(string),
+		"--showChanges", strconv.FormatBool(diagramValues["ShowChanges"].(bool)),
 	)
 
 	// Defining sinks for std data
