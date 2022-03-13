@@ -51,6 +51,7 @@ func GetDiagramValues(flags *pflag.FlagSet) (map[string]interface{}, error) {
 	diagramValues["FileName"], _ = flags.GetString("file-name")
 	diagramValues["SkipPlan"], _ = flags.GetBool("skip-plan")
 	diagramValues["GenerateMd"], _ = flags.GetBool("generate-md")
+	diagramValues["ShowChanges"], _ = flags.GetBool("show-changes")
 
 	// If no explicit output directory given -> Write to current working directory
 	if diagramValues["OutDir"] == "" {

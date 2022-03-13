@@ -95,6 +95,7 @@ func init() {
 	graphCmd.PersistentFlags().String("version", "", "The diagram version, will be displayed in the PDF output")
 	graphCmd.PersistentFlags().String("out-dir", "", "The directory the diagram should be exported to")
 	graphCmd.PersistentFlags().String("file-name", "", "The name of the exported PDF")
+	graphCmd.PersistentFlags().Bool("show-changes", false, "Determines whether the exported PDF highlights changes made in the latest Terraform plan or outputs a general diagram of the infrastructure")
 	graphCmd.PersistentFlags().Bool("skip-plan", false, "Generates a diagram without running plan again (needs pluralith state from previous plan run)")
 	graphCmd.PersistentFlags().Bool("generate-md", false, "Generate markdown output with exported PDF link and preview image for pull request comments")
 }
