@@ -14,21 +14,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var winUpdateHelper string = `TIMEOUT 3
-DEL pluralith.exe
-REN pluralith_update.exe pluralith.exe`
-
-var unixUpdateHelper string = `sleep 3
-rm /usr/local/bin/pluralith
-mv ~/Pluralith/bin/pluralith_update /usr/local/bin/pluralith
-`
-
 // planOldCmd represents the planOld command
 var updateCmd = &cobra.Command{
 	Use:   "update",
 	Short: "Check for and install updates for the Pluralith CLI and its modules",
 	Long:  `Check for and install updates for the Pluralith CLI and its modules`,
 	Run: func(cmd *cobra.Command, args []string) {
+		var unixTargetPath string = "/usr/local/bin"
+		if auxiliary.StateInstance.IsWSL {
+			unixTargetPath = auxiliary.StateInstance.BinPath
+		}
+
+		var unixUpdateHelper string = fmt.Sprintf("sleep 3\nrm %s/pluralith\nmv %s/pluralith_update %s/pluralith", unixTargetPath, auxiliary.StateInstance.BinPath, unixTargetPath)
+		var winUpdateHelper string = fmt.Sprintf("TIMEOUT /nobreak /t 3 \nDEL %s\\pluralith.exe \nREN %s\\pluralith_update.exe pluralith.exe", auxiliary.StateInstance.BinPath, auxiliary.StateInstance.BinPath)
+
 		ux.PrintHead()
 
 		fmt.Print("Current Version: ")
@@ -68,6 +67,7 @@ var updateCmd = &cobra.Command{
 		}
 
 		if shouldUpdate {
+			fmt.Println("->>> UPDATE:", UpdatePath)
 			if downloadErr := install.DownloadGitHubRelease("Pluralith CLI", updateUrl, UpdatePath); downloadErr != nil {
 				fmt.Println(fmt.Errorf("failed to download latest version -> %w", downloadErr))
 				return
@@ -76,7 +76,7 @@ var updateCmd = &cobra.Command{
 			// Depending on os -> run script at path as bash
 			var replaceCmd *exec.Cmd
 			if runtime.GOOS == "windows" {
-				replaceCmd = exec.Command(UpdateHelperPath)
+				replaceCmd = exec.Command("CMD", "/C", UpdateHelperPath)
 			} else {
 				replaceCmd = exec.Command("bash", UpdateHelperPath)
 			}
