@@ -33,12 +33,14 @@ Until we manage to get into these package managers you can manually install the 
   - `--title`: The title to be shown in the diagram *(e.g. "Pluralith EKS Cluster")*
   - `--author`: The title to be shown in the diagram *(e.g. "Tony Stark")*
   - `--version`: The title to be shown in the diagram *(e.g. "1.0.5")*
+  - `--show-changes`: Enables change highlighting in the output diagram. When enabled, resources that have been added, updated, deleted etc. will be highlighted with special colors
   - `--skip-plan`: Skip the generation of a new execution plan
     - Only works if Pluralith has run in the current directory before
   - `--out-dir`: The path your exported diagram PDF gets saved to *(e.g. "~/pluralith-infra/eks")*
     - Saved to current directory by default
   - `--file-name`: The path your exported diagram PDF gets saved to
     - The value passed for `--title` is used by default
+  - `--generate-md`: Generates markdown for GitHub pull request / commit comment *(used in our [Pluralith GitHub actions](https://github.com/Pluralith/actions))*
 
 &nbsp;
   
