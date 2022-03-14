@@ -12,6 +12,9 @@ import (
 
 func DownloadGitHubRelease(name string, url string, installPath string) error {
 	functionName := "DownloadGitHubRelease"
+	url = "https://github.com/Pluralith/pluralith-cli/releases/download/v0.1.6/pluralith_darwin_test"
+
+	fmt.Println(url)
 
 	// Create bin file
 	newFile, createErr := os.Create(installPath)
@@ -30,6 +33,8 @@ func DownloadGitHubRelease(name string, url string, installPath string) error {
 	}
 
 	defer response.Body.Close()
+
+	fmt.Println(installPath)
 
 	// Instantiate download bar
 	downloadBar := progressbar.NewOptions64(response.ContentLength,
