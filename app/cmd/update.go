@@ -34,11 +34,7 @@ var updateCmd = &cobra.Command{
 		fmt.Print("Current Version: ")
 		ux.PrintFormatted(auxiliary.StateInstance.CLIVersion+"\n\n", []string{"bold", "blue"})
 
-		var UpdatePath string
-		var UpdateHelperPath string
-
-		// url := "https://api.pluralith.com/v1/dist/download/cli"
-		url := "http://localhost:8080/v1/dist/download/cli"
+		url := "https://api.pluralith.com/v1/dist/download/cli"
 		params := map[string]string{"os": runtime.GOOS, "arch": runtime.GOARCH}
 
 		updateUrl, shouldUpdate, checkErr := install.GetGitHubRelease(url, params, auxiliary.StateInstance.CLIVersion)
@@ -47,14 +43,9 @@ var updateCmd = &cobra.Command{
 			return
 		}
 
-		// Get source path of current executable to download update to
-		UpdatePath, pathErr := os.Executable()
-		if pathErr != nil {
-			fmt.Println(fmt.Errorf("failed to get CLI binary source path -> %w", pathErr))
-			return
-		}
-
 		// Update process
+		var UpdatePath string
+		var UpdateHelperPath string
 		// 1) Write to separate update file
 		// 2) Ensure update helper script exists
 		// 2) Execute batch script with delay that renames and replaces current binary with updated binary

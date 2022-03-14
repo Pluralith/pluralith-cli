@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/ux"
 
 	"github.com/fatih/color"
@@ -39,7 +40,7 @@ var rootCmd = &cobra.Command{
 	Long:  longText,
 	Run: func(cmd *cobra.Command, args []string) {
 		ux.PrintHead()
-		// auxiliary.LaunchPluralith()
+		auxiliary.LaunchPluralith()
 	},
 }
 
