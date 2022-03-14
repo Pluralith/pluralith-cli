@@ -32,7 +32,6 @@ func GenerateComment(diagramPath string, changeActions map[string]interface{}) e
 
 	// Write markdown to file system for usage by pipeline
 	commentPath := filepath.Join(filepath.Dir(diagramPath), "comment.md")
-	fmt.Println(commentPath)
 	if writeErr := os.WriteFile(commentPath, []byte(commentMD), 0700); writeErr != nil {
 		return fmt.Errorf("writing PR comment markdown to filesystem failed -> %v: %w", functionName, hostErr)
 	}
@@ -50,8 +49,6 @@ func ExportDiagram(diagramValues map[string]interface{}) error {
 
 	exportSpinner := ux.NewSpinner("Generating Diagram PDF", "PDF Export Successful!", "PDF Export Failed", true)
 	exportSpinner.Start()
-
-	fmt.Println(strconv.FormatBool(diagramValues["ShowChanges"].(bool)))
 
 	cmd := exec.Command(
 		graphModulePath,
