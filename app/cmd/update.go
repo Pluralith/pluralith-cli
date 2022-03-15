@@ -67,7 +67,6 @@ var updateCmd = &cobra.Command{
 		}
 
 		if shouldUpdate {
-			fmt.Println("->>> UPDATE:", UpdatePath)
 			if downloadErr := install.DownloadGitHubRelease("Pluralith CLI", updateUrl, UpdatePath); downloadErr != nil {
 				fmt.Println(fmt.Errorf("failed to download latest version -> %w", downloadErr))
 				return

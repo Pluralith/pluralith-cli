@@ -31,8 +31,6 @@ func DownloadGitHubRelease(name string, url string, installPath string) error {
 
 	defer response.Body.Close()
 
-	fmt.Println(installPath)
-
 	// Instantiate download bar
 	downloadBar := progressbar.NewOptions64(response.ContentLength,
 		progressbar.OptionEnableColorCodes(true),
