@@ -14,16 +14,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var winUpdateHelper string = `TIMEOUT 3
-DEL pluralith.exe
-REN pluralith_update.exe pluralith.exe`
-
 // planOldCmd represents the planOld command
 var updateCmd = &cobra.Command{
 	Use:   "update",
 	Short: "Check for and install updates for the Pluralith CLI and its modules",
 	Long:  `Check for and install updates for the Pluralith CLI and its modules`,
 	Run: func(cmd *cobra.Command, args []string) {
+		var unixTargetPath string = "/usr/local/bin"
+		if auxiliary.StateInstance.IsWSL {
+			unixTargetPath = auxiliary.StateInstance.BinPath
+		}
+
+		var unixUpdateHelper string = fmt.Sprintf("sleep 3\nrm %s/pluralith\nmv %s/pluralith_update %s/pluralith", unixTargetPath, auxiliary.StateInstance.BinPath, unixTargetPath)
+		var winUpdateHelper string = fmt.Sprintf("TIMEOUT /nobreak /t 3 \nDEL %s\\pluralith.exe \nREN %s\\pluralith_update.exe pluralith.exe", auxiliary.StateInstance.BinPath, auxiliary.StateInstance.BinPath)
+
 		ux.PrintHead()
 
 		fmt.Print("Current Version: ")
@@ -38,21 +42,24 @@ var updateCmd = &cobra.Command{
 			return
 		}
 
-		// Get source path of current executable to download update to
-		UpdatePath, pathErr := os.Executable()
-		if pathErr != nil {
-			fmt.Println(fmt.Errorf("failed to get CLI binary source path -> %w", pathErr))
-			return
-		}
-
-		// Add special condition where windows cannot override currently executed binary
+		// Update process
+		var UpdatePath string
+		var UpdateHelperPath string
 		// 1) Write to separate update file
-		// 2) Ensure update helper batch script exists
+		// 2) Ensure update helper script exists
 		// 2) Execute batch script with delay that renames and replaces current binary with updated binary
 		if runtime.GOOS == "windows" {
 			UpdatePath = filepath.Join(auxiliary.StateInstance.BinPath, "pluralith_update.exe")
-			UpdateHelperPath := filepath.Join(auxiliary.StateInstance.BinPath, "update.bat")
+			UpdateHelperPath = filepath.Join(auxiliary.StateInstance.BinPath, "update.bat")
 			helperWriteErr := os.WriteFile(UpdateHelperPath, []byte(winUpdateHelper), 0700)
+			if helperWriteErr != nil {
+				fmt.Println(fmt.Errorf("failed to create update helper -> %w", helperWriteErr))
+				return
+			}
+		} else {
+			UpdatePath = filepath.Join(auxiliary.StateInstance.BinPath, "pluralith_update")
+			UpdateHelperPath = filepath.Join(auxiliary.StateInstance.BinPath, "update.sh")
+			helperWriteErr := os.WriteFile(UpdateHelperPath, []byte(unixUpdateHelper), 0700)
 			if helperWriteErr != nil {
 				fmt.Println(fmt.Errorf("failed to create update helper -> %w", helperWriteErr))
 				return
@@ -65,13 +72,18 @@ var updateCmd = &cobra.Command{
 				return
 			}
 
-			// Execute batch script to replace binary after CLI terminates
+			// Depending on os -> run script at path as bash
+			var replaceCmd *exec.Cmd
 			if runtime.GOOS == "windows" {
-				replaceCmd := exec.Command(filepath.Join(auxiliary.StateInstance.BinPath, "update.bat"))
-				if replaceErr := replaceCmd.Start(); replaceErr != nil {
-					fmt.Println(fmt.Errorf("failed to run update helper -> %w", replaceErr))
-					return
-				}
+				replaceCmd = exec.Command("CMD", "/C", UpdateHelperPath)
+			} else {
+				replaceCmd = exec.Command("bash", UpdateHelperPath)
+			}
+
+			// Execute helper script to replace binary after CLI terminates
+			if replaceErr := replaceCmd.Start(); replaceErr != nil {
+				fmt.Println(fmt.Errorf("failed to run update helper -> %w", replaceErr))
+				return
 			}
 		}
 	},
