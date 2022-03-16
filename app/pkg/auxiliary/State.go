@@ -22,13 +22,15 @@ type State struct {
 	APIKey        string
 	IsWSL         bool
 	IsCI          bool
+	TerraformInit bool
 }
 
-func (P *State) GeneratePaths() error {
+// Produce relevant paths to be used across the application
+func (S *State) GeneratePaths() error {
 	functionName := "GeneratePaths"
 
 	// Check for WSL
-	WSLPath := P.CheckWSL()
+	WSLPath := S.CheckWSL()
 
 	// Get current working directory
 	workingDir, workingErr := os.Getwd()
@@ -43,40 +45,42 @@ func (P *State) GeneratePaths() error {
 	}
 
 	// If it is WSL -> Set homedir to homedir on Windows
-	if P.IsWSL {
+	if S.IsWSL {
 		pathParts := strings.Split(WSLPath, "Pluralith")
 		homeDir = pathParts[0]
 	}
 
 	// Set path parameters
-	P.HomePath = homeDir
-	P.WorkingPath = workingDir
-	P.PluralithPath = filepath.Join(homeDir, "Pluralith")
-	P.BinPath = filepath.Join(P.PluralithPath, "bin")
-	P.ComDBPath = filepath.Join(P.PluralithPath, "pluralithComDB.json")
-	P.LockPath = filepath.Join(P.PluralithPath, "pluralithLock.json")
+	S.HomePath = homeDir
+	S.WorkingPath = workingDir
+	S.PluralithPath = filepath.Join(homeDir, "Pluralith")
+	S.BinPath = filepath.Join(S.PluralithPath, "bin")
+	S.ComDBPath = filepath.Join(S.PluralithPath, "pluralithComDB.json")
+	S.LockPath = filepath.Join(S.PluralithPath, "pluralithLock.json")
 
 	return nil
 }
 
-func (P *State) InitPaths() error {
+// Make sure important directory structures exist
+func (S *State) InitPaths() error {
 	functionName := "InitPaths"
 
 	// Create parent directories for path if they don't exist yet
-	if mkErr := os.MkdirAll(P.BinPath, 0700); mkErr != nil {
+	if mkErr := os.MkdirAll(S.BinPath, 0700); mkErr != nil {
 		return fmt.Errorf("%v: %w", functionName, mkErr)
 	}
 
 	return nil
 }
 
-func (P *State) SetAPIKey() error {
+// Set API key in credentials file
+func (S *State) SetAPIKey() error {
 	functionName := "SetAPIKey"
-	credentialsPath := filepath.Join(P.PluralithPath, "credentials")
+	credentialsPath := filepath.Join(S.PluralithPath, "credentials")
 
 	// Check if credentials file exists
 	if _, pathErr := os.Stat(credentialsPath); errors.Is(pathErr, os.ErrNotExist) {
-		P.APIKey = ""
+		S.APIKey = ""
 		return nil
 	}
 
@@ -85,17 +89,18 @@ func (P *State) SetAPIKey() error {
 		return fmt.Errorf("%v: %w", functionName, readErr)
 	}
 
-	P.APIKey = string(keyValue)
+	S.APIKey = string(keyValue)
 	return nil
 }
 
-func (P *State) CheckWSL() string {
+// Check if running on WSL if GOOS is linux
+func (S *State) CheckWSL() string {
 	// If OS is some form of Linux
 	if runtime.GOOS != "windows" && runtime.GOOS != "darwin" {
 		// Get kernel version
 		versionBytes, versionErr := os.ReadFile("/proc/version")
 		if versionErr != nil {
-			P.IsWSL = false
+			S.IsWSL = false
 			return ""
 		}
 
@@ -107,31 +112,41 @@ func (P *State) CheckWSL() string {
 			ex, err := os.Executable()
 			if err != nil {
 				fmt.Println("Could not check for WSL")
-				P.IsWSL = false
+				S.IsWSL = false
 				return ""
 			}
 
-			P.IsWSL = true
+			S.IsWSL = true
 			return filepath.Dir(ex)
 		}
 	}
 
-	P.IsWSL = false
+	S.IsWSL = false
 	return ""
 }
 
-func (P *State) CheckCI() {
+// Check if running in any of the known CI environments
+func (S *State) CheckCI() {
 	if isCI := ci.CheckEnvVars(); isCI {
-		P.IsCI = true
+		S.IsCI = true
 		return
 	}
 
 	if isCI := ci.CheckDocker(); isCI {
-		P.IsCI = true
+		S.IsCI = true
 		return
 	}
 
-	P.IsCI = false
+	S.IsCI = false
+}
+
+// Check if Terraform has been initialized
+func (S *State) CheckTerraformInit() {
+	if _, statErr := os.Stat(filepath.Join(S.WorkingPath, ".terraform")); !os.IsNotExist(statErr) {
+		S.TerraformInit = true
+	} else {
+		S.TerraformInit = false
+	}
 }
 
 var StateInstance = &State{}

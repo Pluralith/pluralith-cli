@@ -9,6 +9,16 @@ import (
 func RunTerraform(command string, args []string) error {
 	functionName := "RunTerraform"
 
+	// Check if "terraform init" has been run
+	if !auxiliary.StateInstance.TerraformInit {
+		ux.PrintHead()
+		ux.PrintFormatted("⠿", []string{"blue"})
+		fmt.Print(" No Terraform Initialization found ⇢ Run ")
+		ux.PrintFormatted("'terraform init'", []string{"blue", "bold"})
+		fmt.Println(" first\n")
+		return nil
+	}
+
 	// Print running message
 	ux.PrintFormatted("⠿", []string{"blue"})
 	fmt.Println(RunMessages[command].([]string)[0])
