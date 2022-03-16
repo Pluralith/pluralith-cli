@@ -40,6 +40,7 @@ func initApp() {
 	}
 
 	auxiliary.StateInstance.CheckCI()
+	auxiliary.StateInstance.CheckTerraformInit()
 
 	if filterInitErr := auxiliary.FilterInstance.InitFilters(); filterInitErr != nil {
 		fmt.Println(fmt.Errorf("initializing secret filters failed -> %v: %w", functionName, filterInitErr))
