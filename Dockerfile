@@ -4,15 +4,19 @@ FROM alpine:3.15
 ENV PLURALITH_CI=true
 
 # Install dependencies
-RUN apk upgrade --no-cache && apk --no-cache add jq curl wget gcompat libgcc libstdc++
+RUN apk upgrade --no-cache && apk --no-cache add jq curl wget gcompat libgcc libstdc++ npm
 
-# Donwload and install Pluralith CLI
+# Download and install Pluralith CLI
 COPY ./scripts/ci ./scripts
 RUN ./scripts/download.sh
 RUN ./scripts/install.sh
 
-CMD tail -f /dev/null
+# Make terraform installation script executable in finished image
+RUN chmod +x ./scripts/install-terraform.sh
 
-# ENTRYPOINT [ "pluralith" ]
+# Install Compost for pull request commenting
+RUN npm install -g @infracost/compost
+
+ENTRYPOINT [ "pluralith" ]
 
 
