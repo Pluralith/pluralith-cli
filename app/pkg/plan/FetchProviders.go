@@ -8,6 +8,9 @@ import (
 func FetchProviders(jsonString string) ([]string, error) {
 	functionName := "FetchProviders"
 
+	// Initialize provider array
+	var providers = []string{}
+
 	// Parse JSON object from string
 	parsedJson, parseErr := auxiliary.ParseJson(jsonString)
 	if parseErr != nil {
@@ -16,12 +19,28 @@ func FetchProviders(jsonString string) ([]string, error) {
 
 	// Get provider config
 	configuration := parsedJson["configuration"].(map[string]interface{})
-	provider_config := configuration["provider_config"].(map[string]interface{})
 
-	// Find all used providers
-	providers := make([]string, 0, len(provider_config))
-	for item := range provider_config {
-		providers = append(providers, item)
+	if configuration["provider_config"] != nil {
+		provider_config := configuration["provider_config"].(map[string]interface{})
+
+		// Find all used providers
+		for item := range provider_config {
+			providers = append(providers, item)
+		}
+
+		return providers, nil
+	}
+
+	// If provider_config missing -> Fall back to fetching providers from resources
+	rootModule := configuration["root_module"].(map[string]interface{})
+	resources := rootModule["resources"].([]interface{})
+
+	for _, resource := range resources {
+		resourceMap := resource.(map[string]interface{})
+		providerName := resourceMap["provider_config_key"].(string)
+		if !auxiliary.ElementInSlice(providerName, providers) {
+			providers = append(providers, providerName)
+		}
 	}
 
 	return providers, nil
