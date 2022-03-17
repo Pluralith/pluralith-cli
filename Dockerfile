@@ -4,7 +4,10 @@ FROM alpine:3.15
 ENV PLURALITH_CI=true
 
 # Install dependencies
-RUN apk upgrade --no-cache && apk --no-cache add jq curl wget gcompat libgcc libstdc++ npm
+RUN apk upgrade --no-cache && apk --no-cache add bash jq curl wget gcompat libgcc libstdc++ npm
+
+# Set shell to bash to use bash array
+SHELL ["/bin/bash", "-ec"]
 
 # Download and install Pluralith CLI
 COPY ./scripts/ci ./scripts
