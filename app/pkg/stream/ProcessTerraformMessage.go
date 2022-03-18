@@ -1,19 +1,20 @@
 package stream
 
 import (
-	"fmt"
 	"pluralith/pkg/auxiliary"
+	"pluralith/pkg/comdb"
 	"strings"
+	"time"
 )
 
-func DecodeStateStream(jsonString string, command string) (DecodedEvent, error) {
-	functionName := "DecodeStateStream"
+func ProcessTerraformMessage(message string, command string) {
+	// functionName := "DecodeStateStream"
 	decodedEvent := DecodedEvent{}
 
-	// Parsing state stream JSON
-	parsedState, parseErr := auxiliary.ParseJson(jsonString)
+	// Parsing terraform message
+	parsedState, parseErr := auxiliary.ParseJson(message)
 	if parseErr != nil {
-		return decodedEvent, fmt.Errorf("could not parse json -> %v: %w", functionName, parseErr)
+		return // If message is not valid json that cannot be parsed -> return and do nothing
 	}
 
 	// Get event message
@@ -58,5 +59,18 @@ func DecodeStateStream(jsonString string, command string) (DecodedEvent, error) 
 		decodedEvent.Type = eventType
 	}
 
-	return decodedEvent, nil
+	// If address is given -> Resource event
+	if decodedEvent.Address != "" {
+		// Emit current event update to UI
+		comdb.PushComDBEvent(comdb.ComDBEvent{
+			Receiver:  "UI",
+			Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
+			Command:   decodedEvent.Command,
+			Type:      decodedEvent.Type,
+			Address:   decodedEvent.Address,
+			Message:   decodedEvent.Message,
+			Path:      auxiliary.StateInstance.WorkingPath,
+			Received:  false,
+		})
+	}
 }

@@ -12,32 +12,6 @@ import (
 	"pluralith/pkg/ux"
 )
 
-func handleTerraformOutput(jsonString string, command string) error {
-	functionName := "handleTerraformOutput"
-	// Decode json string to get event type and resource address
-	event, decodeErr := DecodeStateStream(jsonString, command)
-	if decodeErr != nil {
-		return fmt.Errorf("%v: %w", functionName, decodeErr)
-	}
-
-	// If address is given -> Resource event
-	if event.Address != "" {
-		// // Emit current event update to UI
-		comdb.PushComDBEvent(comdb.ComDBEvent{
-			Receiver:  "UI",
-			Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
-			Command:   event.Command,
-			Type:      event.Type,
-			Address:   event.Address,
-			Message:   event.Message,
-			Path:      auxiliary.StateInstance.WorkingPath,
-			Received:  false,
-		})
-	}
-
-	return nil
-}
-
 func StreamCommand(command string, args []string) error {
 	functionName := "StreamCommand"
 
@@ -101,10 +75,7 @@ func StreamCommand(command string, args []string) error {
 
 	// While command line scan is running
 	for applyScanner.Scan() {
-		if scanErr := handleTerraformOutput(applyScanner.Text(), command); scanErr != nil {
-			streamSpinner.Fail()
-			return fmt.Errorf("scanning terraform json output failed -> %v: %w", functionName, scanErr)
-		}
+		ProcessTerraformMessage(applyScanner.Text(), command)
 	}
 
 	// Pull state with latest attributes
