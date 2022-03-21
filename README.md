@@ -59,14 +59,15 @@ Until we manage to get into these package managers you can manually install the 
   -  This is meant for us to debug edge cases on user state without the security hazard
 
 ### → Module Commands
-- `pluralith install`: Installs/updates the Pluralith CLI or one of its modules to the latest version
-  - To install a specific module, pass that module's name (e.g. `pluralith install graph-module`)
-  - If no value is passed, the latest version of the CLI itself will be installed
+- `pluralith install`: Installs/updates the specific module whose name is passed (e.g. `pluralith install graph-module`)
 - `pluralith update`: Essentially the same as `install`. Updates existing modules, if not installed it downloads the latest release
+  - If no value is passed, the latest version of the CLI itself will be installed
  
 ### → Utility Commands
 - `pluralith login`: Authenticate with your API key (necessary for the CLI to work without the UI)<sup>2</sup>
 - `pluralith version`: Shows information about the current CLI version as well as additional, installed modules
+
+&nbsp;
 
 <sup>1</sup> The UI then shows a prompt that lets you confirm or deny an `apply` with hotkeys.  
 <sup>2</sup> You need to be authenticated with your **API key** via `pluralith login`. Currently only available for closed alpha testers. Interested? Shoot us an email dan@pluralith.com
