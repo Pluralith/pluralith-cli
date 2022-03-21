@@ -5,7 +5,7 @@ terraform {
     bucket = "pluralith-infrastructure-state"
     prefix = "pluralith-cli"
   }
-  
+
   required_providers {
     google = {
       source = "hashicorp/google"
@@ -22,29 +22,29 @@ data "google_iam_policy" "pluralith_cli_bucket_policy" {
   binding {
     role = "roles/storage.objectViewer"
     members = [
-        "allUsers",
-    ] 
+      "allUsers",
+    ]
   }
 }
 
 resource "google_storage_bucket_iam_policy" "pluralith_cli_bucket_policy_link" {
-  bucket = google_storage_bucket.pluralith_cli_bucket.name
+  bucket      = google_storage_bucket.pluralith_cli_bucket.name
   policy_data = data.google_iam_policy.pluralith_cli_bucket_policy.policy_data
 }
 
 resource "google_storage_bucket" "pluralith_cli_bucket" {
-  name = var.bucket_name
+  name     = var.bucket_name
   location = var.bucket_location
 }
 
 // Google Cloud Build
-resource "google_cloudbuild_trigger" "pluralith_api_cloud_build_trigger" {
-  name = var.cloud_build_trigger_name
+resource "google_cloudbuild_trigger" "pluralith_cli_cloud_build_trigger" {
+  name        = var.cloud_build_trigger_name
   description = var.cloud_build_trigger_description
 
   github {
     owner = var.repo_owner
-    name = var.repo_name
+    name  = var.repo_name
 
     push {
       branch = var.repo_branch
