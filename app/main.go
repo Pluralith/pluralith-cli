@@ -27,7 +27,7 @@ func initApp() {
 	functionName := "initApp"
 
 	dblock.LockInstance.GenerateLock()
-	auxiliary.StateInstance.CLIVersion = "0.1.5"
+	auxiliary.StateInstance.CLIVersion = "0.1.6"
 
 	if pathGenErr := auxiliary.StateInstance.GeneratePaths(); pathGenErr != nil {
 		fmt.Println(fmt.Errorf("generating application paths failed -> %v: %w", functionName, pathGenErr))
@@ -40,6 +40,7 @@ func initApp() {
 	}
 
 	auxiliary.StateInstance.CheckCI()
+	auxiliary.StateInstance.CheckTerraformInit()
 
 	if filterInitErr := auxiliary.FilterInstance.InitFilters(); filterInitErr != nil {
 		fmt.Println(fmt.Errorf("initializing secret filters failed -> %v: %w", functionName, filterInitErr))

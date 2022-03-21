@@ -28,21 +28,30 @@ func (F *Filters) GetSecretConfig() error {
 	workingConfig := filepath.Join(StateInstance.WorkingPath, "pluralith-config.json")
 	defaultConfig := filepath.Join(StateInstance.HomePath, "Pluralith", "pluralith-config.json")
 
-	// Read config file from working directory
-	configByte, configErr = os.ReadFile(workingConfig)
-	if configErr != nil {
-		configErr = nil
-		// If no config file in working directroy -> fall back to default config
+	// Get default config first
+	if _, statErr := os.Stat(defaultConfig); !os.IsNotExist(statErr) {
+		// Read config file from Pluralith directory
 		configByte, configErr = os.ReadFile(defaultConfig)
 		if configErr != nil {
-			return fmt.Errorf("failed to get config -> %v: %w", functionName, configErr)
+			return fmt.Errorf("failed to read working directory config -> %v: %w", functionName, configErr)
 		}
 	}
 
-	// Parse config
-	parseErr := json.Unmarshal(configByte, &config)
-	if parseErr != nil {
-		return fmt.Errorf("failed to parse config -> %v: %w", functionName, parseErr)
+	// If current working dir has config -> override default config
+	if _, statErr := os.Stat(workingConfig); !os.IsNotExist(statErr) {
+		// Read config file from working directory
+		configByte, configErr = os.ReadFile(workingConfig)
+		if configErr != nil {
+			return fmt.Errorf("failed to read working directory config -> %v: %w", functionName, configErr)
+		}
+	}
+
+	// Parse config if given
+	if len(configByte) > 0 {
+		parseErr := json.Unmarshal(configByte, &config)
+		if parseErr != nil {
+			return fmt.Errorf("failed to parse config -> %v: %w", functionName, parseErr)
+		}
 	}
 
 	// Set config for global access

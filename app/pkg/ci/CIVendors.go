@@ -13,6 +13,7 @@ var GeneralEnvVars = []string{
 	"CONTINUOUS_INTEGRATION", // Travis CI, Cirrus CI
 	"BUILD_NUMBER",           // Jenkins, TeamCity
 	"RUN_ID",
+	"PLURALITH_CI", // Pluralith CI Docker Image
 }
 
 var CIVendors = []Vendor{
