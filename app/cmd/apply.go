@@ -13,7 +13,7 @@ var applyCmd = &cobra.Command{
 	Short: "Run terraform apply and show changes in Pluralith",
 	Long:  `Run terraform apply and show changes in Pluralith`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := terraform.RunTerraform("apply", args); err != nil {
+		if err := terraform.RunTerraform("apply", cmd.Flags()); err != nil {
 			fmt.Println(err)
 		}
 	},

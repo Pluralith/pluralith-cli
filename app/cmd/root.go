@@ -17,7 +17,7 @@ import (
 var cfgFile string
 
 // Defining custom "Long" message with colored output
-var blueColor = color.New(color.FgBlue).SprintFunc()
+var blueColor = color.New(color.FgHiBlue).SprintFunc()
 var longText = fmt.Sprintf(`%s
 
 Welcome to %s, a tool to visualize your Terraform state.

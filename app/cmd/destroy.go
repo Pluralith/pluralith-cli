@@ -13,7 +13,7 @@ var destroyCmd = &cobra.Command{
 	Short: "Run terraform destroy and show changes in Pluralith",
 	Long:  `Run terraform destroy and show changes in Pluralith`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := terraform.RunTerraform("destroy", args); err != nil {
+		if err := terraform.RunTerraform("destroy", cmd.Flags()); err != nil {
 			fmt.Println(err)
 		}
 	},

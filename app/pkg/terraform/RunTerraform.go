@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/ux"
+
+	"github.com/spf13/pflag"
 )
 
-func RunTerraform(command string, args []string) error {
+func RunTerraform(command string, flags *pflag.FlagSet) error {
 	functionName := "RunTerraform"
 
 	// Check if "terraform init" has been run
@@ -24,15 +26,17 @@ func RunTerraform(command string, args []string) error {
 	fmt.Println(RunMessages[command].([]string)[0])
 
 	// Manually parse arg (due to cobra lacking a feature)
-	parsedArgs, parsedArgMap := auxiliary.ParseArgs(args, []string{})
+	// parsedArgs, parsedArgMap := auxiliary.ParseArgs(args, []string{})
+	// parsedArgMap := make(map[string]interface{})
+	parsedArgs := []string{}
 
 	// Add necessary flags if not already given
-	if parsedArgMap["auto-approve"] == "" {
-		parsedArgs = append(parsedArgs, "-auto-approve")
-	}
-	if parsedArgMap["json"] == "" {
-		parsedArgs = append(parsedArgs, "-json")
-	}
+	// if parsedArgMap["auto-approve"] == "" {
+	parsedArgs = append(parsedArgs, "-auto-approve")
+	// }
+	// if parsedArgMap["json"] == "" {
+	parsedArgs = append(parsedArgs, "-json")
+	// }
 
 	// Remove old Pluralith state
 	removeErr := auxiliary.RemoveOldState()
@@ -50,6 +54,16 @@ func RunTerraform(command string, args []string) error {
 	planPath, planErr := RunPlan(command, false)
 	if planErr != nil {
 		return fmt.Errorf("running terraform plan failed -> %v: %w", functionName, planErr)
+	}
+
+	// Run infracost
+	showCosts, flagErr := flags.GetBool("show-costs")
+	if flagErr != nil {
+		fmt.Println(flagErr)
+	}
+
+	if showCosts {
+		// cost.CalculateCost()
 	}
 
 	fmt.Println() // Line separation between plan and apply message prints
