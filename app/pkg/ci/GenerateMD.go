@@ -18,7 +18,7 @@ func GenerateMD(urls map[string]string, changeActions map[string]interface{}) (s
 
 	// Changes Section
 	comment += "## Changes\n\n"
-	comment += fmt.Sprintf("| **Created** | **Updated** | **Destroyed** | **Recreated** | **Unchanged** |\n|-------------|-------------|---------------|---------------|---------------|\n| 🟢 **`+ %v`** | 🟠 **`~ %v`** | 🔴 **`- %v`**   | 🔵 **`@ %v`**   | ⚪ **`# %v`**   |", changeActions["create"], changeActions["update"], changeActions["delete"], changeActions["deletecreate"], changeActions["no-op"])
+	comment += fmt.Sprintf("| **Created** | **Updated** | **Destroyed** | **Recreated** | **Drifted** | **Unchanged** |\n|-------------|-------------|-------------|---------------|---------------|---------------|\n| 🟢 **`+ %v`** | 🟠 **`~ %v`** | 🔴 **`- %v`**   | 🔵 **`@ %v`**   | 🟣 **`# %v`**   | ⚪ **`# %v`**   |", changeActions["create"], changeActions["update"], changeActions["delete"], changeActions["deletecreate"], changeActions["drift"], changeActions["no-op"])
 
 	return comment, nil
 }
