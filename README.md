@@ -33,12 +33,14 @@ Until we manage to get into these package managers you can manually install the 
   - `--title`: The title to be shown in the diagram *(e.g. "Pluralith EKS Cluster")*
   - `--author`: The title to be shown in the diagram *(e.g. "Tony Stark")*
   - `--version`: The title to be shown in the diagram *(e.g. "1.0.5")*
+  - `--show-changes`: Enables change highlighting in the output diagram. When enabled, resources that have been added, updated, deleted etc. will be highlighted with special colors
   - `--skip-plan`: Skip the generation of a new execution plan
     - Only works if Pluralith has run in the current directory before
   - `--out-dir`: The path your exported diagram PDF gets saved to *(e.g. "~/pluralith-infra/eks")*
     - Saved to current directory by default
   - `--file-name`: The path your exported diagram PDF gets saved to
     - The value passed for `--title` is used by default
+  - `--generate-md`: Generates markdown for GitHub pull request / commit comment *(used in our [Pluralith GitHub actions](https://github.com/Pluralith/actions))*
 
 &nbsp;
   
@@ -57,14 +59,15 @@ Until we manage to get into these package managers you can manually install the 
   -  This is meant for us to debug edge cases on user state without the security hazard
 
 ### → Module Commands
-- `pluralith install`: Installs/updates the Pluralith CLI or one of its modules to the latest version
-  - To install a specific module, pass that module's name (e.g. `pluralith install graph-module`)
-  - If no value is passed, the latest version of the CLI itself will be installed
+- `pluralith install`: Installs/updates the specific module whose name is passed (e.g. `pluralith install graph-module`)
 - `pluralith update`: Essentially the same as `install`. Updates existing modules, if not installed it downloads the latest release
+  - If no value is passed, the latest version of the CLI itself will be installed
  
 ### → Utility Commands
 - `pluralith login`: Authenticate with your API key (necessary for the CLI to work without the UI)<sup>2</sup>
 - `pluralith version`: Shows information about the current CLI version as well as additional, installed modules
+
+&nbsp;
 
 <sup>1</sup> The UI then shows a prompt that lets you confirm or deny an `apply` with hotkeys.  
 <sup>2</sup> You need to be authenticated with your **API key** via `pluralith login`. Currently only available for closed alpha testers. Interested? Shoot us an email dan@pluralith.com
