@@ -25,8 +25,8 @@ var updateCmd = &cobra.Command{
 			unixTargetPath = auxiliary.StateInstance.BinPath
 		}
 
-		var unixUpdateHelper string = fmt.Sprintf("sleep 3\nrm %s/pluralith\nmv %s/pluralith_update %s/pluralith", unixTargetPath, auxiliary.StateInstance.BinPath, unixTargetPath)
-		var winUpdateHelper string = fmt.Sprintf("TIMEOUT /nobreak /t 3 \nDEL %s\\pluralith.exe \nREN %s\\pluralith_update.exe pluralith.exe", auxiliary.StateInstance.BinPath, auxiliary.StateInstance.BinPath)
+		var unixUpdateHelper string = fmt.Sprintf("sleep 2\nrm %s/pluralith\nmv %s/pluralith_update %s/pluralith", unixTargetPath, auxiliary.StateInstance.BinPath, unixTargetPath)
+		var winUpdateHelper string = fmt.Sprintf("TIMEOUT /nobreak /t 2 \nDEL %s\\pluralith.exe \nREN %s\\pluralith_update.exe pluralith.exe", auxiliary.StateInstance.BinPath, auxiliary.StateInstance.BinPath)
 
 		ux.PrintHead()
 
