@@ -61,6 +61,7 @@ func ExportDiagram(diagramValues map[string]interface{}) error {
 		"--outDir", diagramValues["OutDir"].(string),
 		"--planStatePath", diagramValues["PlanStatePath"].(string),
 		"--showChanges", strconv.FormatBool(diagramValues["ShowChanges"].(bool)),
+		"--showDrift", strconv.FormatBool(diagramValues["ShowDrift"].(bool)),
 	)
 
 	// Defining sinks for std data
