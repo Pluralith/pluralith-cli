@@ -11,20 +11,19 @@ import (
 	"time"
 )
 
-func RunApply(command string, args []string) error {
+func RunApply(command string, planPath string) error {
 	functionName := "RunApply"
 
-	// Define terraform args used by this command
-	pluralithArgs := make(map[string]string)
-	pluralithArgs["auto-approve"] = "true"
-	pluralithArgs["json"] = "true"
-	pluralithArgs["input"] = "false"
-	if command == "destroy" {
-		pluralithArgs["destroy"] = ""
+	// Construct terraform args
+	terraformArgs := []string{
+		"-auto-approve",
+		"-json",
+		"-input=false",
 	}
 
-	// Manually parse arg (due to cobra lacking a feature)
-	parsedArgs := auxiliary.ParseArgs(args, pluralithArgs)
+	if command == "destroy" {
+		terraformArgs = append(terraformArgs, "-destroy")
+	}
 
 	ux.PrintFormatted("→", []string{"blue", "bold"})
 	ux.PrintFormatted(strings.Join([]string{" ", strings.Title(command)}, ""), []string{"white", "bold"})
@@ -76,7 +75,7 @@ func RunApply(command string, args []string) error {
 			command = "apply"
 		}
 
-		streamErr := stream.StreamCommand(command, parsedArgs)
+		streamErr := stream.StreamCommand(command, terraformArgs)
 		if streamErr != nil {
 			return fmt.Errorf("streaming terraform command output failed -> %v: %w", functionName, streamErr)
 		}

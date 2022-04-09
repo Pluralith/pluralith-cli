@@ -43,11 +43,8 @@ func RunTerraform(command string, args []string) error {
 
 	fmt.Println() // Line separation between plan and apply message prints
 
-	// Add plan path to arguments to run apply on already created execution plan
-	args = append(args, planPath)
-
 	// Run terraform apply on existing execution plan
-	applyErr := RunApply(command, args)
+	applyErr := RunApply(command, planPath)
 	if applyErr != nil {
 		return fmt.Errorf("running terraform apply failed -> %v: %w", functionName, applyErr)
 	}

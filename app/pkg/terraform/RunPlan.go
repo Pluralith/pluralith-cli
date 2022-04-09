@@ -13,23 +13,23 @@ import (
 	"time"
 )
 
-func RunPlan(command string, args []string, silent bool) (string, error) {
+func RunPlan(command string, userArgs []string, silent bool) (string, error) {
 	functionName := "RunPlan"
 
 	// Constructing execution plan path
 	workingPlan := filepath.Join(auxiliary.StateInstance.WorkingPath, "pluralith.plan")
 
-	// Define terraform args used by this command
-	pluralithArgs := make(map[string]string)
-	pluralithArgs["json"] = "true"
-	pluralithArgs["input"] = "false"
-	pluralithArgs["out"] = workingPlan
-	if command == "destroy" {
-		pluralithArgs["destroy"] = ""
+	// Construct terraform args
+	terraformArgs := []string{
+		"-input=false",
+		"-out=" + workingPlan,
 	}
 
-	// Manually parse arg (due to cobra lacking a feature)
-	parsedArgs := auxiliary.ParseArgs(args, pluralithArgs)
+	terraformArgs = append(terraformArgs, userArgs...)
+
+	if command == "destroy" {
+		terraformArgs = append(terraformArgs, "-destroy")
+	}
 
 	ux.PrintFormatted("→", []string{"blue", "bold"})
 	ux.PrintFormatted(" Plan\n", []string{"white", "bold"})
@@ -52,7 +52,7 @@ func RunPlan(command string, args []string, silent bool) (string, error) {
 	}
 
 	// Constructing command to execute
-	cmd := exec.Command("terraform", append([]string{"plan"}, parsedArgs...)...)
+	cmd := exec.Command("terraform", append([]string{"plan"}, terraformArgs...)...)
 
 	// Defining sinks for std data
 	var outputSink bytes.Buffer
