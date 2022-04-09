@@ -6,15 +6,14 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-
-	"github.com/spf13/cobra"
-
 	"pluralith/pkg/auth"
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/graph"
 	"pluralith/pkg/install/components"
 	"pluralith/pkg/terraform"
 	"pluralith/pkg/ux"
+
+	"github.com/spf13/cobra"
 )
 
 // stripCmd represents the strip command
@@ -23,12 +22,18 @@ var graphCmd = &cobra.Command{
 	Short: "Generate and export a diagram of the current plan state as a PDF",
 	Long:  `Generate and export a diagram of the current plan state as a PDF`,
 	Run: func(cmd *cobra.Command, args []string) {
+		varArgs, varErr := terraform.ConstructVarArgs(cmd.Flags())
+		if varErr != nil {
+			fmt.Println(varErr)
+		}
+
 		// Verify API key with backend
 		isValid, verifyErr := auth.VerifyAPIKey(auxiliary.StateInstance.APIKey)
 		if verifyErr != nil {
 			fmt.Println(fmt.Errorf("verifying API key failed -> %w", verifyErr))
 			return
 		}
+
 		if !isValid {
 			ux.PrintFormatted("\n✖️", []string{"red", "bold"})
 			fmt.Print(" Invalid API key → Run ")
@@ -52,7 +57,7 @@ var graphCmd = &cobra.Command{
 
 		// Run terraform plan to create execution plan if not specified otherwise by user
 		if diagramValues["SkipPlan"] == false {
-			_, planErr := terraform.RunPlan("plan", true)
+			_, planErr := terraform.RunPlan("plan", varArgs, true)
 			if planErr != nil {
 				fmt.Println(fmt.Errorf("running terraform plan failed -> %w", planErr))
 				return
@@ -65,7 +70,7 @@ var graphCmd = &cobra.Command{
 		}
 
 		// Construct plan state path
-		planStatePath := filepath.Join(auxiliary.StateInstance.WorkingPath, "pluralith.state.stripped")
+		planStatePath := filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith", "pluralith.state.stripped")
 
 		// Check if plan state exists
 		_, existErr := os.Stat(planStatePath)    // Check if old state exists
@@ -99,4 +104,6 @@ func init() {
 	graphCmd.PersistentFlags().Bool("show-drift", false, "Determines whether the exported PDF highlights resource drift detected by Terraform")
 	graphCmd.PersistentFlags().Bool("skip-plan", false, "Generates a diagram without running plan again (needs pluralith state from previous plan run)")
 	graphCmd.PersistentFlags().Bool("generate-md", false, "Generate markdown output with exported PDF link and preview image for pull request comments")
+	graphCmd.PersistentFlags().StringSlice("var-file", []string{}, "Path to a var file to pass to Terraform. Can be specified multiple times.")
+	graphCmd.PersistentFlags().StringSlice("var", []string{}, "A variable to pass to Terraform. Can be specified multiple times. (Format: --var='NAME=VALUE')")
 }
