@@ -349,8 +349,8 @@ func (S *StripState) StripAndHash() error {
 	stripSpinner.Start()
 
 	// Initialize relevant paths
-	planPath := filepath.Join(auxiliary.StateInstance.WorkingPath, "pluralith.state.stripped")
-	outPath := filepath.Join(auxiliary.StateInstance.WorkingPath, "pluralith.state.hashed")
+	planPath := filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith", "pluralith.state.stripped")
+	outPath := filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith", "pluralith.state.hashed")
 
 	// Check if plan state exists -> if not, alert and return
 	if _, existErr := os.Stat(planPath); existErr != nil {
@@ -373,6 +373,8 @@ func (S *StripState) StripAndHash() error {
 		stripSpinner.Fail("Failed to parse plan state")
 		return fmt.Errorf("could not parse plan state -> %v: %w", functionName, readErr)
 	}
+
+	fmt.Println(S.planJson)
 
 	S.CollectNames(S.planJson)
 	S.providers = auxiliary.DeduplicateSlice(S.providers)

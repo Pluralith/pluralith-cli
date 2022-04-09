@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-
 	"pluralith/pkg/terraform"
 
 	"github.com/spf13/cobra"
@@ -14,24 +13,19 @@ var planCmd = &cobra.Command{
 	Short: "Run terraform plan and show changes in Pluralith",
 	Long:  `Run terraform plan and show changes in Pluralith`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// showCosts, flagErr := cmd.Flags().GetBool("show-costs")
-		// if flagErr != nil {
-		// 	fmt.Println(flagErr)
-		// }
+		varArgs, varErr := terraform.ConstructVarArgs(cmd.Flags())
+		if varErr != nil {
+			fmt.Println(varErr)
+		}
 
-		// if showCosts {
-		// 	cost.CalculateCost()
-		// }
-
-		// fmt.Println(showCosts)
-
-		if err := terraform.RunTerraform("plan", cmd.Flags()); err != nil {
-			fmt.Println(err)
+		if planErr := terraform.RunTerraform("plan", varArgs); planErr != nil {
+			fmt.Println(planErr)
 		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(planCmd)
-	planCmd.PersistentFlags().Bool("show-costs", false, "Shows cost information in Pluralith desktop (courtesy of Infracost)")
+	planCmd.PersistentFlags().StringSlice("var-file", []string{}, "Path to a var file to pass to Terraform. Can be specified multiple times.")
+	planCmd.PersistentFlags().StringSlice("var", []string{}, "A variable to pass to Terraform. Can be specified multiple times. (Format: --var='NAME=VALUE')")
 }

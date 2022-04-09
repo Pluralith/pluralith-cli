@@ -35,7 +35,7 @@ func StreamCommand(command string, args []string) error {
 	streamSpinner.Start()
 
 	// Constructing command to execute
-	cmd := exec.Command("terraform", append([]string{"apply", "-input=false"}, args...)...)
+	cmd := exec.Command("terraform", append([]string{"apply"}, args...)...)
 
 	// Define sinks for std data
 	var errorSink bytes.Buffer

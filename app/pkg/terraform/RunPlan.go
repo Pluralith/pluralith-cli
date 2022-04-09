@@ -13,20 +13,26 @@ import (
 	"time"
 )
 
-func RunPlan(command string, silent bool) (string, error) {
+func RunPlan(command string, userArgs []string, silent bool) (string, error) {
 	functionName := "RunPlan"
+
+	// Constructing execution plan path
+	workingPlan := filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith", "pluralith.plan.bin")
+
+	// Construct terraform args
+	terraformArgs := []string{
+		"-input=false",
+		"-out=" + workingPlan,
+	}
+
+	terraformArgs = append(terraformArgs, userArgs...)
+
+	if command == "destroy" {
+		terraformArgs = append(terraformArgs, "-destroy")
+	}
 
 	ux.PrintFormatted("→", []string{"blue", "bold"})
 	ux.PrintFormatted(" Plan\n", []string{"white", "bold"})
-
-	// Constructing execution plan path
-	workingPlan := filepath.Join(auxiliary.StateInstance.WorkingPath, "pluralith.plan")
-
-	// Initialize variables
-	planArgs := []string{"-out", workingPlan}
-	if command == "destroy" {
-		planArgs = append(planArgs, "-destroy")
-	}
 
 	// Instantiate spinners
 	planSpinner := ux.NewSpinner("Generating Execution Plan", "Execution Plan Generated", "Couldn't Generate Execution Plan", true)
@@ -46,7 +52,7 @@ func RunPlan(command string, silent bool) (string, error) {
 	}
 
 	// Constructing command to execute
-	cmd := exec.Command("terraform", append([]string{"plan", "-input=false"}, planArgs...)...)
+	cmd := exec.Command("terraform", append([]string{"plan"}, terraformArgs...)...)
 
 	// Defining sinks for std data
 	var outputSink bytes.Buffer
