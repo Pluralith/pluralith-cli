@@ -17,7 +17,7 @@ func RunPlan(command string, userArgs []string, silent bool) (string, error) {
 	functionName := "RunPlan"
 
 	// Constructing execution plan path
-	workingPlan := filepath.Join(auxiliary.StateInstance.WorkingPath, "pluralith.plan")
+	workingPlan := filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith", "pluralith.plan.bin")
 
 	// Construct terraform args
 	terraformArgs := []string{

@@ -1,7 +1,10 @@
 package terraform
 
 import (
+	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/ux"
 )
@@ -17,6 +20,15 @@ func RunTerraform(command string, args []string) error {
 		ux.PrintFormatted("'terraform init'", []string{"blue", "bold"})
 		fmt.Println(" first\n")
 		return nil
+	}
+
+	// Create Pluralith helper directory (.pluralith)
+	_, existErr := os.Stat(filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith"))
+	if errors.Is(existErr, os.ErrNotExist) {
+		// Create file if it doesn't exist yet
+		if mkErr := os.Mkdir(filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith"), 0700); mkErr != nil {
+			return fmt.Errorf("%v: %w", functionName, mkErr)
+		}
 	}
 
 	// Print running message
