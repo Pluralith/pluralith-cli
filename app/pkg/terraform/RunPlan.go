@@ -25,7 +25,7 @@ func RunPlan(command string, args []string, silent bool) (string, error) {
 	pluralithArgs["input"] = "false"
 	pluralithArgs["out"] = workingPlan
 	if command == "destroy" {
-		pluralithArgs["destroy"] = "true"
+		pluralithArgs["destroy"] = ""
 	}
 
 	// Manually parse arg (due to cobra lacking a feature)
@@ -51,8 +51,6 @@ func RunPlan(command string, args []string, silent bool) (string, error) {
 		})
 	}
 
-	fmt.Println(parsedArgs)
-
 	// Constructing command to execute
 	cmd := exec.Command("terraform", append([]string{"plan"}, parsedArgs...)...)
 
@@ -68,7 +66,6 @@ func RunPlan(command string, args []string, silent bool) (string, error) {
 	// Run terraform plan
 	if err := cmd.Run(); err != nil {
 		planSpinner.Fail()
-		fmt.Println(outputSink.String())
 		fmt.Println(errorSink.String())
 
 		if !silent {

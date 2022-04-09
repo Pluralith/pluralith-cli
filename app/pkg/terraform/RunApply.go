@@ -19,6 +19,9 @@ func RunApply(command string, args []string) error {
 	pluralithArgs["auto-approve"] = "true"
 	pluralithArgs["json"] = "true"
 	pluralithArgs["input"] = "false"
+	if command == "destroy" {
+		pluralithArgs["destroy"] = ""
+	}
 
 	// Manually parse arg (due to cobra lacking a feature)
 	parsedArgs := auxiliary.ParseArgs(args, pluralithArgs)

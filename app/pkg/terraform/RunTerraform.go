@@ -23,14 +23,6 @@ func RunTerraform(command string, args []string) error {
 	ux.PrintFormatted("⠿", []string{"blue"})
 	fmt.Println(RunMessages[command].([]string)[0])
 
-	// // Add necessary flags if not already given
-	// if parsedArgMap["auto-approve"] == "" {
-	// 	parsedArgs = append(parsedArgs, "-auto-approve")
-	// }
-	// if parsedArgMap["json"] == "" {
-	// 	parsedArgs = append(parsedArgs, "-json")
-	// }
-
 	// Remove old Pluralith state
 	removeErr := auxiliary.RemoveOldState()
 	if removeErr != nil {
