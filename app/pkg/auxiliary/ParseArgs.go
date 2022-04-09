@@ -19,30 +19,20 @@ func ParseArgs(args []string, pluralithArgs map[string]string) []string {
 		parsedArgs = append(parsedArgs, splitArg...)
 	}
 
-	argLength := len(parsedArgs) // Getting cleanArgs length to use in loop
+	totalArgs := len(parsedArgs) - 1 // Getting cleanArgs length to use in loop
 
 	// Creating arg map
 	for index, arg := range parsedArgs {
 		// Determining if current value is an arg or a value by checking for "-"
 		if strings.HasPrefix(arg, "-") {
 			// Initializing a few variables
-			var nextArg string
 			var value string
 
 			currentArg := arg[1:] // Clearing "-" prefix from args
 
-			// Checking if this is the last argument of the slice, to avoid error
-			if argLength >= index+2 {
-				nextArg = parsedArgs[index+1] // If there is a value beyond the current one -> Assign it to next arg
-			} else {
-				nextArg = "true" // Otherwise assign "true" to mark the current argument as present
-			}
-
-			// Checking if the next value (if given) contains "-" (which would make it an arg)
-			if !strings.HasPrefix(nextArg, "-") {
-				value = nextArg // If it doesn't it can be seen as value for current arg
-			} else {
-				value = "true" // If it does, our current arg does not have a dedicated value and is a simple boolean arg
+			// If there is a value in arg slice beyond this one and it isn't another flag (doesn't start with '-') -> treat it as value for current flag
+			if index+1 <= totalArgs && !strings.HasPrefix(parsedArgs[index+1], "-") {
+				value = parsedArgs[index+1]
 			}
 
 			// Storing results from above in previously initialized map
@@ -50,7 +40,7 @@ func ParseArgs(args []string, pluralithArgs map[string]string) []string {
 		}
 	}
 
-	// Merge pluralith arg map with parsed arg map
+	// Merge Pluralith arg map with parsed arg map
 	for arg, value := range pluralithArgs {
 		parsedArgMap[arg] = value
 	}
@@ -58,7 +48,9 @@ func ParseArgs(args []string, pluralithArgs map[string]string) []string {
 	// Create new arg array
 	var finalArgs []string
 	for arg, value := range parsedArgMap {
-		if strings.Contains(value, " ") {
+		if value == "" {
+			finalArgs = append(finalArgs, "-"+arg)
+		} else if strings.Contains(value, " ") {
 			finalArgs = append(finalArgs, "-"+arg+"=\""+value+"\"")
 		} else {
 			finalArgs = append(finalArgs, "-"+arg+"="+value+"")
