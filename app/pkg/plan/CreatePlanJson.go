@@ -36,6 +36,7 @@ func CreatePlanJson(planPath string) (string, []string, error) {
 
 	// Run terraform command
 	if err := cmd.Run(); err != nil {
+		fmt.Println(errorSink.String())
 		return errorSink.String(), []string{}, fmt.Errorf("terraform command failed -> %v: %w", functionName, err)
 	}
 

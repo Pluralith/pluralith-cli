@@ -1,20 +1,10 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
-	"os"
-	"os/exec"
-	"path/filepath"
+	"pluralith/pkg/auxiliary"
 
 	"github.com/spf13/cobra"
-
-	"pluralith/pkg/auth"
-	"pluralith/pkg/auxiliary"
-	"pluralith/pkg/graph"
-	"pluralith/pkg/install/components"
-	"pluralith/pkg/terraform"
-	"pluralith/pkg/ux"
 )
 
 // stripCmd represents the strip command
@@ -23,68 +13,76 @@ var graphCmd = &cobra.Command{
 	Short: "Generate and export a diagram of the current plan state as a PDF",
 	Long:  `Generate and export a diagram of the current plan state as a PDF`,
 	Run: func(cmd *cobra.Command, args []string) {
+		pluralithArgs := make(map[string]string)
+		pluralithArgs["auto-approve"] = "true"
+		pluralithArgs["json"] = "true"
+
+		parsedArgs := auxiliary.ParseArgs(args, pluralithArgs)
+		fmt.Println(parsedArgs)
+
 		// Verify API key with backend
-		isValid, verifyErr := auth.VerifyAPIKey(auxiliary.StateInstance.APIKey)
-		if verifyErr != nil {
-			fmt.Println(fmt.Errorf("verifying API key failed -> %w", verifyErr))
-			return
-		}
-		if !isValid {
-			ux.PrintFormatted("\n✖️", []string{"red", "bold"})
-			fmt.Print(" Invalid API key → Run ")
-			ux.PrintFormatted("pluralith login", []string{"blue"})
-			fmt.Println(" again\n")
-			return
-		}
+		// isValid, verifyErr := auth.VerifyAPIKey(auxiliary.StateInstance.APIKey)
+		// if verifyErr != nil {
+		// 	fmt.Println(fmt.Errorf("verifying API key failed -> %w", verifyErr))
+		// 	return
+		// }
 
-		// Check if graph module installed, if not -> install
-		_, versionErr := exec.Command(filepath.Join(auxiliary.StateInstance.BinPath, "pluralith-cli-graphing"), "version").Output()
-		if versionErr != nil {
-			components.GraphModule()
-		}
+		// if !isValid {
+		// 	ux.PrintFormatted("\n✖️", []string{"red", "bold"})
+		// 	fmt.Print(" Invalid API key → Run ")
+		// 	ux.PrintFormatted("pluralith login", []string{"blue"})
+		// 	fmt.Println(" again\n")
+		// 	return
+		// }
 
-		// Parse flag values
-		diagramValues, valueErr := graph.GetDiagramValues(cmd.Flags())
-		if valueErr != nil {
-			fmt.Println(fmt.Errorf("getting diagram values failed -> %w", valueErr))
-			return
-		}
+		// // Check if graph module installed, if not -> install
+		// _, versionErr := exec.Command(filepath.Join(auxiliary.StateInstance.BinPath, "pluralith-cli-graphing"), "version").Output()
+		// if versionErr != nil {
+		// 	components.GraphModule()
+		// }
 
-		// Run terraform plan to create execution plan if not specified otherwise by user
-		if diagramValues["SkipPlan"] == false {
-			_, planErr := terraform.RunPlan("plan", true)
-			if planErr != nil {
-				fmt.Println(fmt.Errorf("running terraform plan failed -> %w", planErr))
-				return
-			}
-		} else {
-			ux.PrintFormatted("→ ", []string{"bold", "blue"})
-			ux.PrintFormatted("Plan\n", []string{"bold", "white"})
-			ux.PrintFormatted("  -", []string{"blue", "bold"})
-			fmt.Println(" Skipped\n")
-		}
+		// // Parse flag values
+		// diagramValues, valueErr := graph.GetDiagramValues(cmd.Flags())
+		// if valueErr != nil {
+		// 	fmt.Println(fmt.Errorf("getting diagram values failed -> %w", valueErr))
+		// 	return
+		// }
 
-		// Construct plan state path
-		planStatePath := filepath.Join(auxiliary.StateInstance.WorkingPath, "pluralith.state.stripped")
+		// // Run terraform plan to create execution plan if not specified otherwise by user
+		// if diagramValues["SkipPlan"] == false {
+		// 	_, planErr := terraform.RunPlan("plan", args, true)
+		// 	if planErr != nil {
+		// 		fmt.Println(fmt.Errorf("running terraform plan failed -> %w", planErr))
+		// 		return
+		// 	}
+		// } else {
+		// 	ux.PrintFormatted("→ ", []string{"bold", "blue"})
+		// 	ux.PrintFormatted("Plan\n", []string{"bold", "white"})
+		// 	ux.PrintFormatted("  -", []string{"blue", "bold"})
+		// 	fmt.Println(" Skipped\n")
+		// }
 
-		// Check if plan state exists
-		_, existErr := os.Stat(planStatePath)    // Check if old state exists
-		if errors.Is(existErr, os.ErrNotExist) { // If it exists -> delete
-			ux.PrintFormatted("✖️", []string{"bold", "red"})
-			fmt.Print(" No plan state found ")
-			ux.PrintFormatted("→", []string{"bold", "red"})
-			fmt.Println(" Run pluralith graph again without --skip-plan")
-			return
-		}
+		// // Construct plan state path
+		// planStatePath := filepath.Join(auxiliary.StateInstance.WorkingPath, "pluralith.state.stripped")
 
-		// Pass plan state on to graphing module
-		diagramValues["PlanStatePath"] = planStatePath
+		// // Check if plan state exists
+		// _, existErr := os.Stat(planStatePath)    // Check if old state exists
+		// if errors.Is(existErr, os.ErrNotExist) { // If it exists -> delete
+		// 	ux.PrintFormatted("✖️", []string{"bold", "red"})
+		// 	fmt.Print(" No plan state found ")
+		// 	ux.PrintFormatted("→", []string{"bold", "red"})
+		// 	fmt.Println(" Run pluralith graph again without --skip-plan")
+		// 	return
+		// }
 
-		// Generate diagram through graphing module
-		if exportErr := graph.ExportDiagram(diagramValues); exportErr != nil {
-			fmt.Println(fmt.Errorf("exporting diagram failed -> %w", exportErr))
-			return
-		}
+		// // Pass plan state on to graphing module
+		// diagramValues["PlanStatePath"] = planStatePath
+
+		// // Generate diagram through graphing module
+		// if exportErr := graph.ExportDiagram(diagramValues); exportErr != nil {
+		// 	fmt.Println(fmt.Errorf("exporting diagram failed -> %w", exportErr))
+		// 	return
+		// }
 	},
 }
 

@@ -13,20 +13,26 @@ import (
 	"time"
 )
 
-func RunPlan(command string, silent bool) (string, error) {
+func RunPlan(command string, args []string, silent bool) (string, error) {
 	functionName := "RunPlan"
-
-	ux.PrintFormatted("→", []string{"blue", "bold"})
-	ux.PrintFormatted(" Plan\n", []string{"white", "bold"})
 
 	// Constructing execution plan path
 	workingPlan := filepath.Join(auxiliary.StateInstance.WorkingPath, "pluralith.plan")
 
-	// Initialize variables
-	planArgs := []string{"-out", workingPlan}
+	// Define terraform args used by this command
+	pluralithArgs := make(map[string]string)
+	pluralithArgs["json"] = "true"
+	pluralithArgs["input"] = "false"
+	pluralithArgs["out"] = workingPlan
 	if command == "destroy" {
-		planArgs = append(planArgs, "-destroy")
+		pluralithArgs["destroy"] = "true"
 	}
+
+	// Manually parse arg (due to cobra lacking a feature)
+	parsedArgs := auxiliary.ParseArgs(args, pluralithArgs)
+
+	ux.PrintFormatted("→", []string{"blue", "bold"})
+	ux.PrintFormatted(" Plan\n", []string{"white", "bold"})
 
 	// Instantiate spinners
 	planSpinner := ux.NewSpinner("Generating Execution Plan", "Execution Plan Generated", "Couldn't Generate Execution Plan", true)
@@ -45,8 +51,10 @@ func RunPlan(command string, silent bool) (string, error) {
 		})
 	}
 
+	fmt.Println(parsedArgs)
+
 	// Constructing command to execute
-	cmd := exec.Command("terraform", append([]string{"plan", "-input=false"}, planArgs...)...)
+	cmd := exec.Command("terraform", append([]string{"plan"}, parsedArgs...)...)
 
 	// Defining sinks for std data
 	var outputSink bytes.Buffer
@@ -60,6 +68,7 @@ func RunPlan(command string, silent bool) (string, error) {
 	// Run terraform plan
 	if err := cmd.Run(); err != nil {
 		planSpinner.Fail()
+		fmt.Println(outputSink.String())
 		fmt.Println(errorSink.String())
 
 		if !silent {
