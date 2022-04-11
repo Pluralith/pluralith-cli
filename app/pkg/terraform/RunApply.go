@@ -20,12 +20,13 @@ func RunApply(command string, planPath string) error {
 		"-auto-approve",
 		"-json",
 		"-input=false",
-		planPath,
 	}
 
 	if command == "destroy" {
 		allArgs = append(allArgs, "-destroy")
 	}
+
+	allArgs = append(allArgs, planPath)
 
 	ux.PrintFormatted("→", []string{"blue", "bold"})
 	ux.PrintFormatted(strings.Join([]string{" ", strings.Title(command)}, ""), []string{"white", "bold"})

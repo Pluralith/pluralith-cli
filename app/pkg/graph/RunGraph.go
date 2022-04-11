@@ -23,7 +23,7 @@ func RunGraph(tfArgs []string, costArgs []string, exportArgs map[string]interfac
 	}
 
 	if !isValid {
-		ux.PrintFormatted("\n✖️", []string{"red", "bold"})
+		ux.PrintFormatted("\n✘", []string{"red", "bold"})
 		fmt.Print(" Invalid API key → Run ")
 		ux.PrintFormatted("pluralith login", []string{"blue"})
 		fmt.Println(" again\n")
@@ -55,7 +55,7 @@ func RunGraph(tfArgs []string, costArgs []string, exportArgs map[string]interfac
 	// Check if plan state exists
 	_, existErr := os.Stat(planStatePath)    // Check if old state exists
 	if errors.Is(existErr, os.ErrNotExist) { // If it exists -> delete
-		ux.PrintFormatted("✖️", []string{"bold", "red"})
+		ux.PrintFormatted("✘", []string{"bold", "red"})
 		fmt.Print(" No plan state found ")
 		ux.PrintFormatted("→", []string{"bold", "red"})
 		fmt.Println(" Run pluralith graph again without --skip-plan")

@@ -54,9 +54,11 @@ func ProcessTerraformMessage(message string, command string) DecodedEvent {
 		}
 
 		// Set address and type
-		decodedEvent.Command = "diagnostic"
-		decodedEvent.Address = diagnostic["address"].(string)
-		decodedEvent.Type = eventType
+		if diagnostic["address"] != nil {
+			decodedEvent.Command = "diagnostic"
+			decodedEvent.Address = diagnostic["address"].(string)
+			decodedEvent.Type = eventType
+		}
 	}
 
 	// If address is given -> Resource event

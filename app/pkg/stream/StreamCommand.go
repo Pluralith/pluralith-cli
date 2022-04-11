@@ -15,7 +15,7 @@ import (
 	"github.com/fatih/color"
 )
 
-func StreamCommand(command string, args []string) error {
+func StreamCommand(command string, tfArgs []string) error {
 	functionName := "StreamCommand"
 
 	// Instantiate spinners
@@ -38,7 +38,7 @@ func StreamCommand(command string, args []string) error {
 	// streamSpinner.Start()
 
 	// Constructing command to execute
-	cmd := exec.Command("terraform", args...)
+	cmd := exec.Command("terraform", tfArgs...)
 
 	// Define sinks for std data
 	var errorSink bytes.Buffer
@@ -79,14 +79,31 @@ func StreamCommand(command string, args []string) error {
 	// progressWriter := color.Output
 	eventLog := ""
 	eventCount := 0
-	completeCount := 0
+
 	errorCount := 0
+	errorPrint := color.New(color.Bold, color.FgHiRed)
+
+	commandCount := 0
+	commandMode := "Completed"
+	commandModePrint := color.New(color.Bold, color.FgHiGreen)
+
+	if command == "destroy" {
+		commandMode = "Destroyed"
+		commandModePrint = color.New(color.Bold, color.FgHiBlue)
+	}
+
+	// blueStyle := color.New(color.Bold, color.FgHiBlue)
+	// redStyle := color.New(color.Bold, color.FgHiRed)
+	// greenStyle :=
+
+	commandModePrint.Sprint(strconv.Itoa(commandCount))
 
 	// Deactivate cursor
 	fmt.Print("\033[?25l")
 
 	ux.PrintFormatted("  → ", []string{"bold", "blue"})
-	fmt.Printf("Running → %s Completed / %s Errored", color.HiGreenString(strconv.Itoa(completeCount)), color.HiRedString(strconv.Itoa(errorCount)))
+	// commandCountString :=
+	fmt.Printf("Running → %s %s / %s Errored", commandModePrint.Sprint(strconv.Itoa(commandCount)), commandMode, errorPrint.Sprint(strconv.Itoa(errorCount)))
 
 	// While command line scan is running
 	for applyScanner.Scan() {
@@ -94,13 +111,13 @@ func StreamCommand(command string, args []string) error {
 		var eventString string
 
 		if event.Type == "complete" {
-			completeCount += 1
-			eventString = fmt.Sprintf("%s %s %s", color.HiGreenString("    ≡ "), event.Address, color.HiGreenString(" completed"))
+			commandCount += 1
+			eventString = fmt.Sprintf("%s %s %s", commandModePrint.Sprint("    ✔ "), event.Address, commandModePrint.Sprint(commandMode))
 		}
 
 		if event.Type == "errored" {
 			errorCount += 1
-			eventString = fmt.Sprintf("%s %s %s", color.HiRedString("    ≡ "), event.Address, color.HiRedString(" errored"))
+			eventString = fmt.Sprintf("%s %s %s", errorPrint.Sprint("    ✘ "), event.Address, errorPrint.Sprint("Errored"))
 		}
 
 		// fmt.Println(messageString)
@@ -113,7 +130,7 @@ func StreamCommand(command string, args []string) error {
 			eventCount += 1
 
 			ux.PrintFormatted("  → ", []string{"bold", "blue"})
-			fmt.Printf("Running → %s Completed / %s Errored", color.HiGreenString(strconv.Itoa(completeCount)), color.HiRedString(strconv.Itoa(errorCount)))
+			fmt.Printf("Running → %s %s / %s Errored", commandModePrint.Sprint(strconv.Itoa(commandCount)), commandMode, errorPrint.Sprint(strconv.Itoa(errorCount)))
 			fmt.Printf("\033F")
 
 			eventLog += "\n" + eventString
