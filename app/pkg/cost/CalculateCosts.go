@@ -10,7 +10,7 @@ import (
 	"pluralith/pkg/ux"
 )
 
-func CalculateCost() error {
+func CalculateCost(costArgs []string) error {
 	functionName := "CalculateCost"
 
 	costSpinner := ux.NewSpinner("Calculating Infrastructure Costs", "Costs Calculated", "Couldn't Calculate Costs", true)
@@ -18,14 +18,16 @@ func CalculateCost() error {
 
 	planJsonPath := filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith", "pluralith.state.json")
 
-	infracostArgs := []string{
+	allArgs := []string{
 		"breakdown",
 		"--path=" + planJsonPath,
 		"--out-file=.pluralith/pluralith.costs.json",
 		"--format=json",
 	}
 
-	costCmd := exec.Command("infracost", infracostArgs...)
+	allArgs = append(allArgs, costArgs...)
+
+	costCmd := exec.Command("infracost", allArgs...)
 
 	// Defining sinks for std data
 	var outputSink bytes.Buffer

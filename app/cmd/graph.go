@@ -22,9 +22,9 @@ var graphCmd = &cobra.Command{
 	Short: "Generate and export a diagram of the current plan state as a PDF",
 	Long:  `Generate and export a diagram of the current plan state as a PDF`,
 	Run: func(cmd *cobra.Command, args []string) {
-		varArgs, varErr := terraform.ConstructVarArgs(cmd.Flags())
-		if varErr != nil {
-			fmt.Println(varErr)
+		tfArgs, tfErr := terraform.ConstructTerraformArgs(cmd.Flags())
+		if tfErr != nil {
+			fmt.Println(tfErr)
 		}
 
 		// Verify API key with backend
@@ -57,7 +57,7 @@ var graphCmd = &cobra.Command{
 
 		// Run terraform plan to create execution plan if not specified otherwise by user
 		if diagramValues["SkipPlan"] == false {
-			_, planErr := terraform.RunPlan("plan", varArgs, true)
+			_, planErr := terraform.RunPlan("plan", tfArgs, true)
 			if planErr != nil {
 				fmt.Println(fmt.Errorf("running terraform plan failed -> %w", planErr))
 				return

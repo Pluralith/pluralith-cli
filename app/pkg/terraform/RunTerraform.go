@@ -6,10 +6,11 @@ import (
 	"os"
 	"path/filepath"
 	"pluralith/pkg/auxiliary"
+	"pluralith/pkg/cost"
 	"pluralith/pkg/ux"
 )
 
-func RunTerraform(command string, args []string) error {
+func RunTerraform(command string, tfArgs []string, costArgs []string) error {
 	functionName := "RunTerraform"
 
 	// Check if "terraform init" has been run
@@ -42,15 +43,27 @@ func RunTerraform(command string, args []string) error {
 	}
 
 	// Launch Pluralith
-	launchErr := auxiliary.LaunchPluralith()
-	if launchErr != nil {
-		return fmt.Errorf("launching Pluralith failed -> %v: %w", functionName, launchErr)
-	}
+	// launchErr := auxiliary.LaunchPluralith()
+	// if launchErr != nil {
+	// 	return fmt.Errorf("launching Pluralith failed -> %v: %w", functionName, launchErr)
+	// }
 
 	// Run terraform plan to create execution plan
-	planPath, planErr := RunPlan(command, args, false)
+	planPath, planErr := RunPlan(command, tfArgs, false)
 	if planErr != nil {
 		return fmt.Errorf("running terraform plan failed -> %v: %w", functionName, planErr)
+	}
+
+	// Run infracost
+	if auxiliary.StateInstance.Infracost {
+		if costErr := cost.CalculateCost(costArgs); costErr != nil {
+			fmt.Println(costErr)
+		}
+	} else {
+		// ux.PrintFormatted("→ ", []string{"bold", "blue"})
+		// ux.PrintFormatted("Plan\n", []string{"bold", "white"})
+		ux.PrintFormatted("  -", []string{"blue", "bold"})
+		fmt.Println(" Cost Calculation Skipped\n")
 	}
 
 	fmt.Println() // Line separation between plan and apply message prints
