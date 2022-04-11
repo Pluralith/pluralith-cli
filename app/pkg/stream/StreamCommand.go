@@ -5,11 +5,14 @@ import (
 	"bytes"
 	"fmt"
 	"os/exec"
+	"strconv"
 	"time"
 
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/comdb"
 	"pluralith/pkg/ux"
+
+	"github.com/fatih/color"
 )
 
 func StreamCommand(command string, args []string) error {
@@ -32,7 +35,7 @@ func StreamCommand(command string, args []string) error {
 		Received:  false,
 	})
 
-	streamSpinner.Start()
+	// streamSpinner.Start()
 
 	// Constructing command to execute
 	cmd := exec.Command("terraform", args...)
@@ -53,7 +56,7 @@ func StreamCommand(command string, args []string) error {
 	// Run terraform command
 	cmdErr := cmd.Start()
 	if cmdErr != nil {
-		streamSpinner.Fail()
+		// streamSpinner.Fail()
 		fmt.Println(errorSink.String())
 
 		comdb.PushComDBEvent(comdb.ComDBEvent{
@@ -73,9 +76,49 @@ func StreamCommand(command string, args []string) error {
 	applyScanner := bufio.NewScanner(outStream)
 	applyScanner.Split(bufio.ScanLines)
 
+	// progressWriter := color.Output
+	eventLog := ""
+	eventCount := 0
+	completeCount := 0
+	errorCount := 0
+
+	// Deactivate cursor
+	fmt.Print("\033[?25l")
+
+	ux.PrintFormatted("  → ", []string{"bold", "blue"})
+	fmt.Printf("Running → %s Completed / %s Errored", color.HiGreenString(strconv.Itoa(completeCount)), color.HiRedString(strconv.Itoa(errorCount)))
+
 	// While command line scan is running
 	for applyScanner.Scan() {
-		ProcessTerraformMessage(applyScanner.Text(), command)
+		event := ProcessTerraformMessage(applyScanner.Text(), command)
+		var eventString string
+
+		if event.Type == "complete" {
+			completeCount += 1
+			eventString = fmt.Sprintf("%s %s %s", color.HiGreenString("    ≡ "), event.Address, color.HiGreenString(" completed"))
+		}
+
+		if event.Type == "errored" {
+			errorCount += 1
+			eventString = fmt.Sprintf("%s %s %s", color.HiRedString("    ≡ "), event.Address, color.HiRedString(" errored"))
+		}
+
+		// fmt.Println(messageString)
+		if event.Address != "" && eventString != "" {
+			for line := 0; line <= eventCount; line++ {
+				fmt.Printf("\033[A")
+			}
+
+			fmt.Println()
+			eventCount += 1
+
+			ux.PrintFormatted("  → ", []string{"bold", "blue"})
+			fmt.Printf("Running → %s Completed / %s Errored", color.HiGreenString(strconv.Itoa(completeCount)), color.HiRedString(strconv.Itoa(errorCount)))
+			fmt.Printf("\033F")
+
+			eventLog += "\n" + eventString
+			fmt.Print(eventLog)
+		}
 	}
 
 	// Pull state with latest attributes
@@ -95,9 +138,12 @@ func StreamCommand(command string, args []string) error {
 		Received:  false,
 	})
 
-	streamSpinner.Success()
+	// streamSpinner.Success()
 
-	ux.PrintFormatted("\n✔ All Done\n", []string{"green", "bold"})
+	ux.PrintFormatted("\n\n✔ All Done\n", []string{"green", "bold"})
+
+	// Activate cursor
+	fmt.Print("\033[?25h")
 
 	return nil
 }
