@@ -16,6 +16,7 @@ func RunApply(command string, planPath string) error {
 
 	// Construct terraform args
 	terraformArgs := []string{
+		"apply",
 		"-auto-approve",
 		"-json",
 		"-input=false",

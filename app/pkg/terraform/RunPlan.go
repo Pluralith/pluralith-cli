@@ -21,6 +21,7 @@ func RunPlan(command string, userArgs []string, silent bool) (string, error) {
 
 	// Construct terraform args
 	terraformArgs := []string{
+		"plan",
 		"-input=false",
 		"-out=" + workingPlan,
 	}
@@ -52,7 +53,7 @@ func RunPlan(command string, userArgs []string, silent bool) (string, error) {
 	}
 
 	// Constructing command to execute
-	cmd := exec.Command("terraform", append([]string{"plan"}, terraformArgs...)...)
+	cmd := exec.Command("terraform", terraformArgs...)
 
 	// Defining sinks for std data
 	var outputSink bytes.Buffer

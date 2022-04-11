@@ -70,7 +70,7 @@ var graphCmd = &cobra.Command{
 		}
 
 		// Construct plan state path
-		planStatePath := filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith", "pluralith.state.stripped")
+		planStatePath := filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith", "pluralith.state.json")
 
 		// Check if plan state exists
 		_, existErr := os.Stat(planStatePath)    // Check if old state exists

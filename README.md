@@ -57,7 +57,7 @@ Until we manage to get into these package managers you can manually install the 
 
 - `pluralith strip`: Strips and hashes your plan state to make it shareable with us for debugging
   - Takes an existing **Pluralith Plan state** and subjects it to rigorous hashing of values
-    - The Pluralith Plan state is located in the file _pluralith.state.stripped_ in your project directory
+    - The Pluralith Plan state is located in the file _pluralith.state.json_ in your project directory
   - The purpose of this command is to strip the state of all sensitive data while keeping the structure intact, making it shareable
   - This is meant for us to debug edge cases on user state without the security hazard
 

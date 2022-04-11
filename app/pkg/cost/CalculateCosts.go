@@ -10,13 +10,22 @@ import (
 	"pluralith/pkg/ux"
 )
 
-func CalculateCost() {
-	costSpinner := ux.NewSpinner("Calculating infrastructure costs", "Costs calculated", "Couldn't calculate costs", true)
+func CalculateCost() error {
+	functionName := "CalculateCost"
+
+	costSpinner := ux.NewSpinner("Calculating Infrastructure Costs", "Costs Calculated", "Couldn't Calculate Costs", true)
 	costSpinner.Start()
 
-	planJsonPath := filepath.Join(auxiliary.StateInstance.WorkingPath, "pluralith.state.stripped")
+	planJsonPath := filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith", "pluralith.state.json")
 
-	costCmd := exec.Command("infracost", append([]string{"breakdown", "--path", planJsonPath, "--out-file", "cost.json", "--format", "json"})...)
+	infracostArgs := []string{
+		"breakdown",
+		"--path=" + planJsonPath,
+		"--out-file=.pluralith/pluralith.costs.json",
+		"--format=json",
+	}
+
+	costCmd := exec.Command("infracost", infracostArgs...)
 
 	// Defining sinks for std data
 	var outputSink bytes.Buffer
@@ -28,10 +37,11 @@ func CalculateCost() {
 	costCmd.Stdin = os.Stdin
 
 	if runErr := costCmd.Run(); runErr != nil {
-		fmt.Println(runErr)
-		fmt.Println(errorSink.String())
 		costSpinner.Fail()
+		fmt.Println(errorSink.String())
+		return fmt.Errorf("running infracost breakdown failed -> %v: %w", functionName, runErr)
 	}
 
 	costSpinner.Success()
+	return nil
 }

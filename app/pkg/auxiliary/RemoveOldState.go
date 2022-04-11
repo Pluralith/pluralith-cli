@@ -10,7 +10,7 @@ import (
 func RemoveOldState() error {
 	functionName := "RemoveOldState"
 
-	for _, file := range []string{"pluralith.plan", "pluralith.state.stripped", "pluralith.state.hashed"} {
+	for _, file := range []string{"pluralith.plan", "pluralith.state.json", "pluralith.state.hashed"} {
 		oldFilePath := filepath.Join(StateInstance.WorkingPath, file)
 
 		_, existErr := os.Stat(oldFilePath)       // Check if old state exists
