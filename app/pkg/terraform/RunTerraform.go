@@ -43,10 +43,10 @@ func RunTerraform(command string, tfArgs []string, costArgs []string) error {
 	}
 
 	// Launch Pluralith
-	// launchErr := auxiliary.LaunchPluralith()
-	// if launchErr != nil {
-	// 	return fmt.Errorf("launching Pluralith failed -> %v: %w", functionName, launchErr)
-	// }
+	launchErr := auxiliary.LaunchPluralith()
+	if launchErr != nil {
+		return fmt.Errorf("launching Pluralith failed -> %v: %w", functionName, launchErr)
+	}
 
 	// Run terraform plan to create execution plan
 	planPath, planErr := RunPlan(command, tfArgs, false)
@@ -60,8 +60,6 @@ func RunTerraform(command string, tfArgs []string, costArgs []string) error {
 			fmt.Println(costErr)
 		}
 	} else {
-		// ux.PrintFormatted("→ ", []string{"bold", "blue"})
-		// ux.PrintFormatted("Plan\n", []string{"bold", "white"})
 		ux.PrintFormatted("  -", []string{"blue", "bold"})
 		fmt.Println(" Cost Calculation Skipped\n")
 	}
