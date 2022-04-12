@@ -12,8 +12,8 @@ import (
 	"pluralith/pkg/auxiliary"
 )
 
-func HostExport(formFile string) (map[string]string, error) {
-	functionName := "LogExport"
+func PostRun(formFile string) (map[string]string, error) {
+	functionName := "PostRun"
 
 	var urls = make(map[string]string)
 
@@ -50,11 +50,13 @@ func HostExport(formFile string) (map[string]string, error) {
 	}
 	formWriter.Write([]byte("CLI"))
 
+	// http://localhost:8080/v1/run/post?projectId=638462405
+
 	// Close multipart writer
 	uploadWriter.Close()
 
 	// Construct request
-	request, _ := http.NewRequest("POST", "https://api.pluralith.com/v1/user/export/publish", uploadBody)
+	request, _ := http.NewRequest("POST", "https://api.pluralith.com/v1/run/post", uploadBody)
 	request.Header.Add("Authorization", "Bearer "+auxiliary.StateInstance.APIKey)
 	request.Header.Add("Content-Type", uploadWriter.FormDataContentType())
 

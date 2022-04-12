@@ -19,7 +19,7 @@ func GenerateComment(diagramPath string, changeActions map[string]interface{}) e
 	functionName := "preparePRComment"
 
 	// Upload diagram to storage for pull request comment hosting
-	urls, hostErr := HostExport(diagramPath)
+	urls, hostErr := PostRun(diagramPath)
 	if hostErr != nil {
 		return fmt.Errorf("hosting diagram for PR comment failed -> %v: %w", functionName, hostErr)
 	}
