@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os/exec"
 	"strconv"
+	"strings"
 	"time"
 
 	"pluralith/pkg/auxiliary"
@@ -15,15 +16,32 @@ import (
 	"github.com/fatih/color"
 )
 
+func PadEventLogs(address string, newEvent []string, eventLog *[][]string, currentPadding *int) {
+	// Adapt padding if necessary
+	if len(address) > *currentPadding {
+		*currentPadding = len(address) + 1
+	}
+
+	// Append new event
+	*eventLog = append(*eventLog, newEvent)
+
+	// Calculate padding for individual log lines
+	for _, log := range *eventLog {
+		// If current log's resource address is shorter than current padding -> Increase padding
+		if len(log[1]) < *currentPadding {
+			paddingLength := *currentPadding - len(log[1]) // Calculate new padding for current log line
+			log[2] = ""                                    // Reset previous padding
+
+			// Fill padding string ([2] in log slice) with padding spaces
+			for padding := 0; padding <= paddingLength; padding++ {
+				log[2] += " "
+			}
+		}
+	}
+}
+
 func StreamCommand(command string, tfArgs []string) error {
 	functionName := "StreamCommand"
-
-	// Instantiate spinners
-	streamSpinner := ux.NewSpinner("Apply Running", "Apply Completed", "Apply Failed", true)
-	// Adapting spinner to destroy command
-	if command == "destroy" {
-		streamSpinner = ux.NewSpinner("Destroy Running", "Destroy Completed", "Destroy Failed", true)
-	}
 
 	// Emit apply begin update to UI
 	comdb.PushComDBEvent(comdb.ComDBEvent{
@@ -34,8 +52,6 @@ func StreamCommand(command string, tfArgs []string) error {
 		Path:      auxiliary.StateInstance.WorkingPath,
 		Received:  false,
 	})
-
-	// streamSpinner.Start()
 
 	// Constructing command to execute
 	cmd := exec.Command("terraform", tfArgs...)
@@ -49,14 +65,12 @@ func StreamCommand(command string, tfArgs []string) error {
 	// Initiate standard output pipe
 	outStream, outErr := cmd.StdoutPipe()
 	if outErr != nil {
-		streamSpinner.Fail()
 		return fmt.Errorf("%v: %w", functionName, outErr)
 	}
 
 	// Run terraform command
 	cmdErr := cmd.Start()
 	if cmdErr != nil {
-		// streamSpinner.Fail()
 		fmt.Println(errorSink.String())
 
 		comdb.PushComDBEvent(comdb.ComDBEvent{
@@ -76,15 +90,14 @@ func StreamCommand(command string, tfArgs []string) error {
 	applyScanner := bufio.NewScanner(outStream)
 	applyScanner.Split(bufio.ScanLines)
 
-	// progressWriter := color.Output
-	eventLog := ""
-	eventCount := 0
+	eventLog := [][]string{}
+	eventPadding := 0
 
 	errorCount := 0
 	errorPrint := color.New(color.Bold, color.FgHiRed)
 
 	commandCount := 0
-	commandMode := "Completed"
+	commandMode := "Created"
 	commandModePrint := color.New(color.Bold, color.FgHiGreen)
 
 	if command == "destroy" {
@@ -92,49 +105,44 @@ func StreamCommand(command string, tfArgs []string) error {
 		commandModePrint = color.New(color.Bold, color.FgHiBlue)
 	}
 
-	// blueStyle := color.New(color.Bold, color.FgHiBlue)
-	// redStyle := color.New(color.Bold, color.FgHiRed)
-	// greenStyle :=
-
-	commandModePrint.Sprint(strconv.Itoa(commandCount))
-
 	// Deactivate cursor
 	fmt.Print("\033[?25l")
 
 	ux.PrintFormatted("  → ", []string{"bold", "blue"})
-	// commandCountString :=
 	fmt.Printf("Running → %s %s / %s Errored", commandModePrint.Sprint(strconv.Itoa(commandCount)), commandMode, errorPrint.Sprint(strconv.Itoa(errorCount)))
 
 	// While command line scan is running
 	for applyScanner.Scan() {
 		event := ProcessTerraformMessage(applyScanner.Text(), command)
-		var eventString string
+		logEvent := false
 
 		if event.Type == "complete" {
+			logEvent = true
 			commandCount += 1
-			eventString = fmt.Sprintf("%s %s %s", commandModePrint.Sprint("    ✔ "), event.Address, commandModePrint.Sprint(commandMode))
+			newEvent := []string{commandModePrint.Sprint("    ✔ "), event.Address, "", commandModePrint.Sprint(commandMode)}
+			PadEventLogs(event.Address, newEvent, &eventLog, &eventPadding)
 		}
 
 		if event.Type == "errored" {
+			logEvent = true
 			errorCount += 1
-			eventString = fmt.Sprintf("%s %s %s", errorPrint.Sprint("    ✘ "), event.Address, errorPrint.Sprint("Errored"))
+			newEvent := []string{errorPrint.Sprint("    ✘ "), event.Address, "", errorPrint.Sprint("Errored  ")}
+			PadEventLogs(event.Address, newEvent, &eventLog, &eventPadding)
 		}
 
 		// fmt.Println(messageString)
-		if event.Address != "" && eventString != "" {
-			for line := 0; line <= eventCount; line++ {
+		if event.Address != "" && logEvent {
+			for line := 1; line < len(eventLog); line++ {
 				fmt.Printf("\033[A")
 			}
 
-			fmt.Println()
-			eventCount += 1
-
-			ux.PrintFormatted("  → ", []string{"bold", "blue"})
+			ux.PrintFormatted("\r  → ", []string{"bold", "blue"})
 			fmt.Printf("Running → %s %s / %s Errored", commandModePrint.Sprint(strconv.Itoa(commandCount)), commandMode, errorPrint.Sprint(strconv.Itoa(errorCount)))
 			fmt.Printf("\033F")
 
-			eventLog += "\n" + eventString
-			fmt.Print(eventLog)
+			for _, log := range eventLog {
+				fmt.Print("\n" + strings.Join(log, ""))
+			}
 		}
 	}
 
