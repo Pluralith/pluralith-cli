@@ -157,6 +157,7 @@ func (S *State) CheckInfracost() {
 
 	if verifyErr := verifyCmd.Run(); verifyErr != nil {
 		S.Infracost = false
+		return
 	}
 
 	S.Infracost = true
