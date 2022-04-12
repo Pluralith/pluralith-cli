@@ -43,6 +43,12 @@ func PadEventLogs(address string, newEvent []string, eventLog *[][]string, curre
 func StreamCommand(command string, tfArgs []string) error {
 	functionName := "StreamCommand"
 
+	// Set command mode for prints
+	commandMode := "Apply"
+	if command == "destroy" {
+		commandMode = "Destroy"
+	}
+
 	// Emit apply begin update to UI
 	comdb.PushComDBEvent(comdb.ComDBEvent{
 		Receiver:  "UI",
@@ -65,12 +71,18 @@ func StreamCommand(command string, tfArgs []string) error {
 	// Initiate standard output pipe
 	outStream, outErr := cmd.StdoutPipe()
 	if outErr != nil {
+		ux.PrintFormatted("\n  ✘ ", []string{"bold", "red"})
+		fmt.Println(commandMode + " Failed")
+
 		return fmt.Errorf("%v: %w", functionName, outErr)
 	}
 
 	// Run terraform command
 	cmdErr := cmd.Start()
 	if cmdErr != nil {
+		ux.PrintFormatted("\n  ✘ ", []string{"bold", "red"})
+		fmt.Println(commandMode + " Failed")
+
 		fmt.Println(errorSink.String())
 
 		comdb.PushComDBEvent(comdb.ComDBEvent{
@@ -96,20 +108,20 @@ func StreamCommand(command string, tfArgs []string) error {
 	errorCount := 0
 	errorPrint := color.New(color.Bold, color.FgHiRed)
 
-	commandCount := 0
-	commandMode := "Created"
-	commandModePrint := color.New(color.Bold, color.FgHiGreen)
+	successCount := 0
+	successMode := "Created"
+	successPrint := color.New(color.Bold, color.FgHiGreen)
 
 	if command == "destroy" {
-		commandMode = "Destroyed"
-		commandModePrint = color.New(color.Bold, color.FgHiBlue)
+		successMode = "Destroyed"
+		successPrint = color.New(color.Bold, color.FgHiBlue)
 	}
 
 	// Deactivate cursor
 	fmt.Print("\033[?25l")
 
 	ux.PrintFormatted("  → ", []string{"bold", "blue"})
-	fmt.Printf("Running → %s %s / %s Errored", commandModePrint.Sprint(strconv.Itoa(commandCount)), commandMode, errorPrint.Sprint(strconv.Itoa(errorCount)))
+	fmt.Printf("Running → %s %s / %s Errored", successPrint.Sprint(strconv.Itoa(successCount)), successMode, errorPrint.Sprint(strconv.Itoa(errorCount)))
 
 	// While command line scan is running
 	for applyScanner.Scan() {
@@ -118,8 +130,8 @@ func StreamCommand(command string, tfArgs []string) error {
 
 		if event.Type == "complete" {
 			logEvent = true
-			commandCount += 1
-			newEvent := []string{commandModePrint.Sprint("    ✔ "), event.Address, "", commandModePrint.Sprint(commandMode)}
+			successCount += 1
+			newEvent := []string{successPrint.Sprint("    ✔ "), event.Address, "", successPrint.Sprint(successMode)}
 			PadEventLogs(event.Address, newEvent, &eventLog, &eventPadding)
 		}
 
@@ -137,7 +149,7 @@ func StreamCommand(command string, tfArgs []string) error {
 			}
 
 			ux.PrintFormatted("\r  → ", []string{"bold", "blue"})
-			fmt.Printf("Running → %s %s / %s Errored", commandModePrint.Sprint(strconv.Itoa(commandCount)), commandMode, errorPrint.Sprint(strconv.Itoa(errorCount)))
+			fmt.Printf("Running → %s %s / %s Errored", successPrint.Sprint(strconv.Itoa(successCount)), successMode, errorPrint.Sprint(strconv.Itoa(errorCount)))
 			fmt.Printf("\033F")
 
 			for _, log := range eventLog {
@@ -149,6 +161,9 @@ func StreamCommand(command string, tfArgs []string) error {
 	// Pull state with latest attributes
 	latestState, pullErr := PullState()
 	if pullErr != nil {
+		ux.PrintFormatted("\n  ✘ ", []string{"bold", "red"})
+		fmt.Println(commandMode + " Failed")
+
 		return fmt.Errorf("pulling terraform state failed -> %v: %w", functionName, pullErr)
 	}
 
@@ -163,9 +178,10 @@ func StreamCommand(command string, tfArgs []string) error {
 		Received:  false,
 	})
 
-	// streamSpinner.Success()
+	ux.PrintFormatted("\n  ✔ ", []string{"bold", "blue"})
+	fmt.Println(commandMode + " Completed")
 
-	ux.PrintFormatted("\n\n✔ All Done\n", []string{"green", "bold"})
+	ux.PrintFormatted("\n✔ All Done\n", []string{"green", "bold"})
 
 	// Activate cursor
 	fmt.Print("\033[?25h")
