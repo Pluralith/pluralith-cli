@@ -13,22 +13,23 @@ import (
 	"time"
 )
 
-func RunPlan(command string, userArgs []string, silent bool) (string, error) {
+func RunPlan(command string, tfArgs []string, silent bool) (string, error) {
 	functionName := "RunPlan"
 
 	// Constructing execution plan path
 	workingPlan := filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith", "pluralith.plan.bin")
 
 	// Construct terraform args
-	terraformArgs := []string{
+	allArgs := []string{
+		"plan",
 		"-input=false",
 		"-out=" + workingPlan,
 	}
 
-	terraformArgs = append(terraformArgs, userArgs...)
+	allArgs = append(allArgs, tfArgs...)
 
 	if command == "destroy" {
-		terraformArgs = append(terraformArgs, "-destroy")
+		allArgs = append(allArgs, "-destroy")
 	}
 
 	ux.PrintFormatted("→", []string{"blue", "bold"})
@@ -52,7 +53,7 @@ func RunPlan(command string, userArgs []string, silent bool) (string, error) {
 	}
 
 	// Constructing command to execute
-	cmd := exec.Command("terraform", append([]string{"plan"}, terraformArgs...)...)
+	cmd := exec.Command("terraform", allArgs...)
 
 	// Defining sinks for std data
 	var outputSink bytes.Buffer

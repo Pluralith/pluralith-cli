@@ -2,16 +2,30 @@
 
 # Pluralith CLI
 
-Pluralith is a tool to visualize your Terraform state and automate infrastructure documentation. The **Pluralith CLI** is a tool written in **`go`** to:
+Pluralith is a tool to visualize your Terraform state and automate infrastructure documentation.
+
+`Pluralith is currently in Private Alpha`
+
+&nbsp;
+
+## ⚡ Highlights
+
+- Create beautiful `infrastructure diagrams` with one single command: `pluralith plan` 
+- Highlight current plan `changes` in the diagram  
+- Detect and visualise infrastructure `drift`
+- Visualise the `cost` of your infrastructure in the diagram (via Infracost)  
+- Do all of the above in complete automation `in CI pipelines` 
+
+&nbsp;
+
+![flow-illustration](https://user-images.githubusercontent.com/25454503/157021111-816c9936-3232-455f-9709-c3a65f5f8dfe.svg)
+
+The **Pluralith CLI** is a tool written in **`Go`** to:
 
 - Integrate Pluralith with Terraform
 - Interact with the **[Pluralith UI](https://www.pluralith.com)**
 - Run Pluralith in **Pipelines** for automated infrastructure documentation
 - Ship other useful little features
-
-![flow-illustration](https://user-images.githubusercontent.com/25454503/157021111-816c9936-3232-455f-9709-c3a65f5f8dfe.svg)
-
-`Pluralith is currently in Private Alpha`
 
 &nbsp;
 
@@ -31,6 +45,15 @@ Until we manage to get into these package managers you can manually install the 
 - `pluralith apply`: Essentially the same as `pluralith plan` with the intention of actually applying the execution plan<sup>1</sup>.
 - `pluralith destroy`: Creates a Terraform execution plan in destroy mode and opens it as a Diagram in the **Pluralith UI**
 
+All three of the above commands share the same flags:  
+- `pluralith plan | apply | destroy`:
+  - `--var`: Specify a variable to pass to Terraform. Can be specified multiple times. (Format: --var='NAME=VALUE')
+  - `--var-file`: Specify a path to a var file to pass to Terraform. Can be specified multiple times.
+  - `--cost-usage-file`: Specify a path to an infracost usage file to be used for the cost breakdown.
+  - `--no-costs`: Turn off internal `infracost breakdown` on current run
+
+&nbsp;
+
 ### → Diagram Export Command
 
 - `pluralith graph`: Creates a Terraform execution plan, draws a graph and exports it as a PDF in a headless way<sup>2</sup>
@@ -45,7 +68,11 @@ Until we manage to get into these package managers you can manually install the 
     - Saved to current directory by default
   - `--file-name`: The path your exported diagram PDF gets saved to
     - The value passed for `--title` is used by default
-  - `--generate-md`: Generates markdown for GitHub pull request / commit comment _(used in our [Pluralith GitHub actions](https://github.com/Pluralith/actions))_
+  - `--generate-md`: Generates markdown for GitHub pull request / commit comment _(used in our [Pluralith GitHub actions](https://github.com/Pluralith/actions))
+  - `--var`: Specify a variable to pass to Terraform. Can be specified multiple times. (Format: --var='NAME=VALUE')
+  - `--var-file`: Specify a path to a var file to pass to Terraform. Can be specified multiple times.
+  - `--cost-usage-file`: Specify a path to an infracost usage file to be used for the cost breakdown.
+  - `--no-costs`: Turn off internal `infracost breakdown` on current run
 
 &nbsp;
 
@@ -53,19 +80,25 @@ Until we manage to get into these package managers you can manually install the 
 
 ![HighlyAvailableIaaS](https://user-images.githubusercontent.com/25454503/157020490-8dadf7a2-ccb6-4323-a5d1-596d264bb06e.png)
 
+&nbsp;
+
 ### → Strip Command
 
 - `pluralith strip`: Strips and hashes your plan state to make it shareable with us for debugging
   - Takes an existing **Pluralith Plan state** and subjects it to rigorous hashing of values
-    - The Pluralith Plan state is located in the file _pluralith.state.stripped_ in your project directory
+    - The Pluralith Plan state is located in the file _pluralith.state.json_ in your project directory
   - The purpose of this command is to strip the state of all sensitive data while keeping the structure intact, making it shareable
   - This is meant for us to debug edge cases on user state without the security hazard
+
+&nbsp;
 
 ### → Module Commands
 
 - `pluralith install`: Installs/updates the specific module whose name is passed (e.g. `pluralith install graph-module`)
 - `pluralith update`: Essentially the same as `install`. Updates existing modules, if not installed it downloads the latest release
   - If no value is passed, the latest version of the CLI itself will be installed
+
+&nbsp;
 
 ### → Utility Commands
 
@@ -76,6 +109,21 @@ Until we manage to get into these package managers you can manually install the 
 
 <sup>1</sup> The UI then shows a prompt that lets you confirm or deny an `apply` with hotkeys.  
 <sup>2</sup> You need to be authenticated with your **API key** via `pluralith login`. Currently only available for closed alpha testers. Interested? Shoot us an email dan@pluralith.com
+
+&nbsp;
+
+## 💰 Infracost Integration
+
+**`Coming Soon`**
+
+Pluralith shows you cost information directly in your infrastructure diagram. We automatically detect any Infracost installation and run `infracost breakdown` under the hood on every plan. We then match the cost data with the resources in the diagram and show you how much you'll pay. You can select from an array of cost modes:
+  - `Total Mode`: Shows the total cost for each individual resource
+  - `Diff Mode`: Shows the difference in costs for each individual resource in your current plan
+  - `Spike Mode`: Highlights only resources whose costs have increased in your current plan
+
+The `plan`, `apply`, `destroy` and `graph` integrate Infracost:
+  - `--cost-usage-file`: Lets you pass a usage file in YML format as generated by infracost
+  - `--no-costs`: Lets you skip the infracost step on the current run
 
 &nbsp;
 

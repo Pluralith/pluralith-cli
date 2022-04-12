@@ -15,15 +15,18 @@ func RunApply(command string, planPath string) error {
 	functionName := "RunApply"
 
 	// Construct terraform args
-	terraformArgs := []string{
+	allArgs := []string{
+		"apply",
 		"-auto-approve",
 		"-json",
 		"-input=false",
 	}
 
 	if command == "destroy" {
-		terraformArgs = append(terraformArgs, "-destroy")
+		allArgs = append(allArgs, "-destroy")
 	}
+
+	allArgs = append(allArgs, planPath)
 
 	ux.PrintFormatted("→", []string{"blue", "bold"})
 	ux.PrintFormatted(strings.Join([]string{" ", strings.Title(command)}, ""), []string{"white", "bold"})
@@ -75,7 +78,7 @@ func RunApply(command string, planPath string) error {
 			command = "apply"
 		}
 
-		streamErr := stream.StreamCommand(command, terraformArgs)
+		streamErr := stream.StreamCommand(command, allArgs)
 		if streamErr != nil {
 			return fmt.Errorf("streaming terraform command output failed -> %v: %w", functionName, streamErr)
 		}

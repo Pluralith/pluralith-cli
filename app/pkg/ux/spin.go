@@ -73,5 +73,5 @@ func (s Spin) Fail(customMessage ...string) {
 	// Stopping base spinner
 	s.instance.Stop()
 	// Printing custom failure message
-	fmt.Printf("%s%s %s\n", s.instance.Prefix, PrintRed("✖️"), message)
+	fmt.Printf("%s%s %s\n", s.instance.Prefix, PrintRed("✘"), message)
 }

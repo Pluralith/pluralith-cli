@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"pluralith/pkg/ci"
 
@@ -23,6 +24,7 @@ type State struct {
 	IsWSL         bool
 	IsCI          bool
 	TerraformInit bool
+	Infracost     bool
 }
 
 // Produce relevant paths to be used across the application
@@ -147,6 +149,18 @@ func (S *State) CheckTerraformInit() {
 	} else {
 		S.TerraformInit = false
 	}
+}
+
+// Check if Infracost is installed
+func (S *State) CheckInfracost() {
+	verifyCmd := exec.Command("infracost", "--version")
+
+	if verifyErr := verifyCmd.Run(); verifyErr != nil {
+		S.Infracost = false
+		return
+	}
+
+	S.Infracost = true
 }
 
 var StateInstance = &State{}
