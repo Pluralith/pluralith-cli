@@ -31,31 +31,11 @@ var loginCmd = &cobra.Command{
 			fmt.Print(" Enter API Key: ")
 
 			// Capture user input
-			// var APIKey string
 			fmt.Scanln(&APIKey)
 		}
 
-		verificationSpinner := ux.NewSpinner("Verifying your API key", "Your API key is valid, you are logged in!\n", "API key verification failed\n", false)
-		verificationSpinner.Start()
-
-		// Verify API key with backend
-		isValid, verifyErr := auth.VerifyAPIKey(APIKey)
-		if verifyErr != nil {
-			fmt.Println(fmt.Errorf("verifying API key failed -> %w", verifyErr))
-			return
-		}
-
-		if isValid {
-			// Set API key in credentials file at ~/Pluralith/credentials
-			setErr := auth.SetAPIKey(APIKey)
-			if setErr != nil {
-				verificationSpinner.Fail("Could not write to credentials file\n")
-				fmt.Println(fmt.Errorf("setting API key in credentials file failed -> %w", setErr))
-				return
-			}
-			verificationSpinner.Success()
-		} else {
-			verificationSpinner.Fail("The passed API key is invalid, try again!\n")
+		if _, loginErr := auth.RunLogin(APIKey); loginErr != nil {
+			fmt.Println(fmt.Errorf("failed to authenticate you -> %w", loginErr))
 		}
 	},
 }
