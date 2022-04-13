@@ -42,5 +42,5 @@ var loginCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(loginCmd)
-	loginCmd.PersistentFlags().String("api-key", "", "The Pluralith API key passed directly, skips user prompt (for automation)")
+	loginCmd.PersistentFlags().String("api-key", "", "Your Pluralith API key passed directly, to skip user prompt (for automation)")
 }

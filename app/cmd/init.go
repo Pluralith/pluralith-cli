@@ -2,9 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
-	"pluralith/pkg/auth"
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/initialization"
 	"pluralith/pkg/ux"
@@ -21,52 +18,39 @@ var initCmd = &cobra.Command{
 		ux.PrintHead()
 
 		fmt.Print("Welcome to ")
-		ux.PrintFormatted("Pluralith!\n", []string{"blue"})
-		fmt.Println("Lets set up your project and get you up and running.\n")
+		ux.PrintFormatted("Pluralith!\n\n", []string{"blue"})
 
-		var APIKey string
-		var ProjectId int
+		APIKey := auxiliary.StateInstance.APIKey
+		projectId := ""
 
-		if auxiliary.StateInstance.APIKey == "" {
-			ux.PrintFormatted("⠿ ", []string{"blue"})
-			fmt.Println("We noticed you are not authenticated!")
-			ux.PrintFormatted("→", []string{"blue", "bold"})
-			fmt.Print(" Enter your API Key: ")
-
-			// Capture user input
-			// var APIKey string
-			fmt.Scanln(&APIKey)
-			loginValid, loginErr := auth.RunLogin(APIKey)
-			if !loginValid {
-				return
-			}
-			if loginErr != nil {
-				fmt.Println(loginErr)
-			}
-		}
-
-		ux.PrintFormatted("→", []string{"blue", "bold"})
-		fmt.Print(" Enter Project Id: ")
-
-		// Capture user input
-		fmt.Scanln(&ProjectId)
-
-		configPath := filepath.Join(auxiliary.StateInstance.WorkingPath, "pluralith.yml")
-		configString := fmt.Sprintf(initialization.ConfigTemplate, ProjectId)
-
-		helperWriteErr := os.WriteFile(configPath, []byte(configString), 0700)
-		if helperWriteErr != nil {
-			fmt.Println(fmt.Errorf("failed to create config template -> %w", helperWriteErr))
+		// Get flag values
+		isEmpty, emptyError := cmd.Flags().GetBool("empty")
+		if emptyError != nil {
+			fmt.Println(fmt.Errorf("reading flag failed -> %w", emptyError))
 			return
 		}
 
-		ux.PrintFormatted("  ✔", []string{"blue", "bold"})
-		fmt.Print(" Your project has been initialized! Customize your config in ")
-		ux.PrintFormatted("pluralith.yml\n\n", []string{"blue"})
+		APIKey, APIKeyError := cmd.Flags().GetString("api-key")
+		if APIKeyError != nil {
+			fmt.Println(fmt.Errorf("reading flag failed -> %w", APIKeyError))
+			return
+		}
 
+		projectId, projectIdErr := cmd.Flags().GetString("project-id")
+		if APIKeyError != nil {
+			fmt.Println(fmt.Errorf("reading flag failed -> %w", projectIdErr))
+			return
+		}
+
+		if initErr := initialization.RunInit(isEmpty, APIKey, projectId); initErr != nil {
+			fmt.Println(fmt.Errorf("pluralith init failed -> %w", initErr))
+		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(initCmd)
+	initCmd.PersistentFlags().String("api-key", "", "Your Pluralith API key passed directly, to skip user prompt (for automation)")
+	initCmd.PersistentFlags().String("project-id", "", "Your project id passed directly, to skip user prompt (for automation)")
+	initCmd.PersistentFlags().Bool("empty", false, "Creates an empty pluralith.yml config file in the current directory")
 }
