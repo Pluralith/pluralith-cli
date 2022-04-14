@@ -34,7 +34,7 @@ func RunInit(isEmpty bool, APIKey string, projectId string) error {
 			return nil
 		}
 		if loginErr != nil {
-			fmt.Println(loginErr)
+			return fmt.Errorf("failed to authenticate -> %v: %w", functionName, loginErr)
 		}
 	}
 
@@ -44,6 +44,15 @@ func RunInit(isEmpty bool, APIKey string, projectId string) error {
 
 		// Capture user input
 		fmt.Scanln(&projectId)
+
+		projectValid, projectErr := auth.VerifyProject(projectId)
+		if !projectValid {
+			return nil
+		}
+		if projectErr != nil {
+			return fmt.Errorf("failed to verify project id -> %v: %w", functionName, projectErr)
+		}
+
 		fmt.Print("  ") // Formatting gimmick
 	}
 

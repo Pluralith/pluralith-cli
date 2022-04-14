@@ -26,7 +26,7 @@ func VerifyAPIKey(APIKey string, silent bool) (bool, error) {
 		return false, fmt.Errorf("%v: %w", functionName, responseErr)
 	}
 
-	// Hande verification response
+	// Handle verification response
 	if response.StatusCode == 200 {
 		if !silent {
 			verificationSpinner.Success()
