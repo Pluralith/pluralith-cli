@@ -15,25 +15,19 @@ import (
 	"strings"
 )
 
-func GenerateComment(diagramPath string, changeActions map[string]interface{}) error {
+func GenerateComment(urls map[string]string, changeActions map[string]interface{}) error {
 	functionName := "preparePRComment"
-
-	// Upload diagram to storage for pull request comment hosting
-	urls, hostErr := PostRun(diagramPath)
-	if hostErr != nil {
-		return fmt.Errorf("hosting diagram for PR comment failed -> %v: %w", functionName, hostErr)
-	}
 
 	// Generate pull request comment markdown
 	commentMD, commentErr := ci.GenerateMD(urls, changeActions)
 	if commentErr != nil {
-		return fmt.Errorf("generating PR comment markdown failed -> %v: %w", functionName, hostErr)
+		return fmt.Errorf("generating PR comment markdown failed -> %v: %w", functionName, commentErr)
 	}
 
 	// Write markdown to file system for usage by pipeline
-	commentPath := filepath.Join(filepath.Dir(diagramPath), "comment.md")
+	commentPath := filepath.Join(auxiliary.StateInstance.WorkingPath, "comment.md")
 	if writeErr := os.WriteFile(commentPath, []byte(commentMD), 0700); writeErr != nil {
-		return fmt.Errorf("writing PR comment markdown to filesystem failed -> %v: %w", functionName, hostErr)
+		return fmt.Errorf("writing PR comment markdown to filesystem failed -> %v: %w", functionName, writeErr)
 	}
 
 	return nil
@@ -98,14 +92,28 @@ func ExportDiagram(diagramValues map[string]interface{}) error {
 
 	// If environment is CI or --generate-md is set -> Host exported diagram and generate PR comment markdown
 	if auxiliary.StateInstance.IsCI || diagramValues["GenerateMd"].(bool) {
-		if prErr := GenerateComment(exportPath, changeActions); prErr != nil {
+		if auxiliary.StateInstance.PluralithConfig.ProjectId == "" {
+			ux.PrintFormatted("\n✘", []string{"red", "bold"})
+			fmt.Print(" No project ID set → Run ")
+			ux.PrintFormatted("pluralith init", []string{"blue"})
+			fmt.Println(" or provide a valid config\n")
+			return nil
+		}
+		// Upload diagram to storage for pull request comment hosting
+		urls, hostErr := PostRun(exportPath)
+		if hostErr != nil {
+			return fmt.Errorf("hosting diagram for PR comment failed -> %v: %w", functionName, hostErr)
+		}
+
+		if prErr := GenerateComment(urls, changeActions); prErr != nil {
 			return fmt.Errorf("handling pull request update failed -> %v: %w", functionName, prErr)
 		}
-	} else {
-		if logErr := LogExport(); logErr != nil {
-			return fmt.Errorf("logging diagram export failed -> %v: %w", functionName, logErr)
-		}
 	}
+	// else {
+	// 	if logErr := LogExport(); logErr != nil {
+	// 		return fmt.Errorf("logging diagram export failed -> %v: %w", functionName, logErr)
+	// 	}
+	// }
 
 	exportSpinner.Success()
 	ux.PrintFormatted("  → ", []string{"blue"})

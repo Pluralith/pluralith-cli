@@ -36,21 +36,12 @@ func PostRun(formFile string) (map[string]string, error) {
 	readAll, _ := io.ReadAll(diagramExport)
 	formWriter.Write(readAll)
 
-	// field: "id"
-	formWriter, formErr = uploadWriter.CreateFormField("id")
-	if formErr != nil {
-		return urls, fmt.Errorf("%v: %w", functionName, formErr)
-	}
-	formWriter.Write([]byte("hant"))
-
 	// field: "source"
 	formWriter, formErr = uploadWriter.CreateFormField("source")
 	if formErr != nil {
 		return urls, fmt.Errorf("%v: %w", functionName, formErr)
 	}
-	formWriter.Write([]byte("CLI"))
-
-	// http://localhost:8080/v1/run/post?projectId=638462405
+	formWriter.Write([]byte("CI"))
 
 	// Close multipart writer
 	uploadWriter.Close()
@@ -59,6 +50,11 @@ func PostRun(formFile string) (map[string]string, error) {
 	request, _ := http.NewRequest("POST", "https://api.pluralith.com/v1/run/post", uploadBody)
 	request.Header.Add("Authorization", "Bearer "+auxiliary.StateInstance.APIKey)
 	request.Header.Add("Content-Type", uploadWriter.FormDataContentType())
+
+	// Add project id query string
+	queryString := request.URL.Query()
+	queryString.Add("projectId", auxiliary.StateInstance.PluralithConfig.ProjectId)
+	request.URL.RawQuery = queryString.Encode()
 
 	// Instantiate client and execute request
 	client := &http.Client{}
@@ -85,7 +81,7 @@ func PostRun(formFile string) (map[string]string, error) {
 
 	dataObject := bodyObject["data"].(map[string]interface{})
 
-	urls["PDF"] = dataObject["pdfURL"].(string) // = bodyObject["data"].(structs.ExportURLs)
-	urls["PNG"] = dataObject["pngURL"].(string)
+	urls["pluralithURL"] = dataObject["pluralithURL"].(string) // = bodyObject["data"].(structs.ExportURLs)
+	urls["thumbnailURL"] = dataObject["pngURL"].(string)
 	return urls, nil
 }
