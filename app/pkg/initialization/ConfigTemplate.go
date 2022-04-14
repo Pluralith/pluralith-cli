@@ -13,7 +13,7 @@ var ConfigTemplate = `
 
 project_id: %d
 # config:
-#   senitive_attrs:
+#   sensitive_attrs:
 #     - "attribute_name"
 #     - "attribute_name"
 #   vars:
@@ -43,7 +43,7 @@ var EmtpyConfig = `
 
 # project_id: null
 # config:
-#   senitive_attrs:
+#   sensitive_attrs:
 #     - "attribute_name"
 #     - "attribute_name"
 #   vars:
