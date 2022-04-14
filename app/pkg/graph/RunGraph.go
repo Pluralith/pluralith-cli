@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"pluralith/pkg/auth"
 	"pluralith/pkg/auxiliary"
+	"pluralith/pkg/cost"
 	"pluralith/pkg/install/components"
 	"pluralith/pkg/terraform"
 	"pluralith/pkg/ux"
@@ -47,6 +48,16 @@ func RunGraph(tfArgs []string, costArgs []string, exportArgs map[string]interfac
 		ux.PrintFormatted("Plan\n", []string{"bold", "white"})
 		ux.PrintFormatted("  -", []string{"blue", "bold"})
 		fmt.Println(" Skipped\n")
+	}
+
+	// Run infracost
+	if auxiliary.StateInstance.Infracost {
+		if costErr := cost.CalculateCost(costArgs); costErr != nil {
+			fmt.Println(costErr)
+		}
+	} else {
+		ux.PrintFormatted("  -", []string{"blue", "bold"})
+		fmt.Println(" Cost Calculation Skipped\n")
 	}
 
 	// Construct plan state path
