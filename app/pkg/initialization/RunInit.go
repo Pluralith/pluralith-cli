@@ -9,11 +9,12 @@ import (
 func RunInit(isEmpty bool, APIKey string, projectId string) error {
 	functionName := "RunInit"
 
-	if !isEmpty && APIKey == "" && projectId == "" {
+	if !isEmpty && projectId == "" {
 		fmt.Println("Lets set up your project and get you up and running.\n")
 	}
 
 	if isEmpty {
+		fmt.Println()
 		if writeErr := WriteConfig(projectId); writeErr != nil {
 			return fmt.Errorf("failed to create config template -> %v: %w", functionName, writeErr)
 		}

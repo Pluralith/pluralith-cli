@@ -18,9 +18,9 @@ var initCmd = &cobra.Command{
 		ux.PrintHead()
 
 		fmt.Print("Welcome to ")
-		ux.PrintFormatted("Pluralith!\n\n", []string{"blue"})
+		ux.PrintFormatted("Pluralith!\n", []string{"blue"})
 
-		APIKey := auxiliary.StateInstance.APIKey
+		APIKey := ""
 		projectId := ""
 
 		// Get flag values
@@ -34,6 +34,11 @@ var initCmd = &cobra.Command{
 		if APIKeyError != nil {
 			fmt.Println(fmt.Errorf("reading flag failed -> %w", APIKeyError))
 			return
+		}
+
+		// If no API key is passed, set to existing API key value in state (can be "" as well)
+		if APIKey == "" {
+			APIKey = auxiliary.StateInstance.APIKey
 		}
 
 		projectId, projectIdErr := cmd.Flags().GetString("project-id")
