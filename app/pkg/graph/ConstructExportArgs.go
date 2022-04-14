@@ -16,17 +16,31 @@ func ConstructExportArgs(flags *pflag.FlagSet) (map[string]interface{}, error) {
 
 	exportArgs := make(map[string]interface{})
 
-	// Get variable values that are relevant for input
-	exportArgs["Title"], _ = flags.GetString("title")
-	exportArgs["Author"], _ = flags.GetString("author")
-	exportArgs["Version"], _ = flags.GetString("version")
+	// Set variable values according to config export object if given
+	exportArgs["Title"] = auxiliary.StateInstance.PluralithConfig.Export.Title
+	exportArgs["Author"] = auxiliary.StateInstance.PluralithConfig.Export.Author
+	exportArgs["Version"] = auxiliary.StateInstance.PluralithConfig.Export.Version
+
+	// Get variable values that are relevant for input (override config values if flags are explicitly set)
+	flagTitle, _ := flags.GetString("title")
+	if flagTitle != "" {
+		exportArgs["Title"] = flagTitle
+	}
+	flagAuthor, _ := flags.GetString("author")
+	if flagAuthor != "" {
+		exportArgs["Author"] = flagAuthor
+	}
+	flagVersion, _ := flags.GetString("version")
+	if flagVersion != "" {
+		exportArgs["Version"] = flagVersion
+	}
 
 	// Print UX head
 	ux.PrintFormatted("⠿", []string{"blue", "bold"})
 	if exportArgs["Title"] == "" && exportArgs["Author"] == "" && exportArgs["Version"] == "" {
 		fmt.Println(" Exporting Diagram ⇢ Specify details below")
 	} else {
-		fmt.Println(" Exporting Diagram ⇢ Details taken from flags")
+		fmt.Println(" Exporting Diagram ⇢ Details taken from flags or config")
 	}
 
 	// Read all missing diagram values from stdin

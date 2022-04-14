@@ -17,7 +17,7 @@ func RunGraph(tfArgs []string, costArgs []string, exportArgs map[string]interfac
 	functionName := "RunGraph"
 
 	// Verify API key with backend
-	isValid, verifyErr := auth.VerifyAPIKey(auxiliary.StateInstance.APIKey)
+	isValid, verifyErr := auth.VerifyAPIKey(auxiliary.StateInstance.APIKey, true)
 	if verifyErr != nil {
 		return fmt.Errorf("verifying API key failed -> %v: %w", functionName, verifyErr)
 	}

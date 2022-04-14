@@ -6,7 +6,7 @@ func RunLogin(APIKey string) (bool, error) {
 	functionName := "RunLogin"
 
 	// Verify API key with backend
-	isValid, verifyErr := VerifyAPIKey(APIKey)
+	isValid, verifyErr := VerifyAPIKey(APIKey, false)
 	if verifyErr != nil {
 		return false, fmt.Errorf("verifying API key failed -> %v: %w", functionName, verifyErr)
 	}
