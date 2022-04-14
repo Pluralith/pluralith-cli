@@ -12,10 +12,16 @@ import (
 	"pluralith/pkg/auxiliary"
 )
 
-func PostRun(formFile string) (map[string]string, error) {
+func PostRun(formFile string, changes map[string]interface{}) (map[string]string, error) {
 	functionName := "PostRun"
 
 	var urls = make(map[string]string)
+
+	// Stringify changes map
+	changesString, marshalErr := json.MarshalIndent(changes, "", "")
+	if marshalErr != nil {
+		return urls, fmt.Errorf("%v: %w", functionName, marshalErr)
+	}
 
 	// Open form file
 	diagramExport, openErr := os.Open(formFile)
@@ -42,6 +48,13 @@ func PostRun(formFile string) (map[string]string, error) {
 		return urls, fmt.Errorf("%v: %w", functionName, formErr)
 	}
 	formWriter.Write([]byte("CI"))
+
+	// field: "changes"
+	formWriter, formErr = uploadWriter.CreateFormField("changes")
+	if formErr != nil {
+		return urls, fmt.Errorf("%v: %w", functionName, formErr)
+	}
+	formWriter.Write([]byte(changesString))
 
 	// Close multipart writer
 	uploadWriter.Close()
@@ -82,6 +95,6 @@ func PostRun(formFile string) (map[string]string, error) {
 	dataObject := bodyObject["data"].(map[string]interface{})
 
 	urls["pluralithURL"] = dataObject["pluralithURL"].(string) // = bodyObject["data"].(structs.ExportURLs)
-	urls["thumbnailURL"] = dataObject["pngURL"].(string)
+	urls["thumbnailURL"] = dataObject["thumbnailURL"].(string)
 	return urls, nil
 }

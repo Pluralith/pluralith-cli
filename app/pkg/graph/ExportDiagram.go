@@ -100,7 +100,7 @@ func ExportDiagram(diagramValues map[string]interface{}) error {
 			return nil
 		}
 		// Upload diagram to storage for pull request comment hosting
-		urls, hostErr := PostRun(exportPath)
+		urls, hostErr := PostRun(exportPath, changeActions)
 		if hostErr != nil {
 			return fmt.Errorf("hosting diagram for PR comment failed -> %v: %w", functionName, hostErr)
 		}
