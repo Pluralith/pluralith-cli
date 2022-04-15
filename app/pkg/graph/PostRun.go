@@ -12,21 +12,13 @@ import (
 	"pluralith/pkg/auxiliary"
 )
 
-func PostRun(formFile string, changes map[string]interface{}) (map[string]string, error) {
+func PostRun(formFile string) (map[string]interface{}, error) {
 	functionName := "PostRun"
-
-	var urls = make(map[string]string)
-
-	// Stringify changes map
-	changesString, marshalErr := json.MarshalIndent(changes, "", "")
-	if marshalErr != nil {
-		return urls, fmt.Errorf("%v: %w", functionName, marshalErr)
-	}
 
 	// Open form file
 	diagramExport, openErr := os.Open(formFile)
 	if openErr != nil {
-		return urls, fmt.Errorf("%v: %w", functionName, openErr)
+		return nil, fmt.Errorf("%v: %w", functionName, openErr)
 	}
 
 	// Initialize multipart writer
@@ -37,30 +29,17 @@ func PostRun(formFile string, changes map[string]interface{}) (map[string]string
 	// file: "pdf"
 	formWriter, formErr := uploadWriter.CreateFormFile("pdf", formFile)
 	if formErr != nil {
-		return urls, fmt.Errorf("%v: %w", functionName, formErr)
+		return nil, fmt.Errorf("%v: %w", functionName, formErr)
 	}
 	readAll, _ := io.ReadAll(diagramExport)
 	formWriter.Write(readAll)
-
-	// field: "source"
-	formWriter, formErr = uploadWriter.CreateFormField("source")
-	if formErr != nil {
-		return urls, fmt.Errorf("%v: %w", functionName, formErr)
-	}
-	formWriter.Write([]byte("CI"))
-
-	// field: "changes"
-	formWriter, formErr = uploadWriter.CreateFormField("changes")
-	if formErr != nil {
-		return urls, fmt.Errorf("%v: %w", functionName, formErr)
-	}
-	formWriter.Write([]byte(changesString))
 
 	// Close multipart writer
 	uploadWriter.Close()
 
 	// Construct request
 	request, _ := http.NewRequest("POST", "https://api.pluralith.com/v1/run/post", uploadBody)
+	// request, _ := http.NewRequest("POST", "http://localhost:8080/v1/run/post", uploadBody)
 	request.Header.Add("Authorization", "Bearer "+auxiliary.StateInstance.APIKey)
 	request.Header.Add("Content-Type", uploadWriter.FormDataContentType())
 
@@ -73,28 +52,26 @@ func PostRun(formFile string, changes map[string]interface{}) (map[string]string
 	client := &http.Client{}
 	response, responseErr := client.Do(request)
 	if responseErr != nil {
-		return urls, fmt.Errorf("%v: %w", functionName, responseErr)
+		return nil, fmt.Errorf("%v: %w", functionName, responseErr)
 	}
 
 	// Parse response
 	responseBody, readErr := ioutil.ReadAll(response.Body)
 	if readErr != nil {
-		return urls, fmt.Errorf("%v: %w", functionName, readErr)
+		return nil, fmt.Errorf("%v: %w", functionName, readErr)
 	}
 
 	if response.StatusCode != 200 {
-		return urls, fmt.Errorf("%v: %w", functionName, readErr)
+		return nil, fmt.Errorf("%v: %w", functionName, readErr)
 	}
 
 	var bodyObject map[string]interface{}
 	parseErr := json.Unmarshal(responseBody, &bodyObject)
 	if parseErr != nil {
-		return urls, fmt.Errorf("parsing response failed -> %v: %w", functionName, responseErr)
+		return nil, fmt.Errorf("parsing response failed -> %v: %w", functionName, responseErr)
 	}
 
 	dataObject := bodyObject["data"].(map[string]interface{})
 
-	urls["pluralithURL"] = dataObject["pluralithURL"].(string) // = bodyObject["data"].(structs.ExportURLs)
-	urls["thumbnailURL"] = dataObject["thumbnailURL"].(string)
-	return urls, nil
+	return dataObject, nil
 }

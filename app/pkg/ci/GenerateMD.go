@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func GenerateMD(urls map[string]string, changeActions map[string]interface{}) (string, error) {
+func GenerateMD(urls map[string]interface{}, changeActions map[string]interface{}) (string, error) {
 	var comment string = ""
 
 	// Generate Head

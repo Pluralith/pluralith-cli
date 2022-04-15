@@ -1,7 +1,6 @@
 package graph
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -12,14 +11,13 @@ import (
 	"pluralith/pkg/ci"
 	"pluralith/pkg/ux"
 	"strconv"
-	"strings"
 )
 
-func GenerateComment(urls map[string]string, changeActions map[string]interface{}) error {
+func GenerateComment(runCache map[string]interface{}) error {
 	functionName := "preparePRComment"
 
 	// Generate pull request comment markdown
-	commentMD, commentErr := ci.GenerateMD(urls, changeActions)
+	commentMD, commentErr := ci.GenerateMD(runCache["urls"].(map[string]interface{}), runCache["changes"].(map[string]interface{}))
 	if commentErr != nil {
 		return fmt.Errorf("generating PR comment markdown failed -> %v: %w", functionName, commentErr)
 	}
@@ -73,21 +71,6 @@ func ExportDiagram(diagramValues map[string]interface{}) error {
 		return fmt.Errorf("running CLI command failed -> %v: %w", functionName, runErr)
 	}
 
-	// Capture change actions from Stdout
-	var changeActions map[string]interface{}
-
-	scanner := bufio.NewScanner(&outputSink)
-	for scanner.Scan() {
-		line := scanner.Text()
-		if strings.Contains(line, "CHANGEACTIONS") {
-			actionString := strings.ReplaceAll(line, "CHANGEACTIONS:", "")
-
-			if unmarshalErr := json.Unmarshal([]byte(actionString), &changeActions); unmarshalErr != nil {
-				return fmt.Errorf("parsing change actions failed -> %v: %w", functionName, unmarshalErr)
-			}
-		}
-	}
-
 	exportPath := filepath.Join(diagramValues["OutDir"].(string), diagramValues["FileName"].(string)) + ".pdf"
 
 	// If environment is CI or --generate-md is set -> Host exported diagram and generate PR comment markdown
@@ -99,13 +82,36 @@ func ExportDiagram(diagramValues map[string]interface{}) error {
 			fmt.Println(" or provide a valid config\n")
 			return nil
 		}
-		// Upload diagram to storage for pull request comment hosting
-		urls, hostErr := PostRun(exportPath, changeActions)
-		if hostErr != nil {
-			return fmt.Errorf("hosting diagram for PR comment failed -> %v: %w", functionName, hostErr)
+
+		// Read cache from disk
+		cacheByte, cacheErr := os.ReadFile(filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith", "pluralith.cache.json"))
+		if cacheErr != nil {
+			return fmt.Errorf("reading cache from disk failed -> %v: %w", functionName, cacheErr)
 		}
 
-		if prErr := GenerateComment(urls, changeActions); prErr != nil {
+		// Unmarshal cache
+		var runCache map[string]interface{}
+		if unmarshallErr := json.Unmarshal(cacheByte, &runCache); unmarshallErr != nil {
+			return fmt.Errorf("unmarshalling cache failed -> %v: %w", functionName, unmarshallErr)
+		}
+
+		// Upload diagram to storage for pull request comment hosting
+		runData, postErr := PostRun(exportPath)
+		if postErr != nil {
+			return fmt.Errorf("posting run for PR comment failed -> %v: %w", functionName, postErr)
+		}
+
+		// Populate run cache data with additional attributes
+		runCache["id"] = runData["id"]
+		runCache["urls"] = runData["urls"]
+		runCache["source"] = "CI"
+
+		logErr := LogRun(runCache)
+		if logErr != nil {
+			return fmt.Errorf("posting run for PR comment failed -> %v: %w", functionName, logErr)
+		}
+
+		if prErr := GenerateComment(runCache); prErr != nil {
 			return fmt.Errorf("handling pull request update failed -> %v: %w", functionName, prErr)
 		}
 	}
