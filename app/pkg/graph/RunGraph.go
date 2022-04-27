@@ -14,7 +14,7 @@ import (
 	"pluralith/pkg/ux"
 )
 
-func RunGraph(tfArgs []string, costArgs []string, exportArgs map[string]interface{}) error {
+func RunGraph(tfArgs []string, costArgs []string, exportArgs map[string]interface{}, runAsCI bool) error {
 	functionName := "RunGraph"
 
 	// Verify API key with backend
@@ -78,6 +78,10 @@ func RunGraph(tfArgs []string, costArgs []string, exportArgs map[string]interfac
 
 	// Generate diagram through graphing module
 	if exportErr := ExportDiagram(exportArgs); exportErr != nil {
+		return fmt.Errorf("exporting diagram failed -> %v: %w", functionName, exportErr)
+	}
+
+	if exportErr := HandleCIRun(exportArgs); exportErr != nil {
 		return fmt.Errorf("exporting diagram failed -> %v: %w", functionName, exportErr)
 	}
 

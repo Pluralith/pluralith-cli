@@ -2,9 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/cost"
 	"pluralith/pkg/graph"
 	"pluralith/pkg/terraform"
+	"pluralith/pkg/ux"
 
 	"github.com/spf13/cobra"
 )
@@ -15,6 +17,15 @@ var graphCmd = &cobra.Command{
 	Short: "Generate and export a diagram of the current plan state as a PDF",
 	Long:  `Generate and export a diagram of the current plan state as a PDF`,
 	Run: func(cmd *cobra.Command, args []string) {
+		// Check for CI environment -> If CI -> Prompt user to use `pluralith run`
+		if auxiliary.StateInstance.IsCI {
+			ux.PrintFormatted("✘", []string{"red", "bold"})
+			fmt.Print(" CI environment detected ⇢ Use ")
+			ux.PrintFormatted("'pluralith run'", []string{"red", "bold"})
+			fmt.Println(" to generate a diagram and post your run")
+			return
+		}
+
 		tfArgs, tfErr := terraform.ConstructTerraformArgs(cmd.Flags())
 		if tfErr != nil {
 			fmt.Println(tfErr)
@@ -25,13 +36,13 @@ var graphCmd = &cobra.Command{
 			fmt.Println(costErr)
 		}
 
-		exportArgs, exportErr := graph.ConstructExportArgs(cmd.Flags())
+		exportArgs, exportErr := graph.ConstructExportArgs(cmd.Flags(), false)
 		if exportErr != nil {
 			fmt.Println(fmt.Errorf("getting diagram values failed -> %w", exportErr))
 			return
 		}
 
-		if graphErr := graph.RunGraph(tfArgs, costArgs, exportArgs); graphErr != nil {
+		if graphErr := graph.RunGraph(tfArgs, costArgs, exportArgs, false); graphErr != nil {
 			fmt.Println(graphErr)
 		}
 	},
@@ -47,7 +58,6 @@ func init() {
 	graphCmd.PersistentFlags().Bool("show-changes", false, "Determines whether the exported PDF highlights changes made in the latest Terraform plan or outputs a general diagram of the infrastructure")
 	graphCmd.PersistentFlags().Bool("show-drift", false, "Determines whether the exported PDF highlights resource drift detected by Terraform")
 	graphCmd.PersistentFlags().Bool("skip-plan", false, "Generates a diagram without running plan again (needs pluralith state from previous plan run)")
-	graphCmd.PersistentFlags().Bool("generate-md", false, "Generate markdown output with exported PDF link and preview image for pull request comments")
 	graphCmd.PersistentFlags().StringSlice("var-file", []string{}, "Path to a var file to pass to Terraform. Can be specified multiple times.")
 	graphCmd.PersistentFlags().StringSlice("var", []string{}, "A variable to pass to Terraform. Can be specified multiple times. (Format: --var='NAME=VALUE')")
 	graphCmd.PersistentFlags().String("cost-usage-file", "", "Path to an infracost usage file to be used for the cost breakdown")
