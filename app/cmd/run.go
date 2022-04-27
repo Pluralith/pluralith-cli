@@ -5,6 +5,7 @@ import (
 	"pluralith/pkg/cost"
 	"pluralith/pkg/graph"
 	"pluralith/pkg/terraform"
+	"pluralith/pkg/ux"
 
 	"github.com/spf13/cobra"
 )
@@ -17,6 +18,10 @@ var runCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var runAsCI bool = true // Run as if in CI, no matter what 'IsCI' in state is
 
+		// Print UX head
+		ux.PrintFormatted("⠿", []string{"blue", "bold"})
+		fmt.Print(" Initiating Run ⇢ Posting To Pluralith Dashboard\n\n")
+
 		tfArgs, tfErr := terraform.ConstructTerraformArgs(cmd.Flags())
 		if tfErr != nil {
 			fmt.Println(tfErr)
@@ -25,6 +30,11 @@ var runCmd = &cobra.Command{
 		costArgs, costErr := cost.ConstructInfracostArgs(cmd.Flags())
 		if costErr != nil {
 			fmt.Println(costErr)
+		}
+
+		configErr := graph.VerifyConfig(false)
+		if configErr != nil {
+			fmt.Println(configErr)
 		}
 
 		exportArgs, exportErr := graph.ConstructExportArgs(cmd.Flags(), runAsCI)

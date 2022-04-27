@@ -10,7 +10,7 @@ import (
 func VerifyProject(projectId string) (bool, error) {
 	functionName := "VerifyAPIKey"
 
-	verificationSpinner := ux.NewSpinner("Verifying Project ID", "Project ID is valid!", "No project with this ID exists, try again!\n", true)
+	verificationSpinner := ux.NewSpinner("Verifying Project ID", "Project ID is valid!", "No project with this ID exists, try again!", true)
 	verificationSpinner.Start()
 
 	// Construct key verification request

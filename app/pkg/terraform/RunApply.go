@@ -14,6 +14,11 @@ import (
 func RunApply(command string, planPath string) error {
 	functionName := "RunApply"
 
+	// Adapt command string if plan
+	if command == "plan" {
+		command = "apply"
+	}
+
 	// Construct terraform args
 	allArgs := []string{
 		"apply",
@@ -30,7 +35,7 @@ func RunApply(command string, planPath string) error {
 
 	ux.PrintFormatted("→", []string{"blue", "bold"})
 	ux.PrintFormatted(strings.Join([]string{" ", strings.Title(command)}, ""), []string{"white", "bold"})
-	fmt.Println("")
+	fmt.Println()
 
 	// Get working directory
 	workingDir, workingErr := os.Getwd()
@@ -72,11 +77,6 @@ func RunApply(command string, planPath string) error {
 	// Stream apply command output
 	if confirm {
 		confirmSpinner.Success()
-
-		// Adapt command string if plan
-		if command == "plan" {
-			command = "apply"
-		}
 
 		streamErr := stream.StreamCommand(command, allArgs)
 		if streamErr != nil {

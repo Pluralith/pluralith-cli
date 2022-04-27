@@ -9,7 +9,7 @@ import (
 func VerifyAPIKey(APIKey string, silent bool) (bool, error) {
 	functionName := "VerifyAPIKey"
 
-	verificationSpinner := ux.NewSpinner("Verifying your API key", "Your API key is valid, you are authenticated!\n", "The passed API key is invalid, try again!\n", true)
+	verificationSpinner := ux.NewSpinner("Verifying your API key", "API key is valid, you are authenticated!", "The passed API key is invalid, try again!", true)
 	if !silent {
 		verificationSpinner.Start()
 	}

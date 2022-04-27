@@ -39,8 +39,8 @@ func RunInit(isEmpty bool, APIKey string, projectId string) error {
 		return fmt.Errorf("failed to authenticate -> %v: %w", functionName, loginErr)
 	}
 
-	ux.PrintFormatted("→", []string{"blue", "bold"})
-	ux.PrintFormatted(" Project\n", []string{"white", "bold"})
+	ux.PrintFormatted("\n→", []string{"blue", "bold"})
+	ux.PrintFormatted(" Project Setup\n", []string{"white", "bold"})
 
 	if projectId == "" {
 		ux.PrintFormatted("  →", []string{"blue", "bold"})

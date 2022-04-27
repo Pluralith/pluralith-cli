@@ -33,12 +33,12 @@ func GenerateComment(runCache map[string]interface{}) error {
 func ExportDiagram(exportArgs map[string]interface{}) error {
 	functionName := "ExportDiagram"
 
-	ux.PrintFormatted("→", []string{"blue", "bold"})
+	ux.PrintFormatted("\n→", []string{"blue", "bold"})
 	ux.PrintFormatted(" Export\n", []string{"white", "bold"})
 
 	graphModulePath := filepath.Join(auxiliary.StateInstance.BinPath, "pluralith-cli-graphing")
 
-	exportSpinner := ux.NewSpinner("Generating Diagram PDF", "PDF Export Successful!", "PDF Export Failed", true)
+	exportSpinner := ux.NewSpinner("Generating Diagram PDF", "PDF Generated", "PDF Generation Failed", true)
 	exportSpinner.Start()
 
 	cmd := exec.Command(
@@ -75,8 +75,7 @@ func ExportDiagram(exportArgs map[string]interface{}) error {
 	exportSpinner.Success()
 	ux.PrintFormatted("  → ", []string{"blue"})
 	fmt.Print("Diagram exported to: ")
-	ux.PrintFormatted(exportPath, []string{"blue"})
-	fmt.Println("\n")
+	ux.PrintFormatted(exportPath+"\n", []string{"blue"})
 
 	return nil
 }

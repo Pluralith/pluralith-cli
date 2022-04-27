@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/pflag"
 )
 
-func ConstructExportArgs(flags *pflag.FlagSet, silent bool) (map[string]interface{}, error) {
+func ConstructExportArgs(flags *pflag.FlagSet, runAsCI bool) (map[string]interface{}, error) {
 	functionName := "ConstructExportArgs"
 
 	exportArgs := make(map[string]interface{})
@@ -36,20 +36,17 @@ func ConstructExportArgs(flags *pflag.FlagSet, silent bool) (map[string]interfac
 		exportArgs["Version"] = flagVersion
 	}
 
-	// Print UX head
-	ux.PrintFormatted("⠿", []string{"blue", "bold"})
-	if exportArgs["Title"] == "" && exportArgs["Author"] == "" && exportArgs["Version"] == "" && !silent {
-		fmt.Println(" Exporting Diagram ⇢ Specify details below")
-	} else {
-		fmt.Println(" Exporting Diagram ⇢ Details taken from flags or config")
-	}
-
 	missingArguments := []string{}
+
+	if exportArgs["Title"] == "" || exportArgs["Author"] == "" || exportArgs["Version"] == "" {
+		ux.PrintFormatted("\n→", []string{"blue", "bold"})
+		ux.PrintFormatted(" Details\n", []string{"white", "bold"})
+	}
 
 	// If not in CI -> Read all missing diagram values from stdin
 	for key, _ := range exportArgs {
 		if exportArgs[key] == "" {
-			if silent { // In CI -> Push key into missing arguments and fail after loop
+			if runAsCI { // In CI -> Push key into missing arguments and fail after loop
 				missingArguments = append(missingArguments, key)
 			} else { // Locally -> Ask user for input
 				ux.PrintFormatted("  →", []string{"blue", "bold"})

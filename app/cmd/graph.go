@@ -26,6 +26,9 @@ var graphCmd = &cobra.Command{
 			return
 		}
 
+		ux.PrintFormatted("⠿", []string{"blue", "bold"})
+		fmt.Print(" Exporting Diagram\n\n")
+
 		tfArgs, tfErr := terraform.ConstructTerraformArgs(cmd.Flags())
 		if tfErr != nil {
 			fmt.Println(tfErr)
@@ -34,6 +37,11 @@ var graphCmd = &cobra.Command{
 		costArgs, costErr := cost.ConstructInfracostArgs(cmd.Flags())
 		if costErr != nil {
 			fmt.Println(costErr)
+		}
+
+		configErr := graph.VerifyConfig(true)
+		if configErr != nil {
+			fmt.Println(configErr)
 		}
 
 		exportArgs, exportErr := graph.ConstructExportArgs(cmd.Flags(), false)

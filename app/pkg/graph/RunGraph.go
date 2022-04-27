@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"pluralith/pkg/auth"
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/cost"
 	"pluralith/pkg/install/components"
@@ -16,20 +15,6 @@ import (
 
 func RunGraph(tfArgs []string, costArgs []string, exportArgs map[string]interface{}, runAsCI bool) error {
 	functionName := "RunGraph"
-
-	// Verify API key with backend
-	isValid, verifyErr := auth.VerifyAPIKey(auxiliary.StateInstance.APIKey, true)
-	if verifyErr != nil {
-		return fmt.Errorf("verifying API key failed -> %v: %w", functionName, verifyErr)
-	}
-
-	if !isValid {
-		ux.PrintFormatted("\n✘", []string{"red", "bold"})
-		fmt.Print(" Invalid API key → Run ")
-		ux.PrintFormatted("pluralith login", []string{"blue"})
-		fmt.Println(" again\n")
-		return nil
-	}
 
 	// Check if graph module installed, if not -> install
 	_, versionErr := exec.Command(filepath.Join(auxiliary.StateInstance.BinPath, "pluralith-cli-graphing"), "version").Output()
@@ -81,9 +66,13 @@ func RunGraph(tfArgs []string, costArgs []string, exportArgs map[string]interfac
 		return fmt.Errorf("exporting diagram failed -> %v: %w", functionName, exportErr)
 	}
 
-	if exportErr := HandleCIRun(exportArgs); exportErr != nil {
-		return fmt.Errorf("exporting diagram failed -> %v: %w", functionName, exportErr)
+	if runAsCI {
+		if exportErr := HandleCIRun(exportArgs); exportErr != nil {
+			return fmt.Errorf("exporting diagram failed -> %v: %w", functionName, exportErr)
+		}
 	}
+
+	fmt.Println()
 
 	return nil
 }
