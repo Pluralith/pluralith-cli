@@ -21,7 +21,7 @@ func HandleCIRun(exportArgs map[string]interface{}) error {
 		return nil
 	}
 
-	runSpinner := ux.NewSpinner("Posting Run", "Run Posted To Pluralith Dashboard!", "Posting Run To Pluralith Dashboard Failed", true)
+	runSpinner := ux.NewSpinner("Posting Run", "Run Posted To Pluralith Dashboard", "Posting Run To Pluralith Dashboard Failed", true)
 	runSpinner.Start()
 
 	// Read cache from disk

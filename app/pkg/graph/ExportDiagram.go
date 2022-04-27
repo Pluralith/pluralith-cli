@@ -74,7 +74,7 @@ func ExportDiagram(exportArgs map[string]interface{}) error {
 
 	exportSpinner.Success()
 	ux.PrintFormatted("  → ", []string{"blue"})
-	fmt.Print("Diagram exported to: ")
+	fmt.Print("Diagram Exported To: ")
 	ux.PrintFormatted(exportPath+"\n", []string{"blue"})
 
 	return nil

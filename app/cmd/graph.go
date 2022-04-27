@@ -39,7 +39,10 @@ var graphCmd = &cobra.Command{
 			fmt.Println(costErr)
 		}
 
-		configErr := graph.VerifyConfig(true)
+		configValid, configErr := graph.VerifyConfig(true)
+		if !configValid {
+			return
+		}
 		if configErr != nil {
 			fmt.Println(configErr)
 		}

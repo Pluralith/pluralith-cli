@@ -32,9 +32,13 @@ var runCmd = &cobra.Command{
 			fmt.Println(costErr)
 		}
 
-		configErr := graph.VerifyConfig(false)
+		configValid, configErr := graph.VerifyConfig(false)
+		if !configValid {
+			return
+		}
 		if configErr != nil {
 			fmt.Println(configErr)
+			return
 		}
 
 		exportArgs, exportErr := graph.ConstructExportArgs(cmd.Flags(), runAsCI)

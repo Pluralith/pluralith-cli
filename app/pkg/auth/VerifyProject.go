@@ -34,6 +34,9 @@ func VerifyProject(projectId string) (bool, error) {
 	if response.StatusCode == 200 {
 		verificationSpinner.Success()
 		return true, nil
+	} else if response.StatusCode == 401 {
+		verificationSpinner.Fail("You are not authorized to access this project")
+		return false, nil
 	} else {
 		verificationSpinner.Fail()
 		return false, nil
