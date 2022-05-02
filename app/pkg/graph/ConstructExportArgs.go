@@ -2,6 +2,7 @@ package graph
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"pluralith/pkg/auxiliary"
@@ -11,46 +12,74 @@ import (
 	"github.com/spf13/pflag"
 )
 
-func ConstructExportArgs(flags *pflag.FlagSet) (map[string]interface{}, error) {
+func ConstructExportArgs(flags *pflag.FlagSet, runAsCI bool) (map[string]interface{}, error) {
 	functionName := "ConstructExportArgs"
 
 	exportArgs := make(map[string]interface{})
 
-	// Get variable values that are relevant for input
-	exportArgs["Title"], _ = flags.GetString("title")
-	exportArgs["Author"], _ = flags.GetString("author")
-	exportArgs["Version"], _ = flags.GetString("version")
+	// Set variable values according to config export object if given
+	exportArgs["Title"] = auxiliary.StateInstance.PluralithConfig.Export.Title
+	exportArgs["Author"] = auxiliary.StateInstance.PluralithConfig.Export.Author
+	exportArgs["Version"] = auxiliary.StateInstance.PluralithConfig.Export.Version
 
-	// Print UX head
-	ux.PrintFormatted("⠿", []string{"blue", "bold"})
-	if exportArgs["Title"] == "" && exportArgs["Author"] == "" && exportArgs["Version"] == "" {
-		fmt.Println(" Exporting Diagram ⇢ Specify details below")
-	} else {
-		fmt.Println(" Exporting Diagram ⇢ Details taken from flags")
+	// Get variable values that are relevant for input (override config values if flags are explicitly set)
+	flagTitle, _ := flags.GetString("title")
+	if flagTitle != "" {
+		exportArgs["Title"] = flagTitle
+	}
+	flagAuthor, _ := flags.GetString("author")
+	if flagAuthor != "" {
+		exportArgs["Author"] = flagAuthor
+	}
+	flagVersion, _ := flags.GetString("version")
+	if flagVersion != "" {
+		exportArgs["Version"] = flagVersion
 	}
 
-	// Read all missing diagram values from stdin
+	missingArguments := []string{}
+
+	if exportArgs["Title"] == "" || exportArgs["Author"] == "" || exportArgs["Version"] == "" {
+		ux.PrintFormatted("\n→", []string{"blue", "bold"})
+		ux.PrintFormatted(" Details\n", []string{"white", "bold"})
+	}
+
+	// If not in CI -> Read all missing diagram values from stdin
 	for key, _ := range exportArgs {
 		if exportArgs[key] == "" {
-			ux.PrintFormatted("  →", []string{"blue", "bold"})
-			fmt.Printf(" %s: ", key)
+			if runAsCI { // In CI -> Push key into missing arguments and fail after loop
+				missingArguments = append(missingArguments, key)
+			} else { // Locally -> Ask user for input
+				ux.PrintFormatted("  →", []string{"blue", "bold"})
+				fmt.Printf(" %s: ", key)
 
-			// Create scanner
-			scanner := bufio.NewScanner(os.Stdin)
-			if scanner.Scan() {
-				exportArgs[key] = scanner.Text()
-			}
-			if scanErr := scanner.Err(); scanErr != nil {
-				return exportArgs, fmt.Errorf("scanning input failed -> %v: %w", functionName, scanErr)
+				// Create scanner
+				scanner := bufio.NewScanner(os.Stdin)
+				if scanner.Scan() {
+					exportArgs[key] = scanner.Text()
+				}
+				if scanErr := scanner.Err(); scanErr != nil {
+					return exportArgs, fmt.Errorf("scanning input failed -> %v: %w", functionName, scanErr)
+				}
 			}
 		}
+	}
+
+	if len(missingArguments) != 0 {
+		ux.PrintFormatted("✘", []string{"red", "bold"})
+		fmt.Print(" Missing required arguments: ")
+		for _, argument := range missingArguments {
+			fmt.Print("\n  ⇢ ")
+			ux.PrintFormatted(argument, []string{"red", "bold"})
+		}
+		fmt.Println()
+
+		return exportArgs, errors.New("Handled")
 	}
 
 	// Get remaining diagram values that don't require potential user input
 	exportArgs["OutDir"], _ = flags.GetString("out-dir")
 	exportArgs["FileName"], _ = flags.GetString("file-name")
 	exportArgs["SkipPlan"], _ = flags.GetBool("skip-plan")
-	exportArgs["GenerateMd"], _ = flags.GetBool("generate-md")
 	exportArgs["ShowChanges"], _ = flags.GetBool("show-changes")
 	exportArgs["ShowDrift"], _ = flags.GetBool("show-drift")
 

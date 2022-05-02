@@ -13,18 +13,19 @@ import (
 )
 
 type State struct {
-	CLIVersion    string
-	HomePath      string
-	WorkingPath   string
-	PluralithPath string
-	BinPath       string
-	ComDBPath     string
-	LockPath      string
-	APIKey        string
-	IsWSL         bool
-	IsCI          bool
-	TerraformInit bool
-	Infracost     bool
+	PluralithConfig PluralithConfig
+	CLIVersion      string
+	HomePath        string
+	WorkingPath     string
+	PluralithPath   string
+	BinPath         string
+	ComDBPath       string
+	LockPath        string
+	APIKey          string
+	IsWSL           bool
+	IsCI            bool
+	TerraformInit   bool
+	Infracost       bool
 }
 
 // Produce relevant paths to be used across the application

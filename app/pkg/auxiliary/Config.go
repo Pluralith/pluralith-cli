@@ -1,32 +1,39 @@
 package auxiliary
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"gopkg.in/yaml.v2"
 )
 
-type Filters struct {
-	Replacement string
-	Config      SecretConfig
+type PluralithConfig struct {
+	ProjectId string `yaml:"project_id"`
+	Config    struct {
+		SensitiveAttrs []string `yaml:"sensitive_attrs"`
+		Vars           []string `yaml:"vars"`
+		VarFiles       []string `yaml:"var_files"`
+		CostUsageFile  string   `yaml:"cost_usage_file"`
+	} `yaml:"config"`
+	Export struct {
+		Title   string `yaml:"title"`
+		Author  string `yaml:"author"`
+		Version string `yaml:"version"`
+	} `yaml:"export"`
 }
 
-type SecretConfig struct {
-	Sensitive []string
-}
-
-func (F *Filters) GetSecretConfig() error {
+func (S *State) GetConfig() error {
 	functionName := "GetSecretConfig"
 
 	// Initialize variables
 	var configByte []byte
 	var configErr error
-	var config SecretConfig
+	var config PluralithConfig
 
 	// Get relevant paths to read config from
-	workingConfig := filepath.Join(StateInstance.WorkingPath, "pluralith-config.json")
-	defaultConfig := filepath.Join(StateInstance.HomePath, "Pluralith", "pluralith-config.json")
+	workingConfig := filepath.Join(StateInstance.WorkingPath, "pluralith.yml")
+	defaultConfig := filepath.Join(StateInstance.HomePath, "Pluralith", "pluralith.yml")
 
 	// Get default config first
 	if _, statErr := os.Stat(defaultConfig); !os.IsNotExist(statErr) {
@@ -48,23 +55,14 @@ func (F *Filters) GetSecretConfig() error {
 
 	// Parse config if given
 	if len(configByte) > 0 {
-		parseErr := json.Unmarshal(configByte, &config)
-		if parseErr != nil {
-			return fmt.Errorf("failed to parse config -> %v: %w", functionName, parseErr)
+		yamlErr := yaml.Unmarshal(configByte, &config)
+		if yamlErr != nil {
+			return fmt.Errorf("failed to parse config -> %v: %w", functionName, yamlErr)
 		}
 	}
 
 	// Set config for global access
-	FilterInstance.Config = config
+	S.PluralithConfig = config
 
 	return nil
 }
-
-func (F *Filters) InitFilters() error {
-	// functionName := "InitializeFilters"
-	F.Replacement = "gatewatch"
-
-	return nil
-}
-
-var FilterInstance = &Filters{}

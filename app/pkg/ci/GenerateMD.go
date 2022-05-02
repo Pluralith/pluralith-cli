@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func GenerateMD(urls map[string]string, changeActions map[string]interface{}) (string, error) {
+func GenerateMD(urls map[string]interface{}, changeActions map[string]interface{}) (string, error) {
 	var comment string = ""
 
 	// Generate Head
@@ -13,8 +13,8 @@ func GenerateMD(urls map[string]string, changeActions map[string]interface{}) (s
 
 	// Generate Body
 	// Diagram Section
-	comment += "→ **`Click the image to view the PDF`**\n\n"
-	comment += fmt.Sprintf("[![Pluralith Diagram](%s)](%s)\n\n", urls["PNG"], urls["PDF"])
+	comment += "→ **`Click the image to view this run in the Pluralith Dashboard`**\n\n"
+	comment += fmt.Sprintf("[![Pluralith Diagram](%s)](%s)\n\n", urls["thumbnailURL"], urls["pluralithURL"])
 
 	// Changes Section
 	comment += "## Changes\n\n"
