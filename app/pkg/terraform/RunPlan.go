@@ -9,12 +9,13 @@ import (
 	"path/filepath"
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/comdb"
+	"pluralith/pkg/cost"
 	"pluralith/pkg/plan"
 	"pluralith/pkg/ux"
 	"time"
 )
 
-func RunPlan(command string, tfArgs []string, silent bool) (string, error) {
+func RunPlan(command string, tfArgs []string, costArgs []string, silent bool) (string, error) {
 	functionName := "RunPlan"
 
 	// Create Pluralith helper directory (.pluralith)
@@ -103,6 +104,18 @@ func RunPlan(command string, tfArgs []string, silent bool) (string, error) {
 		return "", fmt.Errorf("creating terraform plan json failed -> %v: %w", functionName, planJsonErr)
 	}
 
+	stripSpinner.Success()
+
+	// Run infracost
+	if auxiliary.StateInstance.Infracost {
+		if costErr := cost.CalculateCost(costArgs); costErr != nil {
+			fmt.Println(costErr)
+		}
+	} else {
+		ux.PrintFormatted("  -", []string{"blue", "bold"})
+		fmt.Println(" Cost Calculation Skipped\n")
+	}
+
 	// Emit plan end update to UI
 	if !silent {
 		comdb.PushComDBEvent(comdb.ComDBEvent{
@@ -115,8 +128,6 @@ func RunPlan(command string, tfArgs []string, silent bool) (string, error) {
 			Providers: providers,
 		})
 	}
-
-	stripSpinner.Success()
 
 	return workingPlan, nil
 }

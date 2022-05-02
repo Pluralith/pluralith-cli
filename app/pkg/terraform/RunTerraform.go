@@ -3,7 +3,6 @@ package terraform
 import (
 	"fmt"
 	"pluralith/pkg/auxiliary"
-	"pluralith/pkg/cost"
 	"pluralith/pkg/ux"
 )
 
@@ -37,19 +36,9 @@ func RunTerraform(command string, tfArgs []string, costArgs []string) error {
 	}
 
 	// Run terraform plan to create execution plan
-	planPath, planErr := RunPlan(command, tfArgs, false)
+	planPath, planErr := RunPlan(command, tfArgs, costArgs, false)
 	if planErr != nil {
 		return fmt.Errorf("running terraform plan failed -> %v: %w", functionName, planErr)
-	}
-
-	// Run infracost
-	if auxiliary.StateInstance.Infracost {
-		if costErr := cost.CalculateCost(costArgs); costErr != nil {
-			fmt.Println(costErr)
-		}
-	} else {
-		ux.PrintFormatted("  -", []string{"blue", "bold"})
-		fmt.Println(" Cost Calculation Skipped\n")
 	}
 
 	fmt.Println() // Line separation between plan and apply message prints

@@ -24,7 +24,7 @@ func RunGraph(tfArgs []string, costArgs []string, exportArgs map[string]interfac
 
 	// Run terraform plan to create execution plan if not specified otherwise by user
 	if exportArgs["SkipPlan"] == false {
-		_, planErr := terraform.RunPlan("plan", tfArgs, true)
+		_, planErr := terraform.RunPlan("plan", tfArgs, costArgs, true)
 		if planErr != nil {
 			return fmt.Errorf("running terraform plan failed -> %v: %w", functionName, planErr)
 		}
