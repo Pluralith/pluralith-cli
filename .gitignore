@@ -27,6 +27,6 @@ release.sh
 *.tfstate*
 
 # Pluralith
-pluralith.*
+.pluralith
 
 dist/

@@ -23,11 +23,12 @@ func PrintHead() {
 func PrintFormatted(text string, styling []string) {
 	// Creating map with available styles
 	styleMap := map[string]color.Attribute{
-		"white": color.FgHiWhite,
-		"blue":  color.FgHiBlue,
-		"green": color.FgHiGreen,
-		"red":   color.FgHiRed,
-		"bold":  color.Bold,
+		"white":  color.FgHiWhite,
+		"blue":   color.FgHiBlue,
+		"green":  color.FgHiGreen,
+		"red":    color.FgHiRed,
+		"yellow": color.FgHiYellow,
+		"bold":   color.Bold,
 	}
 
 	// Defining new blank color object

@@ -2,31 +2,49 @@ package terraform
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/comdb"
+	"pluralith/pkg/cost"
 	"pluralith/pkg/plan"
 	"pluralith/pkg/ux"
 	"time"
 )
 
-func RunPlan(command string, silent bool) (string, error) {
+func RunPlan(command string, tfArgs []string, costArgs []string, silent bool) (string, error) {
 	functionName := "RunPlan"
+
+	// Create Pluralith helper directory (.pluralith)
+	_, existErr := os.Stat(filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith"))
+	if errors.Is(existErr, os.ErrNotExist) {
+		// Create file if it doesn't exist yet
+		if mkErr := os.Mkdir(filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith"), 0700); mkErr != nil {
+			return "", fmt.Errorf("creating .pluralith helper directory failed -> %v: %w", functionName, mkErr)
+		}
+	}
+
+	// Constructing execution plan path
+	workingPlan := filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith", "pluralith.plan.bin")
+
+	// Construct terraform args
+	allArgs := []string{
+		"plan",
+		"-input=false",
+		"-out=" + workingPlan,
+	}
+
+	allArgs = append(allArgs, tfArgs...)
+
+	if command == "destroy" {
+		allArgs = append(allArgs, "-destroy")
+	}
 
 	ux.PrintFormatted("→", []string{"blue", "bold"})
 	ux.PrintFormatted(" Plan\n", []string{"white", "bold"})
-
-	// Constructing execution plan path
-	workingPlan := filepath.Join(auxiliary.StateInstance.WorkingPath, "pluralith.plan")
-
-	// Initialize variables
-	planArgs := []string{"-out", workingPlan}
-	if command == "destroy" {
-		planArgs = append(planArgs, "-destroy")
-	}
 
 	// Instantiate spinners
 	planSpinner := ux.NewSpinner("Generating Execution Plan", "Execution Plan Generated", "Couldn't Generate Execution Plan", true)
@@ -46,7 +64,7 @@ func RunPlan(command string, silent bool) (string, error) {
 	}
 
 	// Constructing command to execute
-	cmd := exec.Command("terraform", append([]string{"plan", "-input=false"}, planArgs...)...)
+	cmd := exec.Command("terraform", allArgs...)
 
 	// Defining sinks for std data
 	var outputSink bytes.Buffer
@@ -86,6 +104,18 @@ func RunPlan(command string, silent bool) (string, error) {
 		return "", fmt.Errorf("creating terraform plan json failed -> %v: %w", functionName, planJsonErr)
 	}
 
+	stripSpinner.Success()
+
+	// Run infracost
+	if auxiliary.StateInstance.Infracost {
+		if costErr := cost.CalculateCost(costArgs); costErr != nil {
+			fmt.Println(costErr)
+		}
+	} else {
+		ux.PrintFormatted("  -", []string{"blue", "bold"})
+		fmt.Println(" Cost Calculation Skipped\n")
+	}
+
 	// Emit plan end update to UI
 	if !silent {
 		comdb.PushComDBEvent(comdb.ComDBEvent{
@@ -98,8 +128,6 @@ func RunPlan(command string, silent bool) (string, error) {
 			Providers: providers,
 		})
 	}
-
-	stripSpinner.Success()
 
 	return workingPlan, nil
 }

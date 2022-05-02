@@ -20,7 +20,7 @@ func CreatePlanJson(planPath string) (string, []string, error) {
 		return "", []string{}, fmt.Errorf("%v: %w", functionName, workingErr)
 	}
 	// Construct file path for stripped state
-	strippedPath := filepath.Join(workingDir, "pluralith.state.stripped")
+	strippedPath := filepath.Join(workingDir, ".pluralith", "pluralith.state.json")
 
 	// Constructing command to execute
 	cmd := exec.Command("terraform", append([]string{"show", "-json", planPath})...)
@@ -36,6 +36,7 @@ func CreatePlanJson(planPath string) (string, []string, error) {
 
 	// Run terraform command
 	if err := cmd.Run(); err != nil {
+		fmt.Println(errorSink.String())
 		return errorSink.String(), []string{}, fmt.Errorf("terraform command failed -> %v: %w", functionName, err)
 	}
 

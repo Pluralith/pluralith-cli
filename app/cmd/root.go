@@ -17,7 +17,7 @@ import (
 var cfgFile string
 
 // Defining custom "Long" message with colored output
-var blueColor = color.New(color.FgBlue).SprintFunc()
+var blueColor = color.New(color.FgHiBlue).SprintFunc()
 var longText = fmt.Sprintf(`%s
 
 Welcome to %s, a tool to visualize your Terraform state.
@@ -57,7 +57,8 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.pluralith.yaml)")
+	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.pluralith.yaml)")
+	// rootCmd.PersistentFlags().St
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.

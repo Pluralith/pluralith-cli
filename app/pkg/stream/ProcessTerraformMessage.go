@@ -7,14 +7,14 @@ import (
 	"time"
 )
 
-func ProcessTerraformMessage(message string, command string) {
+func ProcessTerraformMessage(message string, command string) DecodedEvent {
 	// functionName := "DecodeStateStream"
 	decodedEvent := DecodedEvent{}
 
 	// Parsing terraform message
 	parsedState, parseErr := auxiliary.ParseJson(message)
 	if parseErr != nil {
-		return // If message is not valid json that cannot be parsed -> return and do nothing
+		return decodedEvent // If message is not valid json that cannot be parsed -> return and do nothing
 	}
 
 	// Get event message
@@ -54,9 +54,11 @@ func ProcessTerraformMessage(message string, command string) {
 		}
 
 		// Set address and type
-		decodedEvent.Command = "diagnostic"
-		decodedEvent.Address = diagnostic["address"].(string)
-		decodedEvent.Type = eventType
+		if diagnostic["address"] != nil {
+			decodedEvent.Command = "diagnostic"
+			decodedEvent.Address = diagnostic["address"].(string)
+			decodedEvent.Type = eventType
+		}
 	}
 
 	// If address is given -> Resource event
@@ -73,4 +75,6 @@ func ProcessTerraformMessage(message string, command string) {
 			Received:  false,
 		})
 	}
+
+	return decodedEvent
 }

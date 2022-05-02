@@ -11,12 +11,31 @@ import (
 	"time"
 )
 
-func RunApply(command string, args []string) error {
+func RunApply(command string, planPath string) error {
 	functionName := "RunApply"
+
+	// Adapt command string if plan
+	if command == "plan" {
+		command = "apply"
+	}
+
+	// Construct terraform args
+	allArgs := []string{
+		"apply",
+		"-auto-approve",
+		"-json",
+		"-input=false",
+	}
+
+	if command == "destroy" {
+		allArgs = append(allArgs, "-destroy")
+	}
+
+	allArgs = append(allArgs, planPath)
 
 	ux.PrintFormatted("→", []string{"blue", "bold"})
 	ux.PrintFormatted(strings.Join([]string{" ", strings.Title(command)}, ""), []string{"white", "bold"})
-	fmt.Println("")
+	fmt.Println()
 
 	// Get working directory
 	workingDir, workingErr := os.Getwd()
@@ -59,12 +78,7 @@ func RunApply(command string, args []string) error {
 	if confirm {
 		confirmSpinner.Success()
 
-		// Adapt command string if plan
-		if command == "plan" {
-			command = "apply"
-		}
-
-		streamErr := stream.StreamCommand(command, args)
+		streamErr := stream.StreamCommand(command, allArgs)
 		if streamErr != nil {
 			return fmt.Errorf("streaming terraform command output failed -> %v: %w", functionName, streamErr)
 		}

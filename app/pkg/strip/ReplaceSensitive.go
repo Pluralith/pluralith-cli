@@ -13,8 +13,8 @@ func ReplaceSensitive(jsonObject map[string]interface{}) {
 		// Check if value at key is given
 		if outerValue != nil {
 			// Subsitute value with replacement if key is among targets
-			if auxiliary.ElementInSlice(outerKey, auxiliary.FilterInstance.Config.Sensitive) {
-				jsonObject[outerKey] = auxiliary.FilterInstance.Replacement
+			if auxiliary.ElementInSlice(outerKey, auxiliary.StateInstance.PluralithConfig.Config.SensitiveAttrs) {
+				jsonObject[outerKey] = "gatewatch"
 			} else {
 				// Get value type to handle different cases
 				outerValueType := reflect.TypeOf(outerValue)

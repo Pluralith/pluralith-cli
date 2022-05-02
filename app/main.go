@@ -27,7 +27,7 @@ func initApp() {
 	functionName := "initApp"
 
 	dblock.LockInstance.GenerateLock()
-	auxiliary.StateInstance.CLIVersion = "0.1.7"
+	auxiliary.StateInstance.CLIVersion = "0.1.8"
 
 	if pathGenErr := auxiliary.StateInstance.GeneratePaths(); pathGenErr != nil {
 		fmt.Println(fmt.Errorf("generating application paths failed -> %v: %w", functionName, pathGenErr))
@@ -41,12 +41,10 @@ func initApp() {
 
 	auxiliary.StateInstance.CheckCI()
 	auxiliary.StateInstance.CheckTerraformInit()
+	auxiliary.StateInstance.CheckInfracost()
 
-	if filterInitErr := auxiliary.FilterInstance.InitFilters(); filterInitErr != nil {
-		fmt.Println(fmt.Errorf("initializing secret filters failed -> %v: %w", functionName, filterInitErr))
-	}
-	if getConfigErr := auxiliary.FilterInstance.GetSecretConfig(); getConfigErr != nil {
-		fmt.Println(fmt.Errorf("fetching secret config failed -> %v: %w", functionName, getConfigErr))
+	if getConfigErr := auxiliary.StateInstance.GetConfig(); getConfigErr != nil {
+		fmt.Println(fmt.Errorf("fetching pluralith config failed -> %v: %w", functionName, getConfigErr))
 	}
 }
 

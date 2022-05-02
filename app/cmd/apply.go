@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"pluralith/pkg/cost"
 	"pluralith/pkg/terraform"
 
 	"github.com/spf13/cobra"
@@ -13,12 +14,26 @@ var applyCmd = &cobra.Command{
 	Short: "Run terraform apply and show changes in Pluralith",
 	Long:  `Run terraform apply and show changes in Pluralith`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := terraform.RunTerraform("apply", args); err != nil {
-			fmt.Println(err)
+		tfArgs, tfErr := terraform.ConstructTerraformArgs(cmd.Flags())
+		if tfErr != nil {
+			fmt.Println(tfErr)
+		}
+
+		costArgs, costErr := cost.ConstructInfracostArgs(cmd.Flags())
+		if costErr != nil {
+			fmt.Println(costErr)
+		}
+
+		if applyErr := terraform.RunTerraform("apply", tfArgs, costArgs); applyErr != nil {
+			fmt.Println(applyErr)
 		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(applyCmd)
+	applyCmd.PersistentFlags().StringSlice("var-file", []string{}, "Path to a var file to pass to Terraform. Can be specified multiple times.")
+	applyCmd.PersistentFlags().StringSlice("var", []string{}, "A variable to pass to Terraform. Can be specified multiple times. (Format: --var='NAME=VALUE')")
+	applyCmd.PersistentFlags().String("cost-usage-file", "", "Path to an infracost usage file to be used for the cost breakdown")
+	applyCmd.PersistentFlags().Bool("no-costs", false, "If we detect infracost we automatically run a cost breakdown and show it in the diagram. Use this flag to turn that off")
 }

@@ -6,7 +6,7 @@ import (
 	"pluralith/pkg/ux"
 )
 
-func RunTerraform(command string, args []string) error {
+func RunTerraform(command string, tfArgs []string, costArgs []string) error {
 	functionName := "RunTerraform"
 
 	// Check if "terraform init" has been run
@@ -23,17 +23,6 @@ func RunTerraform(command string, args []string) error {
 	ux.PrintFormatted("⠿", []string{"blue"})
 	fmt.Println(RunMessages[command].([]string)[0])
 
-	// Manually parse arg (due to cobra lacking a feature)
-	parsedArgs, parsedArgMap := auxiliary.ParseArgs(args, []string{})
-
-	// Add necessary flags if not already given
-	if parsedArgMap["auto-approve"] == "" {
-		parsedArgs = append(parsedArgs, "-auto-approve")
-	}
-	if parsedArgMap["json"] == "" {
-		parsedArgs = append(parsedArgs, "-json")
-	}
-
 	// Remove old Pluralith state
 	removeErr := auxiliary.RemoveOldState()
 	if removeErr != nil {
@@ -47,18 +36,15 @@ func RunTerraform(command string, args []string) error {
 	}
 
 	// Run terraform plan to create execution plan
-	planPath, planErr := RunPlan(command, false)
+	planPath, planErr := RunPlan(command, tfArgs, costArgs, false)
 	if planErr != nil {
 		return fmt.Errorf("running terraform plan failed -> %v: %w", functionName, planErr)
 	}
 
 	fmt.Println() // Line separation between plan and apply message prints
 
-	// Add plan path to arguments to run apply on already created execution plan
-	parsedArgs = append(parsedArgs, planPath)
-
 	// Run terraform apply on existing execution plan
-	applyErr := RunApply(command, parsedArgs)
+	applyErr := RunApply(command, planPath)
 	if applyErr != nil {
 		return fmt.Errorf("running terraform apply failed -> %v: %w", functionName, applyErr)
 	}

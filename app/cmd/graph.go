@@ -1,20 +1,14 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
-	"os"
-	"os/exec"
-	"path/filepath"
-
-	"github.com/spf13/cobra"
-
-	"pluralith/pkg/auth"
 	"pluralith/pkg/auxiliary"
+	"pluralith/pkg/cost"
 	"pluralith/pkg/graph"
-	"pluralith/pkg/install/components"
 	"pluralith/pkg/terraform"
 	"pluralith/pkg/ux"
+
+	"github.com/spf13/cobra"
 )
 
 // stripCmd represents the strip command
@@ -23,67 +17,44 @@ var graphCmd = &cobra.Command{
 	Short: "Generate and export a diagram of the current plan state as a PDF",
 	Long:  `Generate and export a diagram of the current plan state as a PDF`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// Verify API key with backend
-		isValid, verifyErr := auth.VerifyAPIKey(auxiliary.StateInstance.APIKey)
-		if verifyErr != nil {
-			fmt.Println(fmt.Errorf("verifying API key failed -> %w", verifyErr))
-			return
-		}
-		if !isValid {
-			ux.PrintFormatted("\n✖️", []string{"red", "bold"})
-			fmt.Print(" Invalid API key → Run ")
-			ux.PrintFormatted("pluralith login", []string{"blue"})
-			fmt.Println(" again\n")
+		// Check for CI environment -> If CI -> Prompt user to use `pluralith run`
+		if auxiliary.StateInstance.IsCI {
+			ux.PrintFormatted("✘", []string{"red", "bold"})
+			fmt.Print(" CI environment detected ⇢ Use ")
+			ux.PrintFormatted("'pluralith run'", []string{"red", "bold"})
+			fmt.Println(" to generate a diagram and post your run")
 			return
 		}
 
-		// Check if graph module installed, if not -> install
-		_, versionErr := exec.Command(filepath.Join(auxiliary.StateInstance.BinPath, "pluralith-cli-graphing"), "version").Output()
-		if versionErr != nil {
-			components.GraphModule()
+		ux.PrintFormatted("⠿", []string{"blue", "bold"})
+		fmt.Print(" Exporting Diagram\n\n")
+
+		tfArgs, tfErr := terraform.ConstructTerraformArgs(cmd.Flags())
+		if tfErr != nil {
+			fmt.Println(tfErr)
 		}
 
-		// Parse flag values
-		diagramValues, valueErr := graph.GetDiagramValues(cmd.Flags())
-		if valueErr != nil {
-			fmt.Println(fmt.Errorf("getting diagram values failed -> %w", valueErr))
+		costArgs, costErr := cost.ConstructInfracostArgs(cmd.Flags())
+		if costErr != nil {
+			fmt.Println(costErr)
+		}
+
+		configValid, configErr := graph.VerifyConfig(true)
+		if !configValid {
+			return
+		}
+		if configErr != nil {
+			fmt.Println(configErr)
+		}
+
+		exportArgs, exportErr := graph.ConstructExportArgs(cmd.Flags(), false)
+		if exportErr != nil {
+			fmt.Println(fmt.Errorf("getting diagram values failed -> %w", exportErr))
 			return
 		}
 
-		// Run terraform plan to create execution plan if not specified otherwise by user
-		if diagramValues["SkipPlan"] == false {
-			_, planErr := terraform.RunPlan("plan", true)
-			if planErr != nil {
-				fmt.Println(fmt.Errorf("running terraform plan failed -> %w", planErr))
-				return
-			}
-		} else {
-			ux.PrintFormatted("→ ", []string{"bold", "blue"})
-			ux.PrintFormatted("Plan\n", []string{"bold", "white"})
-			ux.PrintFormatted("  -", []string{"blue", "bold"})
-			fmt.Println(" Skipped\n")
-		}
-
-		// Construct plan state path
-		planStatePath := filepath.Join(auxiliary.StateInstance.WorkingPath, "pluralith.state.stripped")
-
-		// Check if plan state exists
-		_, existErr := os.Stat(planStatePath)    // Check if old state exists
-		if errors.Is(existErr, os.ErrNotExist) { // If it exists -> delete
-			ux.PrintFormatted("✖️", []string{"bold", "red"})
-			fmt.Print(" No plan state found ")
-			ux.PrintFormatted("→", []string{"bold", "red"})
-			fmt.Println(" Run pluralith graph again without --skip-plan")
-			return
-		}
-
-		// Pass plan state on to graphing module
-		diagramValues["PlanStatePath"] = planStatePath
-
-		// Generate diagram through graphing module
-		if exportErr := graph.ExportDiagram(diagramValues); exportErr != nil {
-			fmt.Println(fmt.Errorf("exporting diagram failed -> %w", exportErr))
-			return
+		if graphErr := graph.RunGraph(tfArgs, costArgs, exportArgs, false); graphErr != nil {
+			fmt.Println(graphErr)
 		}
 	},
 }
@@ -98,5 +69,8 @@ func init() {
 	graphCmd.PersistentFlags().Bool("show-changes", false, "Determines whether the exported PDF highlights changes made in the latest Terraform plan or outputs a general diagram of the infrastructure")
 	graphCmd.PersistentFlags().Bool("show-drift", false, "Determines whether the exported PDF highlights resource drift detected by Terraform")
 	graphCmd.PersistentFlags().Bool("skip-plan", false, "Generates a diagram without running plan again (needs pluralith state from previous plan run)")
-	graphCmd.PersistentFlags().Bool("generate-md", false, "Generate markdown output with exported PDF link and preview image for pull request comments")
+	graphCmd.PersistentFlags().StringSlice("var-file", []string{}, "Path to a var file to pass to Terraform. Can be specified multiple times.")
+	graphCmd.PersistentFlags().StringSlice("var", []string{}, "A variable to pass to Terraform. Can be specified multiple times. (Format: --var='NAME=VALUE')")
+	graphCmd.PersistentFlags().String("cost-usage-file", "", "Path to an infracost usage file to be used for the cost breakdown")
+	graphCmd.PersistentFlags().Bool("no-costs", false, "If we detect infracost we automatically run a cost breakdown and show it in the diagram. Use this flag to turn that off")
 }
