@@ -50,7 +50,8 @@ func ExportDiagram(exportArgs map[string]interface{}) error {
 		"--ver", exportArgs["Version"].(string),
 		"--fileName", exportArgs["FileName"].(string),
 		"--outDir", exportArgs["OutDir"].(string),
-		"--planStatePath", exportArgs["PlanStatePath"].(string),
+		"--planJsonPath", exportArgs["PlanJsonPath"].(string),
+		"--costJsonPath", exportArgs["CostJsonPath"].(string),
 		"--showChanges", strconv.FormatBool(exportArgs["ShowChanges"].(bool)),
 		"--showDrift", strconv.FormatBool(exportArgs["ShowDrift"].(bool)),
 	)

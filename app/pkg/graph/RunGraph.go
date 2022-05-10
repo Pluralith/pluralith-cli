@@ -46,10 +46,11 @@ func RunGraph(tfArgs []string, costArgs []string, exportArgs map[string]interfac
 	}
 
 	// Construct plan state path
-	planStatePath := filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith", "pluralith.state.json")
+	planJsonPath := filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith", "pluralith.state.json")
+	costJsonPath := filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith", "pluralith.costs.json")
 
 	// Check if plan state exists
-	_, existErr := os.Stat(planStatePath)    // Check if old state exists
+	_, existErr := os.Stat(planJsonPath)     // Check if old state exists
 	if errors.Is(existErr, os.ErrNotExist) { // If it exists -> delete
 		ux.PrintFormatted("✘", []string{"bold", "red"})
 		fmt.Print(" No plan state found ")
@@ -59,7 +60,8 @@ func RunGraph(tfArgs []string, costArgs []string, exportArgs map[string]interfac
 	}
 
 	// Pass plan state on to graphing module
-	exportArgs["PlanStatePath"] = planStatePath
+	exportArgs["PlanJsonPath"] = planJsonPath
+	exportArgs["CostJsonPath"] = costJsonPath
 
 	// Generate diagram through graphing module
 	if exportErr := ExportDiagram(exportArgs); exportErr != nil {
