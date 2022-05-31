@@ -40,12 +40,12 @@ func HandleCIRun(exportArgs map[string]interface{}) error {
 	}
 
 	// Upload diagram to storage for pull request comment hosting
-	exportPath := filepath.Join(exportArgs["OutDir"].(string), exportArgs["FileName"].(string)) + ".pdf"
-	runData, postErr := PostRun(exportPath)
-	if postErr != nil {
-		runSpinner.Fail()
-		return fmt.Errorf("posting run for PR comment failed -> %v: %w", functionName, postErr)
-	}
+	// exportPath := filepath.Join(exportArgs["OutDir"].(string), exportArgs["FileName"].(string)) + ".pdf"
+	// runData, postErr := PostRun(exportPath)
+	// if postErr != nil {
+	// 	runSpinner.Fail()
+	// 	return fmt.Errorf("posting run for PR comment failed -> %v: %w", functionName, postErr)
+	// }
 
 	// Get current branch if possible
 	branchCmd := exec.Command("git", "rev-parse", "--abbrev-ref", "HEAD")
@@ -55,8 +55,8 @@ func HandleCIRun(exportArgs map[string]interface{}) error {
 	}
 
 	// Populate run cache data with additional attributes
-	runCache["id"] = runData["id"]
-	runCache["urls"] = runData["urls"]
+	// runCache["id"] = runData["id"]
+	// runCache["urls"] = runData["urls"]
 	runCache["source"] = "CI"
 
 	logErr := LogRun(runCache)
@@ -65,10 +65,10 @@ func HandleCIRun(exportArgs map[string]interface{}) error {
 		return fmt.Errorf("posting run for PR comment failed -> %v: %w", functionName, logErr)
 	}
 
-	if prErr := GenerateComment(runCache); prErr != nil {
-		runSpinner.Fail()
-		return fmt.Errorf("handling pull request update failed -> %v: %w", functionName, prErr)
-	}
+	// if prErr := GenerateComment(runCache); prErr != nil {
+	// 	runSpinner.Fail()
+	// 	return fmt.Errorf("handling pull request update failed -> %v: %w", functionName, prErr)
+	// }
 
 	runSpinner.Success()
 
