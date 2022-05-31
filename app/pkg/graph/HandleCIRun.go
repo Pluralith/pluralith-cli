@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/ux"
@@ -44,6 +45,13 @@ func HandleCIRun(exportArgs map[string]interface{}) error {
 	if postErr != nil {
 		runSpinner.Fail()
 		return fmt.Errorf("posting run for PR comment failed -> %v: %w", functionName, postErr)
+	}
+
+	// Get current branch if possible
+	branchCmd := exec.Command("git", "rev-parse", "--abbrev-ref", "HEAD")
+	branchName, branchErr := branchCmd.Output()
+	if branchErr == nil {
+		runCache["branch"] = string(branchName)
 	}
 
 	// Populate run cache data with additional attributes
