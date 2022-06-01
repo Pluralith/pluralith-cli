@@ -34,8 +34,11 @@ var runCmd = &cobra.Command{
 		}
 
 		exportArgs := graph.ConstructExportArgs(cmd.Flags())
-		exportArgs["title"] = fmt.Sprintf("%07d", rand.Intn(10000000)) // Generate random run id
-		exportArgs["show-costs"] = true                                // Always run infracost in CI if infracost is installed
+		exportArgs["id"] = fmt.Sprintf("%07d", rand.Intn(10000000)) // Generate random run id
+		exportArgs["title"] = "Run #" + exportArgs["id"].(string)
+		exportArgs["file-name"] = "Run_" + exportArgs["id"].(string)
+
+		costArgs["show-costs"] = true // Always run infracost in CI if infracost is installed
 
 		if graphErr := graph.RunGraph(tfArgs, costArgs, exportArgs, true); graphErr != nil {
 			fmt.Println(graphErr)

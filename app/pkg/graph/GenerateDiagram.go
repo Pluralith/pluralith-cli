@@ -39,7 +39,7 @@ func GenerateDiagram(exportArgs map[string]interface{}) error {
 
 	graphModulePath := filepath.Join(auxiliary.StateInstance.BinPath, "pluralith-cli-graphing")
 
-	exportSpinner := ux.NewSpinner("Generating Diagram PDF", "PDF Generated", "PDF Generation Failed", true)
+	exportSpinner := ux.NewSpinner("Generating Diagram", "Diagram Generated", "Diagram Generation Failed", true)
 	exportSpinner.Start()
 
 	// Handle out dir and file name defaults
@@ -55,6 +55,7 @@ func GenerateDiagram(exportArgs map[string]interface{}) error {
 		"graph",
 		"--api-key", auxiliary.StateInstance.APIKey,
 		"--title", exportArgs["title"].(string),
+		"--branch", exportArgs["branch"].(string),
 		"--author", exportArgs["author"].(string),
 		"--ver", exportArgs["version"].(string),
 		"--file-name", exportArgs["file-name"].(string),
@@ -85,9 +86,12 @@ func GenerateDiagram(exportArgs map[string]interface{}) error {
 	exportPath := filepath.Join(exportArgs["out-dir"].(string), exportArgs["file-name"].(string)) + ".pdf"
 
 	exportSpinner.Success()
-	ux.PrintFormatted("  → ", []string{"blue"})
-	fmt.Print("Diagram Exported To: ")
-	ux.PrintFormatted(exportPath+"\n", []string{"blue"})
+
+	if exportArgs["export-pdf"] == true {
+		ux.PrintFormatted("  → ", []string{"blue"})
+		fmt.Print("Diagram Exported To: ")
+		ux.PrintFormatted(exportPath+"\n", []string{"blue"})
+	}
 
 	return nil
 }
