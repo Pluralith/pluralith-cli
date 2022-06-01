@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"math/rand"
 	"pluralith/pkg/cost"
 	"pluralith/pkg/graph"
 	"pluralith/pkg/terraform"
@@ -33,7 +34,8 @@ var runCmd = &cobra.Command{
 		}
 
 		exportArgs := graph.ConstructExportArgs(cmd.Flags())
-		exportArgs["show-costs"] = true // Always run infracost in CI if infracost is installed
+		exportArgs["title"] = fmt.Sprintf("%07d", rand.Intn(10000000)) // Generate random run id
+		exportArgs["show-costs"] = true                                // Always run infracost in CI if infracost is installed
 
 		if graphErr := graph.RunGraph(tfArgs, costArgs, exportArgs, true); graphErr != nil {
 			fmt.Println(graphErr)
