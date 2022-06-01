@@ -6,7 +6,7 @@ import (
 	"pluralith/pkg/ux"
 )
 
-func RunTerraform(command string, tfArgs []string, costArgs []string) error {
+func RunTerraform(command string, tfArgs map[string]interface{}, costArgs map[string]interface{}) error {
 	functionName := "RunTerraform"
 
 	// Check if "terraform init" has been run
@@ -41,7 +41,7 @@ func RunTerraform(command string, tfArgs []string, costArgs []string) error {
 		return fmt.Errorf("running terraform plan failed -> %v: %w", functionName, planErr)
 	}
 
-	fmt.Println() // Line separation between plan and apply message prints
+	// Line separation between plan and apply message prints
 
 	// Run terraform apply on existing execution plan
 	applyErr := RunApply(command, planPath)

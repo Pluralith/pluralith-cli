@@ -11,6 +11,9 @@ import (
 func LogRun(runCache map[string]interface{}) error {
 	functionName := "LogRun"
 
+	runCache["projectId"] = auxiliary.StateInstance.PluralithConfig.ProjectId
+	runCache["config"] = ""
+
 	// Stringify run cache
 	runCacheBytes, marshalErr := json.MarshalIndent(runCache, "", " ")
 	if marshalErr != nil {
@@ -22,10 +25,14 @@ func LogRun(runCache map[string]interface{}) error {
 	request.Header.Add("Authorization", "Bearer "+auxiliary.StateInstance.APIKey)
 	request.Header.Add("Content-Type", "application/json")
 
+	// bodyMap := map[string]string{"key":"value"}
+	// bodyBytes, _ := json.Marshal(bodyMap)
+	// body := bytes.NewBuffer(bodyBytes)
+
 	// Add project id query string
-	queryString := request.URL.Query()
-	queryString.Add("projectId", auxiliary.StateInstance.PluralithConfig.ProjectId)
-	request.URL.RawQuery = queryString.Encode()
+	// queryString := request.Body()
+	// queryString.Add("projectId", auxiliary.StateInstance.PluralithConfig.ProjectId)
+	// request.Body = body//.URL.RawQuery = queryString.Encode()
 
 	client := &http.Client{}
 	response, responseErr := client.Do(request)

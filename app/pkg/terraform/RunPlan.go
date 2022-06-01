@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-func RunPlan(command string, tfArgs []string, costArgs []string, silent bool) (string, error) {
+func RunPlan(command string, tfArgs map[string]interface{}, costArgs map[string]interface{}, silent bool) (string, error) {
 	functionName := "RunPlan"
 
 	// Create Pluralith helper directory (.pluralith)
@@ -37,13 +37,20 @@ func RunPlan(command string, tfArgs []string, costArgs []string, silent bool) (s
 		"-out=" + workingPlan,
 	}
 
-	allArgs = append(allArgs, tfArgs...)
+	// Construct arg slices for terraform
+	for _, varValue := range tfArgs["var"].([]string) {
+		allArgs = append(allArgs, "-var='"+varValue+"'")
+	}
+
+	for _, varFile := range tfArgs["var-file"].([]string) {
+		allArgs = append(allArgs, "-var-file="+varFile)
+	}
 
 	if command == "destroy" {
 		allArgs = append(allArgs, "-destroy")
 	}
 
-	ux.PrintFormatted("→", []string{"blue", "bold"})
+	ux.PrintFormatted("\n→", []string{"blue", "bold"})
 	ux.PrintFormatted(" Plan\n", []string{"white", "bold"})
 
 	// Instantiate spinners
@@ -106,14 +113,14 @@ func RunPlan(command string, tfArgs []string, costArgs []string, silent bool) (s
 
 	stripSpinner.Success()
 
-	// Run infracost
-	if auxiliary.StateInstance.Infracost {
+	// Run Infracost
+	if auxiliary.StateInstance.Infracost && costArgs["show-costs"] == true {
 		if costErr := cost.CalculateCost(costArgs); costErr != nil {
 			fmt.Println(costErr)
 		}
 	} else {
 		ux.PrintFormatted("  -", []string{"blue", "bold"})
-		fmt.Println(" Cost Calculation Skipped\n")
+		fmt.Println(" Cost Calculation Skipped")
 	}
 
 	// Emit plan end update to UI

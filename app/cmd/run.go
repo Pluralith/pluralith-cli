@@ -16,21 +16,12 @@ var runCmd = &cobra.Command{
 	Short: "Generate a diagram in CI and post it to the Pluralith dashboard",
 	Long:  `Generate a diagram in CI and post it to the Pluralith dashboard`,
 	Run: func(cmd *cobra.Command, args []string) {
-		var runAsCI bool = true // Run as if in CI, no matter what 'IsCI' in state is
-
 		// Print UX head
 		ux.PrintFormatted("⠿", []string{"blue", "bold"})
 		fmt.Print(" Initiating Run ⇢ Posting To Pluralith Dashboard\n\n")
 
-		tfArgs, tfErr := terraform.ConstructTerraformArgs(cmd.Flags())
-		if tfErr != nil {
-			fmt.Println(tfErr)
-		}
-
-		costArgs, costErr := cost.ConstructInfracostArgs(cmd.Flags())
-		if costErr != nil {
-			fmt.Println(costErr)
-		}
+		tfArgs := terraform.ConstructTerraformArgs(cmd.Flags())
+		costArgs := cost.ConstructInfracostArgs(cmd.Flags())
 
 		configValid, configErr := graph.VerifyConfig(false)
 		if !configValid {
@@ -41,30 +32,27 @@ var runCmd = &cobra.Command{
 			return
 		}
 
-		exportArgs, exportErr := graph.ConstructExportArgs(cmd.Flags(), runAsCI)
-		if exportErr != nil {
-			if exportErr.Error() == "Handled" {
-				return
-			}
-			fmt.Println(fmt.Errorf("getting diagram values failed -> %w", exportErr))
-			return
+		exportArgs := graph.ConstructExportArgs(cmd.Flags())
+
+		if graphErr := graph.RunGraph(tfArgs, costArgs, exportArgs, true); graphErr != nil {
+			fmt.Println(graphErr)
 		}
 
-		if graphErr := graph.RunGraph(tfArgs, costArgs, exportArgs, runAsCI); graphErr != nil {
-			fmt.Println(graphErr)
+		if ciError := graph.HandleCIRun(exportArgs); ciError != nil {
+			fmt.Println(ciError)
 		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(runCmd)
-	runCmd.PersistentFlags().String("title", "", "The title for your diagram, will be displayed in the PDF output")
-	runCmd.PersistentFlags().String("author", "", "The author/creator of the diagram, will be displayed in the PDF output")
 	runCmd.PersistentFlags().String("version", "", "The diagram version, will be displayed in the PDF output")
 	runCmd.PersistentFlags().String("out-dir", "", "The directory the diagram should be exported to")
 	runCmd.PersistentFlags().String("file-name", "", "The name of the exported PDF")
-	runCmd.PersistentFlags().Bool("show-changes", false, "Determines whether the exported PDF highlights changes made in the latest Terraform plan or outputs a general diagram of the infrastructure")
-	runCmd.PersistentFlags().Bool("show-drift", false, "Determines whether the exported PDF highlights resource drift detected by Terraform")
+	runCmd.PersistentFlags().Bool("export-pdf", false, "Determines whether a PDF export of the run Diagram is generated locally")
+	runCmd.PersistentFlags().Bool("show-changes", false, "Determines whether the exported diagram highlights changes made in the latest Terraform plan or outputs a general diagram of the infrastructure")
+	runCmd.PersistentFlags().Bool("show-drift", false, "Determines whether the exported diagram highlights resource drift detected by Terraform")
+	runCmd.PersistentFlags().Bool("show-costs", false, "Determines whether the exported diagram includes cost information")
 	runCmd.PersistentFlags().StringSlice("var-file", []string{}, "Path to a var file to pass to Terraform. Can be specified multiple times.")
 	runCmd.PersistentFlags().StringSlice("var", []string{}, "A variable to pass to Terraform. Can be specified multiple times. (Format: --var='NAME=VALUE')")
 	runCmd.PersistentFlags().String("cost-usage-file", "", "Path to an infracost usage file to be used for the cost breakdown")

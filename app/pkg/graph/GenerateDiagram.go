@@ -30,8 +30,8 @@ func GenerateComment(runCache map[string]interface{}) error {
 	return nil
 }
 
-func ExportDiagram(exportArgs map[string]interface{}) error {
-	functionName := "ExportDiagram"
+func GenerateDiagram(exportArgs map[string]interface{}) error {
+	functionName := "GenerateDiagram"
 
 	ux.PrintFormatted("\n→", []string{"blue", "bold"})
 	ux.PrintFormatted(" Export\n", []string{"white", "bold"})
@@ -44,16 +44,18 @@ func ExportDiagram(exportArgs map[string]interface{}) error {
 	cmd := exec.Command(
 		graphModulePath,
 		"graph",
-		"--apiKey", auxiliary.StateInstance.APIKey,
-		"--title", exportArgs["Title"].(string),
-		"--author", exportArgs["Author"].(string),
-		"--ver", exportArgs["Version"].(string),
-		"--fileName", exportArgs["FileName"].(string),
-		"--outDir", exportArgs["OutDir"].(string),
-		"--planJsonPath", exportArgs["PlanJsonPath"].(string),
-		"--costJsonPath", exportArgs["CostJsonPath"].(string),
-		"--showChanges", strconv.FormatBool(exportArgs["ShowChanges"].(bool)),
-		"--showDrift", strconv.FormatBool(exportArgs["ShowDrift"].(bool)),
+		"--api-key", auxiliary.StateInstance.APIKey,
+		"--title", exportArgs["title"].(string),
+		"--author", exportArgs["author"].(string),
+		"--ver", exportArgs["version"].(string),
+		"--file-name", exportArgs["file-name"].(string),
+		"--out-dir", exportArgs["out-dir"].(string),
+		"--plan-json-path", exportArgs["plan-json-path"].(string),
+		"--cost-json-path", exportArgs["cost-json-path"].(string),
+		"--show-changes", strconv.FormatBool(exportArgs["show-changes"].(bool)),
+		"--show-drift", strconv.FormatBool(exportArgs["show-drift"].(bool)),
+		"--show-costs", strconv.FormatBool(exportArgs["show-costs"].(bool)),
+		"--export-pdf", strconv.FormatBool(exportArgs["export-pdf"].(bool)),
 	)
 
 	// Defining sinks for std data
@@ -71,7 +73,7 @@ func ExportDiagram(exportArgs map[string]interface{}) error {
 		return fmt.Errorf("running CLI command failed -> %v: %w", functionName, runErr)
 	}
 
-	exportPath := filepath.Join(exportArgs["OutDir"].(string), exportArgs["FileName"].(string)) + ".pdf"
+	exportPath := filepath.Join(exportArgs["out-dir"].(string), exportArgs["file-name"].(string)) + ".pdf"
 
 	exportSpinner.Success()
 	ux.PrintFormatted("  → ", []string{"blue"})
