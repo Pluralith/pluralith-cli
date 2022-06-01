@@ -52,7 +52,7 @@ var graphCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(graphCmd)
-	graphCmd.PersistentFlags().String("title", "", "The title for your diagram, will be displayed in the PDF output")
+	graphCmd.PersistentFlags().String("title", "Pluralith Diagram", "The title for your diagram, will be displayed in the PDF output")
 	graphCmd.PersistentFlags().String("author", "", "The author/creator of the diagram, will be displayed in the PDF output")
 	graphCmd.PersistentFlags().String("version", "", "The diagram version, will be displayed in the PDF output")
 	graphCmd.PersistentFlags().String("out-dir", "", "The directory the diagram should be exported to")

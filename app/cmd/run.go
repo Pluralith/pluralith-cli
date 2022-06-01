@@ -33,6 +33,7 @@ var runCmd = &cobra.Command{
 		}
 
 		exportArgs := graph.ConstructExportArgs(cmd.Flags())
+		exportArgs["show-costs"] = true // Always run infracost in CI if infracost is installed
 
 		if graphErr := graph.RunGraph(tfArgs, costArgs, exportArgs, true); graphErr != nil {
 			fmt.Println(graphErr)

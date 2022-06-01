@@ -10,6 +10,7 @@ import (
 	"pluralith/pkg/ci"
 	"pluralith/pkg/ux"
 	"strconv"
+	"strings"
 )
 
 func GenerateComment(runCache map[string]interface{}) error {
@@ -40,6 +41,14 @@ func GenerateDiagram(exportArgs map[string]interface{}) error {
 
 	exportSpinner := ux.NewSpinner("Generating Diagram PDF", "PDF Generated", "PDF Generation Failed", true)
 	exportSpinner.Start()
+
+	// Handle out dir and file name defaults
+	if exportArgs["file-name"] == "" {
+		exportArgs["file-name"] = strings.ReplaceAll(exportArgs["title"].(string), " ", "_")
+	}
+	if exportArgs["out-dir"] == "" {
+		exportArgs["out-dir"] = auxiliary.StateInstance.WorkingPath
+	}
 
 	cmd := exec.Command(
 		graphModulePath,
