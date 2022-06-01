@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/ux"
+	"strings"
 )
 
 func HandleCIRun(exportArgs map[string]interface{}) error {
@@ -43,7 +44,7 @@ func HandleCIRun(exportArgs map[string]interface{}) error {
 	branchCmd := exec.Command("git", "rev-parse", "--abbrev-ref", "HEAD")
 	branchName, branchErr := branchCmd.Output()
 	if branchErr == nil {
-		runCache["branch"] = string(branchName)
+		runCache["branch"] = strings.TrimSpace(string(branchName))
 	}
 
 	// Populate run cache data with additional attributes
