@@ -21,17 +21,13 @@ var runCmd = &cobra.Command{
 		ux.PrintFormatted("⠿", []string{"blue", "bold"})
 		fmt.Print(" Initiating Run ⇢ Posting To Pluralith Dashboard\n\n")
 
-		configValid, configErr := graph.VerifyConfig(false)
-		if !configValid {
-			return
-		}
-		if configErr != nil {
-			fmt.Println(configErr)
+		tfArgs := terraform.ConstructTerraformArgs(cmd.Flags())
+		costArgs, costErr := cost.ConstructInfracostArgs(cmd.Flags())
+		if costErr != nil {
+			fmt.Println(costErr)
 			return
 		}
 
-		tfArgs := terraform.ConstructTerraformArgs(cmd.Flags())
-		costArgs := cost.ConstructInfracostArgs(cmd.Flags())
 		exportArgs := graph.ConstructExportArgs(cmd.Flags())
 		exportArgs["id"] = fmt.Sprintf("%07d", rand.Intn(10000000)) // Generate random run id
 		costArgs["show-costs"] = true                               // Always run infracost in CI if infracost is installed
@@ -40,6 +36,15 @@ var runCmd = &cobra.Command{
 		if exportArgs["title"] == "" {
 			exportArgs["title"] = "Run #" + exportArgs["id"].(string)
 			exportArgs["file-name"] = "Run_" + exportArgs["id"].(string)
+		}
+
+		configValid, configErr := graph.VerifyConfig(false)
+		if !configValid {
+			return
+		}
+		if configErr != nil {
+			fmt.Println(configErr)
+			return
 		}
 
 		if graphErr := graph.RunGraph(tfArgs, costArgs, exportArgs, true); graphErr != nil {
@@ -62,6 +67,8 @@ func init() {
 	runCmd.PersistentFlags().Bool("show-changes", false, "Determines whether the exported diagram highlights changes made in the latest Terraform plan or outputs a general diagram of the infrastructure")
 	runCmd.PersistentFlags().Bool("show-drift", false, "Determines whether the exported diagram highlights resource drift detected by Terraform")
 	runCmd.PersistentFlags().Bool("show-costs", false, "Determines whether the exported diagram includes cost information")
+	runCmd.PersistentFlags().String("cost-mode", "delta", "Determines which costs are shown. Can be 'delta' or 'total'")
+	runCmd.PersistentFlags().String("cost-period", "month", "Determines over which period costs are aggregated. Can be 'hour' or 'month'")
 	runCmd.PersistentFlags().StringSlice("var-file", []string{}, "Path to a var file to pass to Terraform. Can be specified multiple times.")
 	runCmd.PersistentFlags().StringSlice("var", []string{}, "A variable to pass to Terraform. Can be specified multiple times. (Format: --var='NAME=VALUE')")
 	runCmd.PersistentFlags().String("cost-usage-file", "", "Path to an infracost usage file to be used for the cost breakdown")

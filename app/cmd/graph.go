@@ -30,7 +30,14 @@ var graphCmd = &cobra.Command{
 		fmt.Print(" Exporting Diagram\n\n")
 
 		tfArgs := terraform.ConstructTerraformArgs(cmd.Flags())
-		costArgs := cost.ConstructInfracostArgs(cmd.Flags())
+		costArgs, costErr := cost.ConstructInfracostArgs(cmd.Flags())
+		if costErr != nil {
+			fmt.Println(costErr)
+			return
+		}
+
+		exportArgs := graph.ConstructExportArgs(cmd.Flags())
+		exportArgs["export-pdf"] = true // Always export pdf when running locally
 
 		configValid, configErr := graph.VerifyConfig(true)
 		if !configValid {
@@ -39,10 +46,6 @@ var graphCmd = &cobra.Command{
 		if configErr != nil {
 			fmt.Println(configErr)
 		}
-
-		// flagMap := graph.ConstructFlagMap(cmd.Flags())
-		exportArgs := graph.ConstructExportArgs(cmd.Flags())
-		exportArgs["export-pdf"] = true // Always export pdf when running locally
 
 		if graphErr := graph.RunGraph(tfArgs, costArgs, exportArgs, false); graphErr != nil {
 			fmt.Println(graphErr)
@@ -60,6 +63,8 @@ func init() {
 	graphCmd.PersistentFlags().Bool("show-changes", false, "Determines whether the exported diagram highlights changes made in the latest Terraform plan or outputs a general diagram of the infrastructure")
 	graphCmd.PersistentFlags().Bool("show-drift", false, "Determines whether the exported diagram highlights resource drift detected by Terraform")
 	graphCmd.PersistentFlags().Bool("show-costs", false, "Determines whether the exported diagram includes cost information")
+	graphCmd.PersistentFlags().String("cost-mode", "delta", "Determines which costs are shown. Can be 'delta' or 'total'")
+	graphCmd.PersistentFlags().String("cost-period", "month", "Determines over which period costs are aggregated. Can be 'hour' or 'month'")
 	graphCmd.PersistentFlags().StringSlice("var-file", []string{}, "Path to a var file to pass to Terraform. Can be specified multiple times.")
 	graphCmd.PersistentFlags().StringSlice("var", []string{}, "A variable to pass to Terraform. Can be specified multiple times. (Format: --var='NAME=VALUE')")
 	graphCmd.PersistentFlags().String("cost-usage-file", "", "Path to an infracost usage file to be used for the cost breakdown")

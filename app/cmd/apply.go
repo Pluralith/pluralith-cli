@@ -15,7 +15,11 @@ var applyCmd = &cobra.Command{
 	Long:  `Run terraform apply and show changes in Pluralith`,
 	Run: func(cmd *cobra.Command, args []string) {
 		tfArgs := terraform.ConstructTerraformArgs(cmd.Flags())
-		costArgs := cost.ConstructInfracostArgs(cmd.Flags())
+		costArgs, costErr := cost.ConstructInfracostArgs(cmd.Flags())
+		if costErr != nil {
+			fmt.Println(costErr)
+			return
+		}
 
 		if applyErr := terraform.RunTerraform("apply", tfArgs, costArgs); applyErr != nil {
 			fmt.Println(applyErr)
