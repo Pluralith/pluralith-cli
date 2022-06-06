@@ -21,9 +21,6 @@ var runCmd = &cobra.Command{
 		ux.PrintFormatted("⠿", []string{"blue", "bold"})
 		fmt.Print(" Initiating Run ⇢ Posting To Pluralith Dashboard\n\n")
 
-		tfArgs := terraform.ConstructTerraformArgs(cmd.Flags())
-		costArgs := cost.ConstructInfracostArgs(cmd.Flags())
-
 		configValid, configErr := graph.VerifyConfig(false)
 		if !configValid {
 			return
@@ -33,12 +30,17 @@ var runCmd = &cobra.Command{
 			return
 		}
 
+		tfArgs := terraform.ConstructTerraformArgs(cmd.Flags())
+		costArgs := cost.ConstructInfracostArgs(cmd.Flags())
 		exportArgs := graph.ConstructExportArgs(cmd.Flags())
 		exportArgs["id"] = fmt.Sprintf("%07d", rand.Intn(10000000)) // Generate random run id
-		exportArgs["title"] = "Run #" + exportArgs["id"].(string)
-		exportArgs["file-name"] = "Run_" + exportArgs["id"].(string)
+		costArgs["show-costs"] = true                               // Always run infracost in CI if infracost is installed
 
-		costArgs["show-costs"] = true // Always run infracost in CI if infracost is installed
+		// Set defaults for export
+		if exportArgs["title"] == "" {
+			exportArgs["title"] = "Run #" + exportArgs["id"].(string)
+			exportArgs["file-name"] = "Run_" + exportArgs["id"].(string)
+		}
 
 		if graphErr := graph.RunGraph(tfArgs, costArgs, exportArgs, true); graphErr != nil {
 			fmt.Println(graphErr)
@@ -52,6 +54,7 @@ var runCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(runCmd)
+	runCmd.PersistentFlags().String("title", "", "The title for your diagram, will be displayed in the PDF output")
 	runCmd.PersistentFlags().String("version", "", "The diagram version, will be displayed in the PDF output")
 	runCmd.PersistentFlags().String("out-dir", "", "The directory the diagram should be exported to")
 	runCmd.PersistentFlags().String("file-name", "", "The name of the exported PDF")
