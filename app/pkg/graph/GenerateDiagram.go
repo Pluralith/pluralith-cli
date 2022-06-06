@@ -31,7 +31,7 @@ func GenerateComment(runCache map[string]interface{}) error {
 	return nil
 }
 
-func GenerateDiagram(exportArgs map[string]interface{}) error {
+func GenerateDiagram(exportArgs map[string]interface{}, costArgs map[string]interface{}) error {
 	functionName := "GenerateDiagram"
 
 	ux.PrintFormatted("\n→", []string{"blue", "bold"})
@@ -62,10 +62,13 @@ func GenerateDiagram(exportArgs map[string]interface{}) error {
 		"--out-dir", exportArgs["out-dir"].(string),
 		"--plan-json-path", exportArgs["plan-json-path"].(string),
 		"--cost-json-path", exportArgs["cost-json-path"].(string),
+		"--export-pdf", strconv.FormatBool(exportArgs["export-pdf"].(bool)),
 		"--show-changes", strconv.FormatBool(exportArgs["show-changes"].(bool)),
 		"--show-drift", strconv.FormatBool(exportArgs["show-drift"].(bool)),
 		"--show-costs", strconv.FormatBool(exportArgs["show-costs"].(bool)),
-		"--export-pdf", strconv.FormatBool(exportArgs["export-pdf"].(bool)),
+
+		"--cost-mode", costArgs["cost-mode"].(string),
+		"--cost-period", costArgs["cost-period"].(string),
 	)
 
 	// Defining sinks for std data
