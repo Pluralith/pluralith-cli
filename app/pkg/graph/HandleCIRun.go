@@ -42,6 +42,14 @@ func HandleCIRun(exportArgs map[string]interface{}) error {
 	runCache["id"] = exportArgs["id"]
 	runCache["branch"] = exportArgs["branch"]
 
+	config := make(map[string]interface{})
+	config["showChanges"] = exportArgs["showChanges"]
+	config["showCosts"] = exportArgs["showCosts"]
+	config["showDrift"] = exportArgs["showDrift"]
+	config["format"] = "png"
+
+	runCache["config"] = config
+
 	logErr := LogRun(runCache)
 	if logErr != nil {
 		runSpinner.Fail()
