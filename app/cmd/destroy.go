@@ -14,14 +14,11 @@ var destroyCmd = &cobra.Command{
 	Short: "Run terraform destroy and show changes in Pluralith",
 	Long:  `Run terraform destroy and show changes in Pluralith`,
 	Run: func(cmd *cobra.Command, args []string) {
-		tfArgs, tfErr := terraform.ConstructTerraformArgs(cmd.Flags())
-		if tfErr != nil {
-			fmt.Println(tfErr)
-		}
-
+		tfArgs := terraform.ConstructTerraformArgs(cmd.Flags())
 		costArgs, costErr := cost.ConstructInfracostArgs(cmd.Flags())
 		if costErr != nil {
 			fmt.Println(costErr)
+			return
 		}
 
 		if destroyErr := terraform.RunTerraform("destroy", tfArgs, costArgs); destroyErr != nil {
@@ -35,5 +32,5 @@ func init() {
 	destroyCmd.PersistentFlags().StringSlice("var-file", []string{}, "Path to a var file to pass to Terraform. Can be specified multiple times.")
 	destroyCmd.PersistentFlags().StringSlice("var", []string{}, "A variable to pass to Terraform. Can be specified multiple times. (Format: --var='NAME=VALUE')")
 	destroyCmd.PersistentFlags().String("cost-usage-file", "", "Path to an infracost usage file to be used for the cost breakdown")
-	destroyCmd.PersistentFlags().Bool("no-costs", false, "If we detect infracost we automatically run a cost breakdown and show it in the diagram. Use this flag to turn that off")
+	destroyCmd.PersistentFlags().Bool("show-costs", false, "If we detect infracost we automatically run a cost breakdown and show it in the diagram. Use this flag to turn that off")
 }

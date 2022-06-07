@@ -29,15 +29,15 @@ var graphCmd = &cobra.Command{
 		ux.PrintFormatted("⠿", []string{"blue", "bold"})
 		fmt.Print(" Exporting Diagram\n\n")
 
-		tfArgs, tfErr := terraform.ConstructTerraformArgs(cmd.Flags())
-		if tfErr != nil {
-			fmt.Println(tfErr)
-		}
-
+		tfArgs := terraform.ConstructTerraformArgs(cmd.Flags())
 		costArgs, costErr := cost.ConstructInfracostArgs(cmd.Flags())
 		if costErr != nil {
 			fmt.Println(costErr)
+			return
 		}
+
+		exportArgs := graph.ConstructExportArgs(cmd.Flags())
+		exportArgs["export-pdf"] = true // Always export pdf when running locally
 
 		configValid, configErr := graph.VerifyConfig(true)
 		if !configValid {
@@ -45,12 +45,6 @@ var graphCmd = &cobra.Command{
 		}
 		if configErr != nil {
 			fmt.Println(configErr)
-		}
-
-		exportArgs, exportErr := graph.ConstructExportArgs(cmd.Flags(), false)
-		if exportErr != nil {
-			fmt.Println(fmt.Errorf("getting diagram values failed -> %w", exportErr))
-			return
 		}
 
 		if graphErr := graph.RunGraph(tfArgs, costArgs, exportArgs, false); graphErr != nil {
@@ -61,16 +55,17 @@ var graphCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(graphCmd)
-	graphCmd.PersistentFlags().String("title", "", "The title for your diagram, will be displayed in the PDF output")
+	graphCmd.PersistentFlags().String("title", "Pluralith Diagram", "The title for your diagram, will be displayed in the PDF output")
 	graphCmd.PersistentFlags().String("author", "", "The author/creator of the diagram, will be displayed in the PDF output")
 	graphCmd.PersistentFlags().String("version", "", "The diagram version, will be displayed in the PDF output")
 	graphCmd.PersistentFlags().String("out-dir", "", "The directory the diagram should be exported to")
 	graphCmd.PersistentFlags().String("file-name", "", "The name of the exported PDF")
-	graphCmd.PersistentFlags().Bool("show-changes", false, "Determines whether the exported PDF highlights changes made in the latest Terraform plan or outputs a general diagram of the infrastructure")
-	graphCmd.PersistentFlags().Bool("show-drift", false, "Determines whether the exported PDF highlights resource drift detected by Terraform")
-	graphCmd.PersistentFlags().Bool("skip-plan", false, "Generates a diagram without running plan again (needs pluralith state from previous plan run)")
+	graphCmd.PersistentFlags().Bool("show-changes", false, "Determines whether the exported diagram highlights changes made in the latest Terraform plan or outputs a general diagram of the infrastructure")
+	graphCmd.PersistentFlags().Bool("show-drift", false, "Determines whether the exported diagram highlights resource drift detected by Terraform")
+	graphCmd.PersistentFlags().Bool("show-costs", false, "Determines whether the exported diagram includes cost information")
+	graphCmd.PersistentFlags().String("cost-mode", "delta", "Determines which costs are shown. Can be 'delta' or 'total'")
+	graphCmd.PersistentFlags().String("cost-period", "month", "Determines over which period costs are aggregated. Can be 'hour' or 'month'")
+	graphCmd.PersistentFlags().String("cost-usage-file", "", "Path to an infracost usage file to be used for the cost breakdown")
 	graphCmd.PersistentFlags().StringSlice("var-file", []string{}, "Path to a var file to pass to Terraform. Can be specified multiple times.")
 	graphCmd.PersistentFlags().StringSlice("var", []string{}, "A variable to pass to Terraform. Can be specified multiple times. (Format: --var='NAME=VALUE')")
-	graphCmd.PersistentFlags().String("cost-usage-file", "", "Path to an infracost usage file to be used for the cost breakdown")
-	graphCmd.PersistentFlags().Bool("no-costs", false, "If we detect infracost we automatically run a cost breakdown and show it in the diagram. Use this flag to turn that off")
 }

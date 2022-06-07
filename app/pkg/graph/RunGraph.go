@@ -12,7 +12,7 @@ import (
 	"pluralith/pkg/ux"
 )
 
-func RunGraph(tfArgs []string, costArgs []string, exportArgs map[string]interface{}, runAsCI bool) error {
+func RunGraph(tfArgs map[string]interface{}, costArgs map[string]interface{}, exportArgs map[string]interface{}, runAsCI bool) error {
 	functionName := "RunGraph"
 
 	// Check if graph module installed, if not -> install
@@ -21,47 +21,31 @@ func RunGraph(tfArgs []string, costArgs []string, exportArgs map[string]interfac
 		components.GraphModule()
 	}
 
-	// Run terraform plan to create execution plan if not specified otherwise by user
-	if exportArgs["SkipPlan"] == false {
-		_, planErr := terraform.RunPlan("plan", tfArgs, costArgs, true)
-		if planErr != nil {
-			return fmt.Errorf("running terraform plan failed -> %v: %w", functionName, planErr)
-		}
-	} else {
-		ux.PrintFormatted("→ ", []string{"bold", "blue"})
-		ux.PrintFormatted("Plan\n", []string{"bold", "white"})
-		ux.PrintFormatted("  -", []string{"blue", "bold"})
-		fmt.Println(" Skipped\n")
+	_, planErr := terraform.RunPlan("plan", tfArgs, costArgs, true)
+	if planErr != nil {
+		return fmt.Errorf("running terraform plan failed -> %v: %w", functionName, planErr)
 	}
 
 	// Construct plan state path
-	planStatePath := filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith", "pluralith.state.json")
+	planJsonPath := filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith", "pluralith.state.json")
+	costJsonPath := filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith", "pluralith.costs.json")
 
 	// Check if plan state exists
-	_, existErr := os.Stat(planStatePath)    // Check if old state exists
+	_, existErr := os.Stat(planJsonPath)     // Check if old state exists
 	if errors.Is(existErr, os.ErrNotExist) { // If it exists -> delete
 		ux.PrintFormatted("✘", []string{"bold", "red"})
 		fmt.Print(" No plan state found ")
-		ux.PrintFormatted("→", []string{"bold", "red"})
-		fmt.Println(" Run pluralith graph again without --skip-plan")
 		return nil
 	}
 
 	// Pass plan state on to graphing module
-	exportArgs["PlanStatePath"] = planStatePath
+	exportArgs["plan-json-path"] = planJsonPath
+	exportArgs["cost-json-path"] = costJsonPath
 
 	// Generate diagram through graphing module
-	if exportErr := ExportDiagram(exportArgs); exportErr != nil {
-		return fmt.Errorf("exporting diagram failed -> %v: %w", functionName, exportErr)
+	if diagramErr := GenerateDiagram(exportArgs, costArgs); diagramErr != nil {
+		return fmt.Errorf("generating diagram failed -> %v: %w", functionName, diagramErr)
 	}
-
-	if runAsCI {
-		if exportErr := HandleCIRun(exportArgs); exportErr != nil {
-			return fmt.Errorf("exporting diagram failed -> %v: %w", functionName, exportErr)
-		}
-	}
-
-	fmt.Println()
 
 	return nil
 }

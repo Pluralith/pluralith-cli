@@ -10,7 +10,7 @@ func RunInit(isEmpty bool, APIKey string, projectId string) error {
 	functionName := "RunInit"
 
 	if isEmpty {
-		fmt.Println()
+		// fmt.Println()
 		if writeErr := WriteConfig(projectId); writeErr != nil {
 			return fmt.Errorf("failed to create config template -> %v: %w", functionName, writeErr)
 		}

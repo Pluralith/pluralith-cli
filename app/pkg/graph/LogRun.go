@@ -4,12 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"pluralith/pkg/auxiliary"
 )
 
 func LogRun(runCache map[string]interface{}) error {
 	functionName := "LogRun"
+
+	runCache["projectId"] = auxiliary.StateInstance.PluralithConfig.ProjectId
 
 	// Stringify run cache
 	runCacheBytes, marshalErr := json.MarshalIndent(runCache, "", " ")
@@ -22,11 +25,6 @@ func LogRun(runCache map[string]interface{}) error {
 	request.Header.Add("Authorization", "Bearer "+auxiliary.StateInstance.APIKey)
 	request.Header.Add("Content-Type", "application/json")
 
-	// Add project id query string
-	queryString := request.URL.Query()
-	queryString.Add("projectId", auxiliary.StateInstance.PluralithConfig.ProjectId)
-	request.URL.RawQuery = queryString.Encode()
-
 	client := &http.Client{}
 	response, responseErr := client.Do(request)
 
@@ -37,6 +35,20 @@ func LogRun(runCache map[string]interface{}) error {
 	if response.StatusCode >= 300 {
 		return fmt.Errorf("request failed -> %v: %v", functionName, response)
 	}
+
+	// Parse response for file URLs
+	responseBody, readErr := ioutil.ReadAll(response.Body)
+	if readErr != nil {
+		return fmt.Errorf("%v: %w", functionName, readErr)
+	}
+
+	var bodyObject map[string]interface{}
+	parseErr := json.Unmarshal(responseBody, &bodyObject)
+	if parseErr != nil {
+		return fmt.Errorf("parsing response failed -> %v: %w", functionName, responseErr)
+	}
+
+	runCache["urls"] = bodyObject["data"]
 
 	return nil
 }

@@ -2,36 +2,25 @@ package cost
 
 import (
 	"fmt"
-	"pluralith/pkg/auxiliary"
 
 	"github.com/spf13/pflag"
 )
 
-func ConstructInfracostArgs(flags *pflag.FlagSet) ([]string, error) {
-	functionName := "ConstructInfracostArgs"
+func ConstructInfracostArgs(flags *pflag.FlagSet) (map[string]interface{}, error) {
+	flagMap := make(map[string]interface{})
 
-	costArgs := []string{}
+	flagMap["show-costs"], _ = flags.GetBool("show-costs")
+	flagMap["cost-usage-file"], _ = flags.GetString("cost-usage-file")
+	flagMap["cost-mode"], _ = flags.GetString("cost-mode")
+	flagMap["cost-period"], _ = flags.GetString("cost-period")
 
-	// No Costs flag
-	noCosts, noCostsErr := flags.GetBool("no-costs")
-	if noCostsErr != nil {
-		return costArgs, fmt.Errorf("failed to parse no-costs flag -> %v: %w", functionName, noCostsErr)
+	if flagMap["cost-mode"] != "" && flagMap["cost-mode"] != "delta" && flagMap["cost-mode"] != "total" {
+		return flagMap, fmt.Errorf("Invalid value for --cost-mode. Can only be 'delta' or 'total'")
 	}
 
-	if noCosts {
-		auxiliary.StateInstance.Infracost = false
-		return costArgs, nil
+	if flagMap["cost-period"] != "" && flagMap["cost-period"] != "hour" && flagMap["cost-period"] != "month" {
+		return flagMap, fmt.Errorf("Invalid value for --cost-period. Can only be 'hour' or 'month'")
 	}
 
-	// Usage file flag
-	usageFilePath, usageFileErr := flags.GetString("cost-usage-file")
-	if usageFileErr != nil {
-		return costArgs, fmt.Errorf("failed to parse cost usage file flag -> %v: %w", functionName, noCostsErr)
-	}
-
-	if usageFilePath != "" {
-		costArgs = append(costArgs, "--usage-file="+usageFilePath)
-	}
-
-	return costArgs, nil
+	return flagMap, nil
 }

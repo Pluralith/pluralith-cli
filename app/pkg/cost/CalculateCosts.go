@@ -10,7 +10,7 @@ import (
 	"pluralith/pkg/ux"
 )
 
-func CalculateCost(costArgs []string) error {
+func CalculateCost(costArgs map[string]interface{}) error {
 	functionName := "CalculateCost"
 
 	costSpinner := ux.NewSpinner("Calculating Infrastructure Costs", "Costs Calculated", "Couldn't Calculate Costs", true)
@@ -25,7 +25,9 @@ func CalculateCost(costArgs []string) error {
 		"--format=json",
 	}
 
-	allArgs = append(allArgs, costArgs...)
+	if costArgs["usage-file-path"] != nil {
+		allArgs = append(allArgs, "--usage-file="+costArgs["usage-file-path"].(string))
+	}
 
 	costCmd := exec.Command("infracost", allArgs...)
 

@@ -38,18 +38,17 @@ func HandleCIRun(exportArgs map[string]interface{}) error {
 		return fmt.Errorf("unmarshalling cache failed -> %v: %w", functionName, unmarshallErr)
 	}
 
-	// Upload diagram to storage for pull request comment hosting
-	exportPath := filepath.Join(exportArgs["OutDir"].(string), exportArgs["FileName"].(string)) + ".pdf"
-	runData, postErr := PostRun(exportPath)
-	if postErr != nil {
-		runSpinner.Fail()
-		return fmt.Errorf("posting run for PR comment failed -> %v: %w", functionName, postErr)
-	}
-
 	// Populate run cache data with additional attributes
-	runCache["id"] = runData["id"]
-	runCache["urls"] = runData["urls"]
-	runCache["source"] = "CI"
+	runCache["id"] = exportArgs["id"]
+	runCache["branch"] = exportArgs["branch"]
+
+	config := make(map[string]interface{})
+	config["showChanges"] = exportArgs["showChanges"]
+	config["showCosts"] = exportArgs["showCosts"]
+	config["showDrift"] = exportArgs["showDrift"]
+	config["format"] = "png"
+
+	runCache["config"] = config
 
 	logErr := LogRun(runCache)
 	if logErr != nil {
