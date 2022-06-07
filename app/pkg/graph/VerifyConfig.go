@@ -11,8 +11,8 @@ func VerifyConfig(noProject bool) (bool, error) {
 	functionName := "VerifyConfig"
 
 	ux.PrintFormatted("→ ", []string{"blue", "bold"})
-	ux.PrintFormatted("Verify", []string{"white", "bold"})
-	fmt.Println()
+	ux.PrintFormatted("Verify\n", []string{"white", "bold"})
+	// fmt.Println()
 
 	// Verify API key with backend
 	apiKeyValid, apiKeyErr := auth.VerifyAPIKey(auxiliary.StateInstance.APIKey, false)

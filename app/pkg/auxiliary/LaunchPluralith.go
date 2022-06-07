@@ -15,7 +15,7 @@ func runOsCommand(command []string) error {
 	functionName := "runOsCommand"
 
 	// Instantiating new custom spinner
-	spinner := ux.NewSpinner("Launching Pluralith...", "Pluralith Running\n", "Failed to launch Pluralith\n", false)
+	spinner := ux.NewSpinner("Launching Pluralith...", "Pluralith Running", "Failed to launch Pluralith", false)
 	spinner.Start()
 
 	// Creating command to launch Pluralith on given OS

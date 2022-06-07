@@ -33,9 +33,9 @@ func RunApply(command string, planPath string) error {
 
 	allArgs = append(allArgs, planPath)
 
-	ux.PrintFormatted("→", []string{"blue", "bold"})
-	ux.PrintFormatted(strings.Join([]string{" ", strings.Title(command)}, ""), []string{"white", "bold"})
-	fmt.Println()
+	ux.PrintFormatted("\n→", []string{"blue", "bold"})
+	ux.PrintFormatted(strings.Join([]string{" ", strings.Title(command), "\n"}, ""), []string{"white", "bold"})
+	// fmt.Println()
 
 	// Get working directory
 	workingDir, workingErr := os.Getwd()
