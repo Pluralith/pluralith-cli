@@ -51,7 +51,7 @@ All three of the above commands share the same flags:
   - `--var`: Specify a variable to pass to Terraform. Can be specified multiple times. (Format: --var='NAME=VALUE')
   - `--var-file`: Specify a path to a var file to pass to Terraform. Can be specified multiple times.
   - `--cost-usage-file`: Specify a path to an infracost usage file to be used for the cost breakdown.
-  - `--no-costs`: Turn off internal `infracost breakdown` on current run
+  - `--show-costs`: Run `infracost breakdown` under the hood and show cost information in the diagram (Requires `infracost` to be installed)
 
 &nbsp;
 
@@ -64,6 +64,9 @@ All three of the above commands share the same flags:
   - `--show-changes`: Enables change highlighting in the output diagram. When enabled, resources that have been added, updated, deleted etc. will be highlighted with special colors
   - `--show-drift`: Enables drift highlighting in the output diagram. When enabled, resources that Terraform has detected drift for will be highlighted with a special badge and color
     - Only works if Pluralith has run in the current directory before
+  - `--show-costs`: Include cost information in the diagram to see which resources cost and how much. (Requires `infracost` to be installed)
+    - `--cost-mode`: Can be either `total` or `delta`. Default is `delta`
+    - `--cost-period`: Can be either `hour` or `month`. Default is `month` 
   - `--out-dir`: The path your exported diagram PDF gets saved to _(e.g. "~/pluralith-infra/eks")_
     - Saved to current directory by default
   - `--file-name`: The path your exported diagram PDF gets saved to
@@ -72,7 +75,30 @@ All three of the above commands share the same flags:
   - `--var`: Specify a variable to pass to Terraform. Can be specified multiple times. (Format: --var='NAME=VALUE')
   - `--var-file`: Specify a path to a var file to pass to Terraform. Can be specified multiple times.
   - `--cost-usage-file`: Specify a path to an infracost usage file to be used for the cost breakdown.
-  - `--no-costs`: Turn off internal `infracost breakdown` on current run
+
+### → CI Command
+Pluralith has a dedicated command - `pluralith run` - to run in CI and generate documentation automatically
+
+- `pluralith run`: Creates a Terraform execution plan, draws a graph and posts it to the Pluralith Dashboard<sup>2</sup>
+  - `--title`: The title to be shown in the diagram _(e.g. "Pluralith EKS Cluster")_
+  - `--version`: The version to be shown in the diagram _(e.g. "1.0.5")_
+  - `--var`: Specify a variable to pass to Terraform. Can be specified multiple times. (Format: --var='NAME=VALUE')
+  - `--var-file`: Specify a path to a var file to pass to Terraform. Can be specified multiple times.
+  - `--cost-usage-file`: Specify a path to an infracost usage file to be used for the cost breakdown.
+  - `--export-pdf`: Generates and exports a local PDF of the diagram in addition to posting it to the Pluralith dashboard
+
+- The following additional flags from the `pluralith graph` command become relevant if you pass `--export-pdf` to generate a local PDF in your pipelines:
+
+  - `--show-changes`: Enables change highlighting in the output diagram. When enabled, resources that have been added, updated, deleted etc. will be highlighted with special colors
+  - `--show-drift`: Enables drift highlighting in the output diagram. When enabled, resources that Terraform has detected drift for will be highlighted with a special badge and color
+    - Only works if Pluralith has run in the current directory before
+  - `--show-costs`: Include cost information in the diagram to see which resources cost and how much. (Requires `infracost` installation)
+    - `--cost-mode`: Can be either `total` or `delta`. Default is `delta`
+    - `--cost-period`: Can be either `hour` or `month`. Default is `month`
+  - `--out-dir`: The path your exported diagram PDF gets saved to _(e.g. "~/pluralith-infra/eks")_
+    - Saved to current directory by default
+  - `--file-name`: The path your exported diagram PDF gets saved to
+    - The value passed for `--title` is used by default
 
 &nbsp;
 
