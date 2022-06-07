@@ -14,11 +14,11 @@ func ConstructInfracostArgs(flags *pflag.FlagSet) (map[string]interface{}, error
 	flagMap["cost-mode"], _ = flags.GetString("cost-mode")
 	flagMap["cost-period"], _ = flags.GetString("cost-period")
 
-	if flagMap["cost-mode"] != "delta" && flagMap["cost-mode"] != "total" {
+	if flagMap["cost-mode"] != "" && flagMap["cost-mode"] != "delta" && flagMap["cost-mode"] != "total" {
 		return flagMap, fmt.Errorf("Invalid value for --cost-mode. Can only be 'delta' or 'total'")
 	}
 
-	if flagMap["cost-period"] != "hour" && flagMap["cost-period"] != "month" {
+	if flagMap["cost-period"] != "" && flagMap["cost-period"] != "hour" && flagMap["cost-period"] != "month" {
 		return flagMap, fmt.Errorf("Invalid value for --cost-period. Can only be 'hour' or 'month'")
 	}
 
