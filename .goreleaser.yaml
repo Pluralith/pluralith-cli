@@ -22,6 +22,7 @@ builds:
       - amd64
     env:
       - CGO_ENABLED=0
+    no_unique_dist_dir: true
 
   - binary: windows/pluralith
     id: windows
@@ -32,6 +33,7 @@ builds:
       - amd64
     env:
       - CGO_ENABLED=0
+    no_unique_dist_dir: true
 
   - binary: darwin/pluralith
     id: darwin
@@ -42,6 +44,7 @@ builds:
       - amd64
     env:
       - CGO_ENABLED=0
+    no_unique_dist_dir: true
 signs:
   - signature: "${artifact}"
     ids:
