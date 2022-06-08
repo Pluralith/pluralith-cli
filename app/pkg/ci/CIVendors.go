@@ -5,6 +5,7 @@ type Vendor struct {
 	Constant string      //`json:Constant`
 	Env      []string    //`json:Env`
 	Pr       interface{} //`json:"pr,omitempty"`
+	Branch   string
 }
 
 var GeneralEnvVars = []string{
@@ -124,12 +125,14 @@ var CIVendors = []Vendor{
 		Pr: map[string]interface{}{
 			"GITHUB_EVENT_NAME": "pull_request",
 		},
+		Branch: "GITHUB_REF_NAME",
 	},
 	{
 		Name:     "GitLab CI",
 		Constant: "GITLAB",
 		Env:      []string{"GITLAB_CI"},
 		Pr:       "CI_MERGE_REQUEST_ID",
+		Branch:   "CI_MERGE_REQUEST_SOURCE_BRANCH_NAME",
 	},
 	{
 		Name:     "GoCD",

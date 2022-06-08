@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"math/rand"
+	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/cost"
 	"pluralith/pkg/graph"
 	"pluralith/pkg/terraform"
@@ -19,7 +20,16 @@ var runCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Print UX head
 		ux.PrintFormatted("⠿", []string{"blue", "bold"})
-		fmt.Print(" Initiating Run ⇢ Posting To Pluralith Dashboard\n\n")
+		fmt.Println(" Initiating Run ⇢ Posting To Pluralith Dashboard")
+
+		if auxiliary.StateInstance.Branch != "none" {
+			ux.PrintFormatted(" →", []string{"blue", "bold"})
+			fmt.Print(" Branch detected: ")
+			ux.PrintFormatted(auxiliary.StateInstance.Branch+"\n\n", []string{"blue"})
+		} else {
+			ux.PrintFormatted(" →", []string{"blue", "bold"})
+			fmt.Print(" Could not detect branch\n\n")
+		}
 
 		tfArgs := terraform.ConstructTerraformArgs(cmd.Flags())
 		costArgs, costErr := cost.ConstructInfracostArgs(cmd.Flags())
