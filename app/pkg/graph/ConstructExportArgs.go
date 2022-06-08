@@ -1,8 +1,7 @@
 package graph
 
 import (
-	"os/exec"
-	"strings"
+	"pluralith/pkg/auxiliary"
 
 	"github.com/spf13/pflag"
 )
@@ -19,13 +18,7 @@ func ConstructExportArgs(flags *pflag.FlagSet) map[string]interface{} {
 	flagMap["show-drift"], _ = flags.GetBool("show-drift")
 	flagMap["show-costs"], _ = flags.GetBool("show-costs")
 	flagMap["export-pdf"], _ = flags.GetBool("export-pdf")
-
-	// Get current branch if possible
-	branchCmd := exec.Command("git", "rev-parse", "--abbrev-ref", "HEAD")
-	branchName, branchErr := branchCmd.Output()
-	if branchErr == nil {
-		flagMap["branch"] = strings.TrimSpace(string(branchName))
-	}
+	flagMap["branch"] = auxiliary.StateInstance.Branch
 
 	return flagMap
 }
