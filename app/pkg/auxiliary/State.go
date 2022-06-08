@@ -24,6 +24,7 @@ type State struct {
 	APIKey          string
 	IsWSL           bool
 	IsCI            bool
+	Branch          string
 	TerraformInit   bool
 	Infracost       bool
 }
@@ -141,6 +142,11 @@ func (S *State) CheckCI() {
 	}
 
 	S.IsCI = false
+}
+
+// Detect branch name
+func (S *State) GetBranch() {
+	S.Branch = ci.GetBranch()
 }
 
 // Check if Terraform has been initialized
