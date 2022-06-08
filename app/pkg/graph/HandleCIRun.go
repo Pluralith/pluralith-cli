@@ -43,9 +43,9 @@ func HandleCIRun(exportArgs map[string]interface{}) error {
 	runCache["branch"] = exportArgs["branch"]
 
 	config := make(map[string]interface{})
-	config["showChanges"] = exportArgs["showChanges"]
-	config["showCosts"] = exportArgs["showCosts"]
-	config["showDrift"] = exportArgs["showDrift"]
+	config["showChanges"] = exportArgs["show-changes"]
+	config["showCosts"] = exportArgs["show-costs"]
+	config["showDrift"] = exportArgs["show-drift"]
 	config["format"] = "png"
 
 	runCache["config"] = config

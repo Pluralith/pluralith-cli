@@ -61,6 +61,9 @@ var runCmd = &cobra.Command{
 			fmt.Println(graphErr)
 		}
 
+		if ciError := graph.HandleCIRun(exportArgs); ciError != nil {
+			fmt.Println(ciError)
+		}
 	},
 }
 
