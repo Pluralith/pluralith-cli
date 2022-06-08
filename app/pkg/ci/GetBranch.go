@@ -24,5 +24,5 @@ func GetBranch() string {
 		return strings.TrimSpace(string(branchName))
 	}
 
-	return ""
+	return "none"
 }

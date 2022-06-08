@@ -28,7 +28,7 @@ var runCmd = &cobra.Command{
 			ux.PrintFormatted(auxiliary.StateInstance.Branch+"\n\n", []string{"blue"})
 		} else {
 			ux.PrintFormatted(" →", []string{"blue", "bold"})
-			fmt.Print(" Could not detect branch")
+			fmt.Print(" Could not detect branch\n\n")
 		}
 
 		tfArgs := terraform.ConstructTerraformArgs(cmd.Flags())
