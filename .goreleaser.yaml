@@ -13,7 +13,7 @@ release:
   # Default is false.
   draft: true
 builds:
-  - binary: pluralith
+  - binary: linux/pluralith
     id: linux
     dir: ./app
     goos:
@@ -23,7 +23,7 @@ builds:
     env:
       - CGO_ENABLED=0
 
-  - binary: pluralith
+  - binary: windows/pluralith
     id: windows
     dir: ./app
     goos:
@@ -33,7 +33,7 @@ builds:
     env:
       - CGO_ENABLED=0
 
-  - binary: pluralith
+  - binary: darwin/pluralith
     id: darwin
     dir: ./app
     goos:
