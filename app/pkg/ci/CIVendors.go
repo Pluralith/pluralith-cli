@@ -125,7 +125,7 @@ var CIVendors = []Vendor{
 		Pr: map[string]interface{}{
 			"GITHUB_EVENT_NAME": "pull_request",
 		},
-		Branch: "GITHUB_REF_NAME",
+		Branch: "GITHUB_HEAD_REF",
 	},
 	{
 		Name:     "GitLab CI",

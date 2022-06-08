@@ -17,7 +17,7 @@ func GenerateComment(runCache map[string]interface{}) error {
 	functionName := "preparePRComment"
 
 	// Generate pull request comment markdown
-	commentMD, commentErr := ci.GenerateMD(runCache["urls"].(map[string]interface{}), runCache["changes"].(map[string]interface{}))
+	commentMD, commentErr := ci.GenerateComment(runCache["urls"].(map[string]interface{}), runCache["changes"].(map[string]interface{}))
 	if commentErr != nil {
 		return fmt.Errorf("generating PR comment markdown failed -> %v: %w", functionName, commentErr)
 	}

@@ -11,7 +11,7 @@ func GetBranch() string {
 	for _, vendor := range CIVendors {
 		if vendor.Branch != "" {
 			branch, found := os.LookupEnv(vendor.Branch)
-			if found {
+			if found && branch != "" {
 				return branch
 			}
 		}
