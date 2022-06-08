@@ -19,7 +19,6 @@
 dist/
 
 # Others
-release.sh
 .DS_Store
 
 # Terraform

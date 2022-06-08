@@ -13,7 +13,7 @@ release:
   # Default is false.
   draft: true
 builds:
-  - binary: pluralith
+  - binary: linux/pluralith
     id: linux
     dir: ./app
     goos:
@@ -22,8 +22,9 @@ builds:
       - amd64
     env:
       - CGO_ENABLED=0
+    no_unique_dist_dir: true
 
-  - binary: pluralith
+  - binary: windows/pluralith
     id: windows
     dir: ./app
     goos:
@@ -32,8 +33,9 @@ builds:
       - amd64
     env:
       - CGO_ENABLED=0
+    no_unique_dist_dir: true
 
-  - binary: pluralith
+  - binary: darwin/pluralith
     id: darwin
     dir: ./app
     goos:
@@ -42,6 +44,7 @@ builds:
       - amd64
     env:
       - CGO_ENABLED=0
+    no_unique_dist_dir: true
 signs:
   - signature: "${artifact}"
     ids:
@@ -69,7 +72,7 @@ archives:
       - goos: windows
         format: zip
 checksum:
-  name_template: "checksums.txt"
+  name_template: "pluralith_checksums_{{ .Tag }}.txt"
 changelog:
   sort: asc
   filters:
