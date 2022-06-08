@@ -72,7 +72,7 @@ archives:
       - goos: windows
         format: zip
 checksum:
-  name_template: "pluralith_checksums.txt"
+  name_template: "pluralith_checksums_{{ .Tag }}.txt"
 changelog:
   sort: asc
   filters:
