@@ -39,7 +39,7 @@ func RunPlan(command string, tfArgs map[string]interface{}, costArgs map[string]
 
 	// Construct arg slices for terraform
 	for _, varValue := range tfArgs["var"].([]string) {
-		allArgs = append(allArgs, "-var='"+varValue+"'")
+		allArgs = append(allArgs, "-var="+varValue)
 	}
 
 	for _, varFile := range tfArgs["var-file"].([]string) {
