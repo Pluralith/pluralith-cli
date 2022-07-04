@@ -27,7 +27,7 @@ func ReplaceSensitive(jsonObject map[string]interface{}) {
 				case reflect.Array, reflect.Slice:
 					// If value is of type array or slice -> Loop through elements, if maps are found -> Move to next recursion level
 					for _, innerValue := range outerValue.([]interface{}) {
-						if reflect.TypeOf(innerValue).Kind() == reflect.Map {
+						if innerValue != nil && reflect.TypeOf(innerValue).Kind() == reflect.Map {
 							ReplaceSensitive(innerValue.(map[string]interface{}))
 						}
 					}
