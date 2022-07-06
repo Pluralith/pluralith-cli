@@ -3,7 +3,7 @@ echo "Installing Pluralith"
 
 # Setup packages
 apt-get -y install jq
-curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | sh
+curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
 source ~/.nvm/nvm.sh
 nvm install --lts
 nvm use --lts
