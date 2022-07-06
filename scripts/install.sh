@@ -1,6 +1,9 @@
 # A little helper script to get Pluralith set up in CI
 echo "Installing Pluralith"
 
+# Setup
+apt-get install jq
+
 # Get download url from latest release
 url="https://api.pluralith.com/v1/dist/download/cli?os=linux&arch=amd64"
 url=$(curl -s $url | jq -r '.data.url')
