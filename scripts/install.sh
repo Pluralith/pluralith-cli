@@ -2,7 +2,7 @@
 echo "Installing Pluralith"
 
 # Setup
-apt-get install jq -y
+apt-get -y install jq
 
 # Get download url from latest release
 url="https://api.pluralith.com/v1/dist/download/cli?os=linux&arch=amd64"
