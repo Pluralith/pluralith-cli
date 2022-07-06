@@ -22,4 +22,3 @@ RUN npm install -g @infracost/compost
 
 ENTRYPOINT [ "pluralith" ]
 
-
