@@ -4,11 +4,6 @@ echo "Installing Pluralith"
 # Setup packages
 apt-get update
 apt-get -y install jq
-# curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
-# source ~/.nvm/nvm.sh
-# source ~/.bashrc
-# nvm install --lts
-# nvm use --lts
 npm install -g @infracost/compost
 
 # Get download url from latest release
