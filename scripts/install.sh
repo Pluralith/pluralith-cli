@@ -2,7 +2,7 @@
 echo "Installing Pluralith"
 
 # Setup
-apt-get -y install jq npm
+apt-get -y install jq nodejs npm
 npm install -g @infracost/compost
 
 # Get download url from latest release
