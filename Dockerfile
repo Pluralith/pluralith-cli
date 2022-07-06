@@ -12,7 +12,7 @@ SHELL ["/bin/bash", "-ec"]
 # Download and install Pluralith CLI
 COPY ./scripts/ci ./scripts
 RUN ./scripts/download.sh
-RUN ./scripts/install.sh
+RUN ./scripts/install-pluralith.sh
 
 # Make terraform installation script executable in finished image
 RUN chmod +x ./scripts/install-terraform.sh
