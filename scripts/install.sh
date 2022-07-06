@@ -1,8 +1,12 @@
 # A little helper script to get Pluralith set up in CI
 echo "Installing Pluralith"
 
-# Setup
-apt-get -y install jq nodejs npm
+# Setup packages
+apt-get -y install jq
+curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | sh
+source ~/.nvm/nvm.sh
+nvm install --lts
+nvm use --lts
 npm install -g @infracost/compost
 
 # Get download url from latest release
