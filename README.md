@@ -24,156 +24,15 @@ The **Pluralith CLI** is a tool written in **`Go`** to:
 
 - Integrate Pluralith with Terraform
 - Interact with the **[Pluralith UI](https://www.pluralith.com)**
-- Run Pluralith in **Pipelines** for automated infrastructure documentation
+- [Run Pluralith in **CI**](https://docs.pluralith.com/docs/get-started/run-in-ci) for automated infrastructure documentation
 - Ship other useful little features
 
 &nbsp;
 
-## ⚙️ Getting Started
+## 📕 Docs
 
-We are currently working on getting `pluralith` into **homebrew/core** and **apt**! For homebrew we need 75 stars, 30 forks and 30 watchers. We'd greatly appreciate if you can help us out with that.
-
-Until we manage to get into these package managers you can manually install the **Pluralith CLI** by downloading your OS's binary from the latest release or by installing the **Pluralith UI** available [here](https://www.pluralith.com). The UI will install the CLI and keep it updated automatically.
-
-&nbsp;
-
-## 🛰️ CLI Overview
-
-### → Terraform Commands
-
-- `pluralith plan`: Creates a Terraform execution plan and opens it as a Diagram in the **Pluralith UI**<sup>1</sup>.
-- `pluralith apply`: Essentially the same as `pluralith plan` with the intention of actually applying the execution plan<sup>1</sup>.
-- `pluralith destroy`: Creates a Terraform execution plan in destroy mode and opens it as a Diagram in the **Pluralith UI**
-
-All three of the above commands share the same flags:
-
-- `pluralith plan | apply | destroy`:
-  - `--var`: Specify a variable to pass to Terraform. Can be specified multiple times. (Format: --var='NAME=VALUE')
-  - `--var-file`: Specify a path to a var file to pass to Terraform. Can be specified multiple times.
-  - `--cost-usage-file`: Specify a path to an infracost usage file to be used for the cost breakdown.
-  - `--show-costs`: Run `infracost breakdown` under the hood and show cost information in the diagram (Requires `infracost` to be installed)
-
-&nbsp;
-
-### → Diagram Export Command
-
-- `pluralith graph`: Creates a Terraform execution plan, draws a graph and exports it as a PDF in a headless way<sup>2</sup>
-  - `--title`: The title to be shown in the diagram _(e.g. "Pluralith EKS Cluster")_
-  - `--author`: The author to be shown in the diagram _(e.g. "Tony Stark")_
-  - `--version`: The version to be shown in the diagram _(e.g. "1.0.5")_
-  - `--show-changes`: Enables change highlighting in the output diagram. When enabled, resources that have been added, updated, deleted etc. will be highlighted with special colors
-  - `--show-drift`: Enables drift highlighting in the output diagram. When enabled, resources that Terraform has detected drift for will be highlighted with a special badge and color
-    - Only works if Pluralith has run in the current directory before
-  - `--show-costs`: Include cost information in the diagram to see which resources cost and how much. (Requires `infracost` to be installed)
-    - `--cost-mode`: Can be either `total` or `delta`. Default is `delta`
-    - `--cost-period`: Can be either `hour` or `month`. Default is `month` 
-  - `--out-dir`: The path your exported diagram PDF gets saved to _(e.g. "~/pluralith-infra/eks")_
-    - Saved to current directory by default
-  - `--file-name`: The path your exported diagram PDF gets saved to
-    - The value passed for `--title` is used by default
-  - `--generate-md`: Generates markdown for GitHub pull request / commit comment _(used in our [Pluralith GitHub actions](https://github.com/Pluralith/actions))_
-  - `--var`: Specify a variable to pass to Terraform. Can be specified multiple times. (Format: --var='NAME=VALUE')
-  - `--var-file`: Specify a path to a var file to pass to Terraform. Can be specified multiple times.
-  - `--cost-usage-file`: Specify a path to an infracost usage file to be used for the cost breakdown.
-
-### → CI Command
-Pluralith has a dedicated command - `pluralith run` - to run in CI and generate documentation automatically
-
-- `pluralith run`: Creates a Terraform execution plan, draws a graph and posts it to the Pluralith Dashboard<sup>2</sup>
-  - `--title`: The title to be shown in the diagram _(e.g. "Pluralith EKS Cluster")_
-  - `--version`: The version to be shown in the diagram _(e.g. "1.0.5")_
-  - `--var`: Specify a variable to pass to Terraform. Can be specified multiple times. (Format: --var='NAME=VALUE')
-  - `--var-file`: Specify a path to a var file to pass to Terraform. Can be specified multiple times.
-  - `--cost-usage-file`: Specify a path to an infracost usage file to be used for the cost breakdown.
-  - `--export-pdf`: Generates and exports a local PDF of the diagram in addition to posting it to the Pluralith dashboard
-
-- The following additional flags from the `pluralith graph` command become relevant if you pass `--export-pdf` to generate a local PDF in your pipelines:
-
-  - `--show-changes`: Enables change highlighting in the output diagram. When enabled, resources that have been added, updated, deleted etc. will be highlighted with special colors
-  - `--show-drift`: Enables drift highlighting in the output diagram. When enabled, resources that Terraform has detected drift for will be highlighted with a special badge and color
-    - Only works if Pluralith has run in the current directory before
-  - `--show-costs`: Include cost information in the diagram to see which resources cost and how much. (Requires `infracost` installation)
-    - `--cost-mode`: Can be either `total` or `delta`. Default is `delta`
-    - `--cost-period`: Can be either `hour` or `month`. Default is `month`
-  - `--out-dir`: The path your exported diagram PDF gets saved to _(e.g. "~/pluralith-infra/eks")_
-    - Saved to current directory by default
-  - `--file-name`: The path your exported diagram PDF gets saved to
-    - The value passed for `--title` is used by default
-
-&nbsp;
-
-### 📍 Here's an example output for one of our test projects. View the PDF version **[here](https://github.com/Pluralith/pluralith-cli/files/8197192/HighlyAvailableIaaS.pdf)**
-
-![HighlyAvailableIaaS](https://user-images.githubusercontent.com/25454503/157020490-8dadf7a2-ccb6-4323-a5d1-596d264bb06e.png)
-
-&nbsp;
-
-### → Init Command
-
-This command initializes Pluralith in the current directory and creates a `pluralith.yml` config file for you to configure Pluralith to your liking.
-
-- `pluralith init`: Initializes Pluralith in the current directory
-  - `--empty`: Creates a config file with all the options commented out for you to edit to your liking
-  - `--api-key`: If not authenticated through `pluralith login` yet, you can pass your API directly to `pluralith init` with this flag _(for CI contexts)_
-  - `--project-id`: Links runs in the current directory to a specific project and posts them to the Pluralith dashboard to share with collaborators _(for CI contexts)_
-
-&nbsp;
-
-### → Strip Command
-
-- `pluralith strip`: Strips and hashes your plan state to make it shareable with us for debugging
-  - Takes an existing **Pluralith Plan state** and subjects it to rigorous hashing of values
-    - The Pluralith Plan state is located in the file _pluralith.state.json_ in your project directory
-  - The purpose of this command is to strip the state of all sensitive data while keeping the structure intact, making it shareable
-  - This is meant for us to debug edge cases on user state without the security hazard
-
-&nbsp;
-
-### → Module Commands
-
-- `pluralith install`: Installs/updates the specific module whose name is passed (e.g. `pluralith install graph-module`)
-- `pluralith update`: Essentially the same as `install`. Updates existing modules, if not installed it downloads the latest release
-  - If no value is passed, the latest version of the CLI itself will be installed
-
-&nbsp;
-
-### → Utility Commands
-
-- `pluralith login`: Authenticate with your API key (necessary for the CLI to work without the UI)<sup>2</sup>
-- `pluralith version`: Shows information about the current CLI version as well as additional, installed modules
-
-&nbsp;
-
-<sup>1</sup> The UI then shows a prompt that lets you confirm or deny an `apply` with hotkeys.  
-<sup>2</sup> You need to be authenticated with your **API key** via `pluralith login`. Currently only available for closed alpha testers. Interested? Shoot us an email dan@pluralith.com
-
-&nbsp;
-
-## 💰 Infracost Integration
-
-**`Coming Soon`**
-
-Pluralith shows you cost information directly in your infrastructure diagram. We automatically detect any Infracost installation and run `infracost breakdown` under the hood on every plan. We then match the cost data with the resources in the diagram and show you how much you'll pay. You can select from an array of cost modes:
-
-- `Total Mode`: Shows the total cost for each individual resource
-- `Diff Mode`: Shows the difference in costs for each individual resource in your current plan
-- `Spike Mode`: Highlights only resources whose costs have increased in your current plan
-
-The `plan`, `apply`, `destroy` and `graph` integrate Infracost:
-
-- `--cost-usage-file`: Lets you pass a usage file in YML format as generated by infracost
-- `--no-costs`: Lets you skip the infracost step on the current run
-
-&nbsp;
-
-## 📦 Modules
-
-The **Pluralith CLI** works with modules under the hood to extend its functionality. Below you can see a table of modules.
-
-| **Module**       | **Installation**                 | **Description**                                 |
-| ---------------- | -------------------------------- | ----------------------------------------------- |
-| **Graph Module** | `pluralith install graph-module` | Installs the latest version of the graph module |
-| **Pluralith UI** | `pluralith install ui`           | Installs the Pluralith UI. **`Coming Soon`**    |
+We've got official docs to get you set up!  
+**[Get started here](https://docs.pluralith.com)**
 
 &nbsp;
 
@@ -186,6 +45,6 @@ The **Pluralith CLI** works with modules under the hood to extend its functional
   - [Dan's Linkedin](https://www.linkedin.com/in/danielputzer/)
   - [Phi's Linkedin](https://www.linkedin.com/in/philipp-weber-a8517b231/)
 
-_Disclaimer: To properly use this CLI you **will need** the **Pluralith UI** and/or an **API key**. [Sign up](https://www.pluralith.com) for the private alpha to get access!_
+_Disclaimer: To properly use this CLI you **will need** the **Pluralith UI** and/or an **API key**. [Sign up](https://www.pluralith.com) for the alpha to get access!_
 
 ![Subreddit subscribers](https://img.shields.io/reddit/subreddit-subscribers/pluralith?style=social)
