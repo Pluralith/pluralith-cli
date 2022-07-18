@@ -5650,6 +5650,7 @@ func GetStripBlacklist() []string {
 		"configuration",
 		"prior_state",
 		"values",
+		"value",
 		"resource_changes",
 		"resource_drift",
 		"before",
