@@ -12,7 +12,7 @@ var stripCmd = &cobra.Command{
 	Short: "Strip a given state file of secrets according to config",
 	Long:  `Strip a given state file of secrets according to config`,
 	Run: func(cmd *cobra.Command, args []string) {
-		strip.StripInstance.StripAndHash()
+		strip.StripAndHash()
 	},
 }
 

@@ -9,332 +9,13 @@ import (
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/ux"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 )
 
-type StripState struct {
-	planJson         map[string]interface{}
-	keyWhitelist     []string
-	valueWhitelist   []string
-	providers        []string
-	deletes          []string
-	hashedKeyParents []string // Parent keys within which to look for keys that need to be hashed
-
-	moduleNames   []string
-	variableNames []string
-	resourceNames []string
-	outputNames   []string
-	indexNames    []string
-}
-
-// Helper function to produce hash digest of given string
-func (S *StripState) Hash(value string) string {
-	h := fnv.New64a()
-	h.Write([]byte(value))
-
-	// Prevent double hashing in recursion
-	if strings.HasPrefix(value, "hash_") {
-		return value
-	}
-
-	return fmt.Sprintf("hash_%v", h.Sum64())
-}
-
-// Function to hash ouput value keys if output value is an object
-func (S *StripState) HashOutputKeys(outputObject map[string]interface{}) map[string]interface{} {
-	if outputValue, hasValue := outputObject["value"]; hasValue {
-		if outputValue == nil {
-			return outputObject
-		}
-
-		if reflect.TypeOf(outputValue).Kind() != reflect.Map {
-			return outputObject // If value object is not a map -> no key hashing to be done
-		}
-
-		valueObject := outputObject["value"].(map[string]interface{})
-		originalOutputValues := []string{}
-
-		for valueKey, _ := range valueObject {
-			originalOutputValues = append(originalOutputValues, valueKey)
-		}
-
-		for _, originalkey := range originalOutputValues {
-			valueObject[S.Hash(originalkey)] = valueObject[originalkey]
-			delete(valueObject, originalkey)
-		}
-	}
-
-	return outputObject
-}
-
-// Function to handle name replacements in string values
-func (S *StripState) CollectNames(inputMap map[string]interface{}) {
-	for key, value := range inputMap {
-		if value == nil {
-			continue
-		}
-
-		// Handle provider config
-		if key == "provider_config" {
-			for _, providerValue := range value.(map[string]interface{}) {
-				providerObject := providerValue.(map[string]interface{})
-				S.providers = append(S.providers, providerObject["name"].(string))
-			}
-		}
-
-		// Resource names
-		if key == "resources" && reflect.TypeOf(value).Kind() == reflect.Slice {
-			for _, resourceValue := range value.([]interface{}) {
-				if reflect.TypeOf(resourceValue).Kind() != reflect.Map {
-					continue
-				}
-
-				resourceObject := resourceValue.(map[string]interface{})
-				S.resourceNames = append(S.resourceNames, resourceObject["name"].(string))
-
-				if indexValue, hasIndex := resourceObject["index"]; hasIndex {
-					if indexValue == nil {
-						continue
-					}
-
-					if reflect.TypeOf(indexValue).Kind() == reflect.String {
-						S.indexNames = append(S.indexNames, indexValue.(string))
-					}
-				}
-			}
-		}
-
-		// Module names
-		if key == "module_calls" {
-			// Hash module keys and add new keys to module_calls object
-			for moduleKey, _ := range value.(map[string]interface{}) {
-				S.moduleNames = append(S.moduleNames, moduleKey)
-			}
-
-			// Delete old unhashed module keys
-			for _, moduleName := range S.moduleNames {
-				valueObject := value.(map[string]interface{})
-				valueObject[S.Hash(moduleName)] = valueObject[moduleName]
-				delete(value.(map[string]interface{}), moduleName)
-			}
-		}
-
-		// Variable names
-		if key == "variables" {
-			for variableKey, _ := range value.(map[string]interface{}) {
-				S.variableNames = append(S.variableNames, variableKey)
-			}
-
-			// Delete old unhashed module keys
-			for _, variableName := range S.variableNames {
-				valueObject := value.(map[string]interface{})
-
-				// Check if value object actually has current name
-				if _, hasOutput := valueObject[variableName]; hasOutput {
-					valueObject[S.Hash(variableName)] = valueObject[variableName]
-					delete(value.(map[string]interface{}), variableName)
-				}
-			}
-		}
-
-		// Output names
-		if key == "outputs" {
-			for outputKey, _ := range value.(map[string]interface{}) {
-				S.outputNames = append(S.outputNames, outputKey)
-			}
-
-			// Delete old unhashed module keys
-			for _, outputName := range S.outputNames {
-				valueObject := value.(map[string]interface{})
-
-				// Check if value object actually has current name
-				if _, hasOutput := valueObject[outputName]; hasOutput {
-					outputObject := valueObject[outputName].(map[string]interface{})
-					outputObject = S.HashOutputKeys(outputObject)
-
-					valueObject[S.Hash(outputName)] = outputObject
-					delete(value.(map[string]interface{}), outputName)
-				}
-			}
-		}
-
-		// Proceed further down the recursion if value is type "map"
-		if reflect.TypeOf(value).Kind() == reflect.Map {
-			S.CollectNames(value.(map[string]interface{}))
-		}
-
-		// If value is a slice -> iterate over slice items and proceed further down with recursion on items that are maps
-		if reflect.TypeOf(value).Kind() == reflect.Slice {
-			for _, valueItem := range value.([]interface{}) {
-				if reflect.TypeOf(valueItem).Kind() == reflect.Map {
-					S.CollectNames(valueItem.(map[string]interface{}))
-				}
-			}
-		}
-	}
-
-}
-
-// Function to handle name replacements in string values
-func (S *StripState) ReplaceNames(inputValue string) string {
-	replaceMatch := false
-	inputParts := strings.Split(inputValue, ".")
-
-	allNames := append(S.resourceNames, S.moduleNames...)
-	allNames = append(allNames, S.variableNames...)
-
-	for inputIndex, part := range inputParts {
-		// Hash names
-		for _, name := range allNames {
-			if part == name || strings.HasPrefix(part, name+"[") || strings.HasPrefix(part, name+":") {
-				replaceMatch = true
-				inputParts[inputIndex] = strings.ReplaceAll(part, name, S.Hash(name)) // Replace only name substring without altering or hashing index
-			}
-		}
-
-		// Hash indices
-		for _, index := range S.indexNames {
-			inputParts[inputIndex] = strings.ReplaceAll(inputParts[inputIndex], "[\""+index+"\"]", "[\""+S.Hash(index)+"\"]")
-		}
-	}
-
-	if replaceMatch {
-		return strings.Join(inputParts, ".")
-	}
-
-	return S.Hash(inputValue)
-}
-
-// Function to process all other value types
-func (S *StripState) ProcessDefault(parentKey string, inputValue string) string {
-	// Check if key is generally whitelisted
-	for _, whitelistedKey := range S.keyWhitelist {
-		if parentKey == whitelistedKey {
-			return inputValue
-		}
-	}
-
-	// Check if value is provider name
-	for _, providerName := range S.providers {
-		if inputValue == providerName {
-			return inputValue
-		}
-	}
-
-	// Whitelist special values relevant for dependencies
-	for _, whitelistedValue := range S.valueWhitelist {
-		if inputValue == whitelistedValue {
-			return inputValue
-		}
-	}
-
-	whitelisted := false
-
-	allNames := append(S.resourceNames, S.moduleNames...)
-	allNames = append(allNames, S.variableNames...)
-
-	// Whitelist values containing names (will be hashed partially later)
-	for _, nameValue := range allNames {
-		if strings.Contains(inputValue, nameValue) {
-			whitelisted = true
-			break
-		}
-	}
-
-	if whitelisted {
-		return S.ReplaceNames(inputValue)
-	} else {
-		return S.Hash(inputValue)
-	}
-}
-
-// Function to recursively process slices
-func (S *StripState) ProcessSlice(parentKey string, inputSlice []interface{}) {
-	for index, value := range inputSlice {
-		if value == nil {
-			continue
-		}
-
-		valueType := reflect.TypeOf(value).Kind()
-
-		switch valueType {
-		case reflect.Map:
-			S.ProcessMap(parentKey, value.(map[string]interface{}))
-		case reflect.Slice:
-			S.ProcessSlice(parentKey, value.([]interface{}))
-		default:
-			stringifiedValue := fmt.Sprintf("%v", value)
-			processedValue := S.ProcessDefault(parentKey, stringifiedValue)
-
-			// Converting potential numbers back to numbers if possible
-			if auxiliary.IsNumeric(processedValue) {
-				inputSlice[index], _ = strconv.Atoi(processedValue)
-			} else {
-				inputSlice[index] = processedValue
-			}
-		}
-	}
-}
-
-// Function to handle hashing of special keys
-func (S *StripState) HashSpecialKeys(parentKey string, inputKey string, inputMap map[string]interface{}) {
-	// Hash variable value keys in module calls
-	if parentKey == "constant_value" {
-		for _, indexName := range S.indexNames {
-			if inputKey == indexName {
-				inputMap[S.Hash(inputKey)] = inputMap[inputKey]
-				delete(inputMap, inputKey)
-			}
-		}
-	}
-
-	// Hash variable names in module calls
-	if parentKey == "expressions" {
-		for _, variableName := range S.variableNames {
-			if inputKey == variableName {
-				inputMap[S.Hash(inputKey)] = inputMap[inputKey]
-				delete(inputMap, inputKey)
-			}
-		}
-	}
-}
-
-// Function to recursively process maps
-func (S *StripState) ProcessMap(parentKey string, inputMap map[string]interface{}) {
-	// Delete unwanted keys
-	for _, item := range S.deletes {
-		delete(inputMap, item)
-	}
-
-	for key, value := range inputMap {
-		if value == nil {
-			continue
-		}
-
-		S.HashSpecialKeys(parentKey, key, inputMap)
-
-		valueType := reflect.TypeOf(value).Kind()
-		switch valueType {
-		case reflect.Map:
-			S.ProcessMap(key, value.(map[string]interface{}))
-		case reflect.Slice:
-			S.ProcessSlice(key, value.([]interface{}))
-		default:
-			stringifiedValue := fmt.Sprintf("%v", value)
-			processedValue := S.ProcessDefault(key, stringifiedValue)
-
-			if auxiliary.IsNumeric(processedValue) {
-				inputMap[key], _ = strconv.Atoi(processedValue)
-			} else {
-				inputMap[key] = processedValue
-			}
-		}
-	}
-}
-
 // Entrypoint
-func (S *StripState) StripAndHash() error {
+func StripAndHash() error {
 	functionName := "StripAndHashState"
 
 	ux.PrintFormatted("⠿", []string{"blue"})
@@ -347,6 +28,8 @@ func (S *StripState) StripAndHash() error {
 
 	stripSpinner := ux.NewSpinner("Stripping and hashing plan state", "Plan state stripped and hashed", "Stripping and hashing plan state failed", false)
 	stripSpinner.Start()
+
+	var planJson interface{} // State
 
 	// Initialize relevant paths
 	planPath := filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith", "pluralith.state.json")
@@ -368,32 +51,17 @@ func (S *StripState) StripAndHash() error {
 	}
 
 	// Parse plan state
-	parseErr := json.Unmarshal(planBytes, &S.planJson)
+	parseErr := json.Unmarshal(planBytes, &planJson)
 	if parseErr != nil {
 		stripSpinner.Fail("Failed to parse plan state")
 		return fmt.Errorf("could not parse plan state -> %v: %w", functionName, readErr)
 	}
 
-	fmt.Println(S.planJson)
-
-	S.CollectNames(S.planJson)
-	S.providers = auxiliary.DeduplicateSlice(S.providers)
-	S.resourceNames = auxiliary.DeduplicateSlice(S.resourceNames)
-	S.moduleNames = auxiliary.DeduplicateSlice(S.moduleNames)
-	S.variableNames = auxiliary.DeduplicateSlice(S.variableNames)
-	S.indexNames = auxiliary.DeduplicateSlice(S.indexNames)
-
-	S.keyWhitelist = []string{"type", "provider_name", "terraform_version"}
-	S.valueWhitelist = []string{"for.each", "count.index"}
-	S.deletes = []string{"tags", "tags_all", "description", "source"}
-	S.hashedKeyParents = []string{"value", "constant_value"}
-
-	// fmt.Println(S.indexNames)
-
-	S.ProcessMap("", S.planJson)
+	// Strip state
+	planJson = StripJson(planJson)
 
 	// Turn stripped and hashed state back into string
-	planString, marshalErr := json.MarshalIndent(S.planJson, "", " ")
+	planString, marshalErr := json.MarshalIndent(planJson, "", " ")
 	if marshalErr != nil {
 		stripSpinner.Fail("Failed to stringify stripped plan state")
 		return fmt.Errorf("%v: %w", functionName, marshalErr)
@@ -415,4 +83,154 @@ func (S *StripState) StripAndHash() error {
 	return nil
 }
 
-var StripInstance = &StripState{}
+// Strip state recursively
+func StripJson(obj interface{}) interface{} {
+
+	if obj == nil {
+		return nil
+	}
+
+	objType := reflect.TypeOf(obj).Kind()
+	if objType == reflect.String { // obj is string
+		return HashString(obj.(string))
+	} else if objType == reflect.Slice { // obj is array
+		for i := 0; i < len(obj.([]interface{})); i++ {
+			stripResult := StripJson((obj.([]interface{}))[i])
+			if stripResult != nil {
+				obj.([]interface{})[i] = stripResult
+			}
+		}
+		return obj
+	} else if objType == reflect.Map { // obj is map
+		newMap := make(map[string]interface{})
+		for k, value := range obj.(map[string]interface{}) {
+			if value == nil {
+				// TODO
+			} else if reflect.TypeOf(value).Kind() == reflect.Bool {
+				obj.(map[string]interface{})[k] = Hash(strconv.FormatBool(obj.(map[string]interface{})[k].(bool)))
+			} else if reflect.TypeOf(value).Kind() == reflect.Int {
+				// TODO
+			} else if reflect.TypeOf(value).Kind() == reflect.String && value.(string) == "" {
+				obj.(map[string]interface{})[k] = ""
+			} else {
+				stripResult := StripJson(value)
+				if stripResult != nil {
+					obj.(map[string]interface{})[k] = stripResult
+				}
+			}
+
+			stripResult := HashString(k)
+			if stripResult != k {
+				newMap[stripResult] = obj.(map[string]interface{})[k]
+			} else {
+				newMap[k] = obj.(map[string]interface{})[k]
+			}
+		}
+
+		obj = newMap
+		return obj
+	}
+
+	return obj
+}
+
+// Hash a string using som e rules
+func HashString(value string) string {
+	splitString := strings.Split(value, ".")
+
+	for index1 := 0; index1 < len(splitString); index1++ {
+		splitPart := []string{}
+		if !strings.Contains(splitString[index1], "[") {
+			splitPart = strings.Split(splitString[index1], "/")
+		} else {
+			splitPart = append(splitPart, splitString[index1])
+		}
+
+		for index := 0; index < len(splitPart); index++ {
+			if splitPart[index] == "" {
+				continue
+			} else if strings.Contains(splitPart[index], "[") {
+				r, _ := regexp.Compile("\\[((([^\\]])|(\"))+)\\]")
+				regexMatch := r.FindStringSubmatch(splitPart[index])
+				if regexMatch != nil {
+					bracketContent := strings.ReplaceAll(regexMatch[1], "[", "")
+					bracketContent = strings.ReplaceAll(regexMatch[1], "]", "")
+					if _, err := strconv.Atoi(bracketContent); err != nil {
+						quotations := false
+						bracketContentBackup := bracketContent
+						if strings.HasSuffix(bracketContent, "\"") && strings.HasPrefix(bracketContent, "\"") {
+							bracketContent = strings.TrimPrefix(bracketContent, "\"")
+							bracketContent = strings.TrimSuffix(bracketContent, "\"")
+							quotations = true
+						}
+						bracketContent = Hash(bracketContent)
+						if quotations {
+							bracketContent = "\"" + bracketContent + "\""
+						}
+
+						splitPart[index] = strings.ReplaceAll(splitPart[index], "["+bracketContentBackup+"]", "["+bracketContent+"]")
+					}
+
+					splitPartPart := strings.Split(splitPart[index], "[")
+					for index2 := 0; index2 < len(splitPartPart); index2++ {
+						if splitPartPart[index2] == "" {
+							continue
+						} else if !strings.Contains(splitPartPart[index2], "]") {
+							splitPartPart[index2] = Hash(splitPartPart[index2])
+						} else {
+							splitPartPart[index2] = "[" + splitPartPart[index2]
+						}
+					}
+					hashedPartPart := ""
+
+					for index2 := 0; index2 < len(splitPartPart); index2++ {
+						hashedPartPart += splitPartPart[index2]
+					}
+					splitPart[index] = hashedPartPart
+				}
+			} else if !contains(GetStripBlacklist(), splitPart[index]) {
+				if _, err := strconv.Atoi(splitPart[index]); err != nil {
+					splitPart[index] = Hash(splitPart[index])
+				}
+			}
+		}
+
+		hashedPart := ""
+
+		for index := 0; index < len(splitPart); index++ {
+			hashedPart += splitPart[index]
+			if index < len(splitPart)-1 {
+				hashedPart += "/"
+			}
+		}
+		splitString[index1] = hashedPart
+	}
+
+	hashedString := ""
+
+	for index := 0; index < len(splitString); index++ {
+		hashedString += splitString[index]
+		if index < len(splitString)-1 {
+			hashedString += "."
+		}
+	}
+
+	return hashedString
+}
+
+// Helper function to produce hash digest of given string
+func Hash(value string) string {
+	h := fnv.New64a()
+	h.Write([]byte(value))
+	return fmt.Sprintf("hash_%v", h.Sum64())
+}
+
+// Check if string contains substring
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
