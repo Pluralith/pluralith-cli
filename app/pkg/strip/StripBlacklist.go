@@ -5701,6 +5701,7 @@ func GetStripBlacklist() []string {
 		"name",
 		"type",
 		"id",
+		"data",
 		"planned_values",
 		"terraform_remote_state",
 		"module_address",
