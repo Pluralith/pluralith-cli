@@ -9,6 +9,7 @@ func ConstructTerraformArgs(flags *pflag.FlagSet) map[string]interface{} {
 
 	flagMap["var"], _ = flags.GetStringSlice("var")
 	flagMap["var-file"], _ = flags.GetStringSlice("var-file")
+	flagMap["plan-file"], _ = flags.GetString("plan-file")
 
 	return flagMap
 }
