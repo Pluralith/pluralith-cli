@@ -45,7 +45,7 @@ func LogRun(runCache map[string]interface{}) error {
 	var bodyObject map[string]interface{}
 	parseErr := json.Unmarshal(responseBody, &bodyObject)
 	if parseErr != nil {
-		return fmt.Errorf("parsing response failed -> %v: %w", functionName, responseErr)
+		return fmt.Errorf("parsing response failed -> %v: %w", functionName, parseErr)
 	}
 
 	runCache["urls"] = bodyObject["data"]

@@ -39,7 +39,7 @@ func HandleCIRun(exportArgs map[string]interface{}) error {
 	}
 
 	// Populate run cache data with additional attributes
-	runCache["id"] = exportArgs["id"]
+	runCache["id"] = exportArgs["runId"]
 	runCache["branch"] = exportArgs["branch"]
 
 	config := make(map[string]interface{})

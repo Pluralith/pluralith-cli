@@ -39,7 +39,7 @@ var graphCmd = &cobra.Command{
 		exportArgs := graph.ConstructExportArgs(cmd.Flags())
 		exportArgs["export-pdf"] = true // Always export pdf when running locally
 
-		configValid, configErr := graph.VerifyConfig(true)
+		configValid, _, configErr := graph.VerifyConfig(true)
 		if !configValid {
 			return
 		}

@@ -50,8 +50,8 @@ func RunInit(isEmpty bool, APIKey string, projectId string) error {
 		fmt.Scanln(&projectId)
 	}
 
-	projectValid, projectErr := auth.VerifyProject(projectId)
-	if !projectValid {
+	projectData, projectErr := auth.VerifyProject(projectId)
+	if projectData == nil {
 		return nil
 	}
 	if projectErr != nil {

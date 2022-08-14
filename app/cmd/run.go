@@ -8,6 +8,7 @@ import (
 	"pluralith/pkg/graph"
 	"pluralith/pkg/terraform"
 	"pluralith/pkg/ux"
+	"strconv"
 
 	"github.com/spf13/cobra"
 )
@@ -39,16 +40,16 @@ var runCmd = &cobra.Command{
 		}
 
 		exportArgs := graph.ConstructExportArgs(cmd.Flags())
-		exportArgs["id"] = fmt.Sprintf("%07d", rand.Intn(10000000)) // Generate random run id
-		costArgs["show-costs"] = true                               // Always run infracost in CI if infracost is installed
+		exportArgs["runId"] = fmt.Sprintf("%07d", rand.Intn(10000000)) // Generate random run id
+		costArgs["show-costs"] = true                                  // Always run infracost in CI if infracost is installed
 
 		// Set defaults for export
 		if exportArgs["title"] == "" {
-			exportArgs["title"] = "Run #" + exportArgs["id"].(string)
-			exportArgs["file-name"] = "Run_" + exportArgs["id"].(string)
+			exportArgs["title"] = "Run #" + exportArgs["runId"].(string)
+			exportArgs["file-name"] = "Run_" + exportArgs["runId"].(string)
 		}
 
-		configValid, configErr := graph.VerifyConfig(false)
+		configValid, projectData, configErr := graph.VerifyConfig(false)
 		if !configValid {
 			return
 		}
@@ -56,6 +57,10 @@ var runCmd = &cobra.Command{
 			fmt.Println(configErr)
 			return
 		}
+
+		projectData = projectData["data"].(map[string]interface{})
+		exportArgs["orgId"] = strconv.Itoa(int(projectData["orgId"].(float64)))
+		exportArgs["projectId"] = auxiliary.StateInstance.PluralithConfig.ProjectId
 
 		if graphErr := graph.RunGraph(tfArgs, costArgs, exportArgs, true); graphErr != nil {
 			fmt.Println(graphErr)
