@@ -58,6 +58,7 @@ func RunPlan(command string, tfArgs map[string]interface{}, costArgs map[string]
 		allArgs := []string{
 			"plan",
 			"-input=false",
+			"-no-color",
 			"-out=" + workingPlan,
 		}
 
@@ -115,6 +116,7 @@ func RunPlan(command string, tfArgs map[string]interface{}, costArgs map[string]
 				})
 			}
 
+			fmt.Println(errorSink.String())
 			return errorSink.String(), fmt.Errorf("%v: %w", functionName, err)
 		}
 
