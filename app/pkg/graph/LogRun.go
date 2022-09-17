@@ -20,8 +20,6 @@ func LogRun(runCache map[string]interface{}) error {
 		return fmt.Errorf("creating run cache string failed -> %v: %w", functionName, marshalErr)
 	}
 
-	request, _ := http.NewRequest("POST", "https://api.pluralith.com/v1/run/log", bytes.NewBuffer(runCacheBytes))
-	// request, _ := http.NewRequest("POST", "http://localhost:8080/v1/run/log", bytes.NewBuffer(runCacheBytes))
 	request.Header.Add("Authorization", "Bearer "+auxiliary.StateInstance.APIKey)
 	request.Header.Add("Content-Type", "application/json")
 
@@ -30,10 +28,6 @@ func LogRun(runCache map[string]interface{}) error {
 
 	if responseErr != nil {
 		return fmt.Errorf("logging run details failed -> %v: %w", functionName, responseErr)
-	}
-
-	if response.StatusCode >= 300 {
-		return fmt.Errorf("request failed -> %v: %v", functionName, response)
 	}
 
 	// Parse response for file URLs
@@ -46,6 +40,10 @@ func LogRun(runCache map[string]interface{}) error {
 	parseErr := json.Unmarshal(responseBody, &bodyObject)
 	if parseErr != nil {
 		return fmt.Errorf("parsing response failed -> %v: %w", functionName, parseErr)
+	}
+
+	if response.StatusCode >= 300 {
+		return fmt.Errorf("request failed -> %v: %v", functionName, bodyObject)
 	}
 
 	runCache["urls"] = bodyObject["data"]
