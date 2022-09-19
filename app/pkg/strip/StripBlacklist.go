@@ -5742,5 +5742,7 @@ func GetStripBlacklist() []string {
 		"time",
 		"tls",
 		"vsphere",
+		"tags",
+		"Name"
 	}
 }
