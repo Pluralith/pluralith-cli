@@ -32,10 +32,6 @@ func LogRun(runCache map[string]interface{}) error {
 		return fmt.Errorf("logging run details failed -> %v: %w", functionName, responseErr)
 	}
 
-	if response.StatusCode >= 300 {
-		return fmt.Errorf("request failed -> %v: %v", functionName, response)
-	}
-
 	// Parse response for file URLs
 	responseBody, readErr := ioutil.ReadAll(response.Body)
 	if readErr != nil {
@@ -45,7 +41,11 @@ func LogRun(runCache map[string]interface{}) error {
 	var bodyObject map[string]interface{}
 	parseErr := json.Unmarshal(responseBody, &bodyObject)
 	if parseErr != nil {
-		return fmt.Errorf("parsing response failed -> %v: %w", functionName, responseErr)
+		return fmt.Errorf("parsing response failed -> %v: %w", functionName, parseErr)
+	}
+
+	if response.StatusCode >= 300 {
+		return fmt.Errorf("request failed -> %v: %v", functionName, bodyObject)
 	}
 
 	runCache["urls"] = bodyObject["data"]

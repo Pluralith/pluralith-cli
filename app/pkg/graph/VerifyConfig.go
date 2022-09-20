@@ -7,7 +7,7 @@ import (
 	"pluralith/pkg/ux"
 )
 
-func VerifyConfig(noProject bool) (bool, error) {
+func VerifyConfig(noProject bool) (bool, map[string]interface{}, error) {
 	functionName := "VerifyConfig"
 
 	ux.PrintFormatted("→ ", []string{"blue", "bold"})
@@ -17,21 +17,23 @@ func VerifyConfig(noProject bool) (bool, error) {
 	// Verify API key with backend
 	apiKeyValid, apiKeyErr := auth.VerifyAPIKey(auxiliary.StateInstance.APIKey, false)
 	if !apiKeyValid {
-		return false, nil
+		return false, nil, nil
 	}
 	if apiKeyErr != nil {
-		return false, fmt.Errorf("verifying API key failed -> %v: %w", functionName, apiKeyErr)
+		return false, nil, fmt.Errorf("verifying API key failed -> %v: %w", functionName, apiKeyErr)
 	}
 
 	if !noProject {
-		projectValid, projectErr := auth.VerifyProject(auxiliary.StateInstance.PluralithConfig.ProjectId)
-		if !projectValid {
-			return false, nil
+		projectData, projectErr := auth.VerifyProject(auxiliary.StateInstance.PluralithConfig.ProjectId)
+		if projectData == nil {
+			return false, nil, nil
 		}
 		if projectErr != nil {
-			return false, fmt.Errorf("failed to verify project id -> %v: %w", functionName, projectErr)
+			return false, nil, fmt.Errorf("failed to verify project id -> %v: %w", functionName, projectErr)
 		}
+
+		return true, projectData, nil
 	}
 
-	return true, nil
+	return true, nil, nil
 }

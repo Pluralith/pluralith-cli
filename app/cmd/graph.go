@@ -39,7 +39,7 @@ var graphCmd = &cobra.Command{
 		exportArgs := graph.ConstructExportArgs(cmd.Flags())
 		exportArgs["export-pdf"] = true // Always export pdf when running locally
 
-		configValid, configErr := graph.VerifyConfig(true)
+		configValid, _, configErr := graph.VerifyConfig(true)
 		if !configValid {
 			return
 		}
@@ -67,6 +67,6 @@ func init() {
 	graphCmd.PersistentFlags().String("cost-period", "month", "Determines over which period costs are aggregated. Can be 'hour' or 'month'")
 	graphCmd.PersistentFlags().String("cost-usage-file", "", "Path to an infracost usage file to be used for the cost breakdown")
 	graphCmd.PersistentFlags().String("plan-file", "", "Path to an execution plan binary file. If passed, this will skip a plan run under the hood.")
-	graphCmd.PersistentFlags().StringSlice("var-file", []string{}, "Path to a var file to pass to Terraform. Can be specified multiple times.")
-	graphCmd.PersistentFlags().StringSlice("var", []string{}, "A variable to pass to Terraform. Can be specified multiple times. (Format: --var='NAME=VALUE')")
+	graphCmd.PersistentFlags().StringArray("var-file", []string{}, "Path to a var file to pass to Terraform. Can be specified multiple times.")
+	graphCmd.PersistentFlags().StringArray("var", []string{}, "A variable to pass to Terraform. Can be specified multiple times. (Format: --var='NAME=VALUE')")
 }

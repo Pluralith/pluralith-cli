@@ -18,6 +18,7 @@ func ConstructExportArgs(flags *pflag.FlagSet) map[string]interface{} {
 	flagMap["show-drift"], _ = flags.GetBool("show-drift")
 	flagMap["show-costs"], _ = flags.GetBool("show-costs")
 	flagMap["export-pdf"], _ = flags.GetBool("export-pdf")
+	flagMap["post-apply"], _ = flags.GetBool("post-apply")
 	flagMap["branch"] = auxiliary.StateInstance.Branch
 
 	return flagMap

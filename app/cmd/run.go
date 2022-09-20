@@ -8,6 +8,7 @@ import (
 	"pluralith/pkg/graph"
 	"pluralith/pkg/terraform"
 	"pluralith/pkg/ux"
+	"strconv"
 
 	"github.com/spf13/cobra"
 )
@@ -39,16 +40,16 @@ var runCmd = &cobra.Command{
 		}
 
 		exportArgs := graph.ConstructExportArgs(cmd.Flags())
-		exportArgs["id"] = fmt.Sprintf("%07d", rand.Intn(10000000)) // Generate random run id
-		costArgs["show-costs"] = true                               // Always run infracost in CI if infracost is installed
+		exportArgs["runId"] = fmt.Sprintf("%07d", rand.Intn(10000000)) // Generate random run id
+		costArgs["show-costs"] = true                                  // Always run infracost in CI if infracost is installed
 
 		// Set defaults for export
 		if exportArgs["title"] == "" {
-			exportArgs["title"] = "Run #" + exportArgs["id"].(string)
-			exportArgs["file-name"] = "Run_" + exportArgs["id"].(string)
+			exportArgs["title"] = "Run #" + exportArgs["runId"].(string)
+			exportArgs["file-name"] = "Run_" + exportArgs["runId"].(string)
 		}
 
-		configValid, configErr := graph.VerifyConfig(false)
+		configValid, projectData, configErr := graph.VerifyConfig(false)
 		if !configValid {
 			return
 		}
@@ -56,6 +57,10 @@ var runCmd = &cobra.Command{
 			fmt.Println(configErr)
 			return
 		}
+
+		projectData = projectData["data"].(map[string]interface{})
+		exportArgs["orgId"] = strconv.Itoa(int(projectData["orgId"].(float64)))
+		exportArgs["projectId"] = auxiliary.StateInstance.PluralithConfig.ProjectId
 
 		if graphErr := graph.RunGraph(tfArgs, costArgs, exportArgs, true); graphErr != nil {
 			fmt.Println(graphErr)
@@ -73,13 +78,14 @@ func init() {
 	runCmd.PersistentFlags().String("version", "", "The diagram version, will be displayed in the PDF output")
 	runCmd.PersistentFlags().String("out-dir", "", "The directory the diagram should be exported to")
 	runCmd.PersistentFlags().String("file-name", "", "The name of the exported PDF")
+	runCmd.PersistentFlags().Bool("post-apply", false, "Determines whether this run is after an apply and should update the latest docs for this infrastructure project")
 	runCmd.PersistentFlags().Bool("export-pdf", false, "Determines whether a PDF export of the run Diagram is generated locally")
 	runCmd.PersistentFlags().Bool("show-changes", false, "Determines whether the exported diagram highlights changes made in the latest Terraform plan or outputs a general diagram of the infrastructure")
 	runCmd.PersistentFlags().Bool("show-drift", false, "Determines whether the exported diagram highlights resource drift detected by Terraform")
 	runCmd.PersistentFlags().Bool("show-costs", false, "Determines whether the exported diagram includes cost information")
 	runCmd.PersistentFlags().String("cost-mode", "delta", "Determines which costs are shown. Can be 'delta' or 'total'")
 	runCmd.PersistentFlags().String("cost-period", "month", "Determines over which period costs are aggregated. Can be 'hour' or 'month'")
-	runCmd.PersistentFlags().StringSlice("var-file", []string{}, "Path to a var file to pass to Terraform. Can be specified multiple times.")
-	runCmd.PersistentFlags().StringSlice("var", []string{}, "A variable to pass to Terraform. Can be specified multiple times. (Format: --var='NAME=VALUE')")
+	runCmd.PersistentFlags().StringArray("var-file", []string{}, "Path to a var file to pass to Terraform. Can be specified multiple times.")
+	runCmd.PersistentFlags().StringArray("var", []string{}, "A variable to pass to Terraform. Can be specified multiple times. (Format: --var='NAME=VALUE')")
 	runCmd.PersistentFlags().String("cost-usage-file", "", "Path to an infracost usage file to be used for the cost breakdown")
 }

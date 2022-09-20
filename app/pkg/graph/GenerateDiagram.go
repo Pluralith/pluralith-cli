@@ -50,8 +50,7 @@ func GenerateDiagram(exportArgs map[string]interface{}, costArgs map[string]inte
 		exportArgs["out-dir"] = auxiliary.StateInstance.WorkingPath
 	}
 
-	cmd := exec.Command(
-		graphModulePath,
+	commandArgs := []string{
 		"graph",
 		"--api-key", auxiliary.StateInstance.APIKey,
 		"--title", exportArgs["title"].(string),
@@ -69,6 +68,21 @@ func GenerateDiagram(exportArgs map[string]interface{}, costArgs map[string]inte
 
 		"--cost-mode", costArgs["cost-mode"].(string),
 		"--cost-period", costArgs["cost-period"].(string),
+	}
+
+	// If a run id is given (only on 'pluralith run') -> pass url components to graph module
+	if exportArgs["runId"] != nil {
+		commandArgs = append(
+			commandArgs,
+			"--run-id", exportArgs["runId"].(string),
+			"--project-id", exportArgs["projectId"].(string),
+			"--org-id", exportArgs["orgId"].(string),
+		)
+	}
+
+	cmd := exec.Command(
+		graphModulePath,
+		commandArgs...,
 	)
 
 	// Defining sinks for std data
