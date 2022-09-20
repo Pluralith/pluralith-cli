@@ -59,7 +59,7 @@ var runCmd = &cobra.Command{
 		}
 
 		projectData = projectData["data"].(map[string]interface{})
-		exportArgs["orgId"] = strconv.Itoa(int(projectData["id"].(float64)))
+		exportArgs["orgId"] = strconv.Itoa(int(projectData["orgId"].(float64)))
 		exportArgs["projectId"] = auxiliary.StateInstance.PluralithConfig.ProjectId
 
 		if graphErr := graph.RunGraph(tfArgs, costArgs, exportArgs, true); graphErr != nil {
@@ -78,6 +78,7 @@ func init() {
 	runCmd.PersistentFlags().String("version", "", "The diagram version, will be displayed in the PDF output")
 	runCmd.PersistentFlags().String("out-dir", "", "The directory the diagram should be exported to")
 	runCmd.PersistentFlags().String("file-name", "", "The name of the exported PDF")
+	runCmd.PersistentFlags().Bool("post-apply", false, "Determines whether this run is after an apply and should update the latest docs for this infrastructure project")
 	runCmd.PersistentFlags().Bool("export-pdf", false, "Determines whether a PDF export of the run Diagram is generated locally")
 	runCmd.PersistentFlags().Bool("show-changes", false, "Determines whether the exported diagram highlights changes made in the latest Terraform plan or outputs a general diagram of the infrastructure")
 	runCmd.PersistentFlags().Bool("show-drift", false, "Determines whether the exported diagram highlights resource drift detected by Terraform")

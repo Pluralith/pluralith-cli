@@ -42,6 +42,12 @@ func HandleCIRun(exportArgs map[string]interface{}) error {
 	runCache["id"] = exportArgs["runId"]
 	runCache["branch"] = exportArgs["branch"]
 
+	if exportArgs["post-apply"] == true {
+		runCache["type"] = "apply"
+	} else {
+		runCache["type"] = "plan"
+	}
+
 	config := make(map[string]interface{})
 	config["showChanges"] = exportArgs["show-changes"]
 	config["showCosts"] = exportArgs["show-costs"]
