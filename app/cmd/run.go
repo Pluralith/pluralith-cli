@@ -59,7 +59,7 @@ var runCmd = &cobra.Command{
 		}
 
 		projectData = projectData["data"].(map[string]interface{})
-		exportArgs["orgId"] = strconv.Itoa(int(projectData["id"].(float64)))
+		exportArgs["orgId"] = strconv.Itoa(int(projectData["orgId"].(float64)))
 		exportArgs["projectId"] = auxiliary.StateInstance.PluralithConfig.ProjectId
 
 		if graphErr := graph.RunGraph(tfArgs, costArgs, exportArgs, true); graphErr != nil {
