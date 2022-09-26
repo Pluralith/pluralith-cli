@@ -26,7 +26,7 @@ func VerifyConfig(noProject bool) (bool, map[string]interface{}, error) {
 	if !noProject {
 		projectData, projectErr := auth.VerifyProject(auxiliary.StateInstance.PluralithConfig.ProjectId)
 		if projectData == nil {
-			return false, nil, nil
+			return false, nil, fmt.Errorf("no project data given -> %v", functionName)
 		}
 		if projectErr != nil {
 			return false, nil, fmt.Errorf("failed to verify project id -> %v: %w", functionName, projectErr)

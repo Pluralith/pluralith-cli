@@ -33,5 +33,5 @@ func init() {
 	planCmd.PersistentFlags().StringArray("var-file", []string{}, "Path to a var file to pass to Terraform. Can be specified multiple times.")
 	planCmd.PersistentFlags().StringArray("var", []string{}, "A variable to pass to Terraform. Can be specified multiple times. (Format: --var='NAME=VALUE')")
 	planCmd.PersistentFlags().String("cost-usage-file", "", "Path to an infracost usage file to be used for the cost breakdown")
-	planCmd.PersistentFlags().Bool("show-costs", false, "If we detect infracost we automatically run a cost breakdown and show it in the diagram. Use this flag to turn that off")
+	planCmd.PersistentFlags().Bool("show-costs", true, "If we detect infracost we automatically run a cost breakdown and show it in the diagram. Use this flag to turn that off")
 }
