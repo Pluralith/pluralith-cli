@@ -131,9 +131,15 @@ func RunPlan(command string, tfArgs map[string]interface{}, costArgs map[string]
 
 	// Run Infracost
 	if auxiliary.StateInstance.Infracost && costArgs["show-costs"] == true {
+		costSpinner := ux.NewSpinner("Calculating Infrastructure Costs", "Costs Calculated", "Couldn't Calculate Costs", true)
+		costSpinner.Start()
+
 		if costErr := cost.CalculateCost(costArgs); costErr != nil {
 			fmt.Println(costErr)
+			costSpinner.Fail()
 		}
+
+		costSpinner.Success()
 	} else {
 		ux.PrintFormatted("  -", []string{"blue", "bold"})
 		fmt.Println(" Cost Calculation Skipped")

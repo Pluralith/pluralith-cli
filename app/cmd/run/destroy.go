@@ -7,74 +7,29 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"pluralith/pkg/auxiliary"
-	"pluralith/pkg/cost"
 	"pluralith/pkg/install/components"
 	"pluralith/pkg/ux"
-	"strconv"
 
 	"github.com/spf13/cobra"
 )
 
-var RunApplyCmd = &cobra.Command{
-	Use:   "apply",
-	Short: "Run terraform apply and push updates to Pluralith",
-	Long:  `Run terraform apply and push updates to Pluralith`,
+var RunDestroyCmd = &cobra.Command{
+	Use:   "destroy",
+	Short: "Run terraform destroy and push updates to Pluralith",
+	Long:  `Run terraform destroy and push updates to Pluralith`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Print UX head
 		ux.PrintFormatted("⠿", []string{"blue", "bold"})
 		fmt.Println(" Initiating Apply Run ⇢ Posting To Pluralith Dashboard")
 
-		// - - - - PreRun - - - -
+		var idStore = make(map[string]interface{})
+
 		tfArgs, costArgs, exportArgs, preErr := PreRun(cmd.Flags())
 		if preErr != nil {
 			fmt.Println(preErr, costArgs, exportArgs)
-		}
-
-		// - - - - Infracost Run - - - -
-		if auxiliary.StateInstance.Infracost && costArgs["show-costs"] == true {
-			costSpinner := ux.NewSpinner("Calculating Infrastructure Costs", "Costs Calculated", "Couldn't Calculate Costs", true)
-			costSpinner.Start()
-
-			if costErr := cost.CalculateCost(costArgs); costErr != nil {
-				fmt.Println(costErr)
-				costSpinner.Fail()
-			}
-
-			costSpinner.Success()
-		}
-
-		// - - - - Load Infracost output - - - -
-		costsByte, costsErr := os.ReadFile(filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith", "pluralith.costs.json"))
-		if costsErr != nil {
-			fmt.Println(costsErr)
-		}
-
-		// Unmarshal cache
-		costsMap := cost.CostMap{}
-		if unmarshallErr := json.Unmarshal(costsByte, &costsMap); unmarshallErr != nil {
-			fmt.Println(unmarshallErr)
-		}
-
-		// Generate resource cost dictionary
-		resourceCosts := make(map[string]interface{})
-
-		// Find costs for given resource
-		for _, project := range costsMap.Projects {
-			for _, resource := range project.Breakdown.Resources {
-				costObject := ApplyEventCosts{}
-
-				if resource.HourlyCost != nil {
-					fmt.Println(resource.HourlyCost)
-					costObject.Hourly, _ = strconv.ParseFloat(resource.HourlyCost.(string), 64)
-					costObject.Monthly, _ = strconv.ParseFloat(resource.MonthlyCost.(string), 64)
-				}
-
-				resourceCosts[resource.Name] = costObject
-			}
 		}
 
 		// Check if graph module installed, if not -> install
@@ -85,7 +40,7 @@ var RunApplyCmd = &cobra.Command{
 
 		// Construct terraform args
 		allArgs := []string{
-			"apply",
+			"destroy",
 			"-json",
 			"-auto-approve",
 		}
@@ -151,7 +106,6 @@ var RunApplyCmd = &cobra.Command{
 		// While command line scan is running
 		for applyScanner.Scan() {
 			message := applyScanner.Text()
-			// fmt.Println(applyScanner.Text())
 
 			// Parse terraform message
 			parsedMessage := ApplyEvent{}
@@ -161,12 +115,20 @@ var RunApplyCmd = &cobra.Command{
 				return
 			}
 
+			// Filter for relevant apply events
 			if parsedMessage.Type == "apply_start" || parsedMessage.Type == "apply_complete" || parsedMessage.Type == "apply_errored" {
 				payload := make(map[string]interface{})
+				address := parsedMessage.Hook.Resource.Addr
+				action := parsedMessage.Hook.Action
 
-				if resourceCosts[parsedMessage.Hook.Resource.Addr] != nil {
-					parsedMessage.Hook.Resource.Costs = resourceCosts[parsedMessage.Hook.Resource.Addr].(ApplyEventCosts)
-					fmt.Println(payload)
+				// On delete: Save ID on apply start and append on apply complete (apply complete does not hold ID value anymore)
+				if action == "delete" {
+					if parsedMessage.Type == "apply_start" {
+						idStore[address] = parsedMessage.Hook.IDValue
+					}
+					if parsedMessage.Type == "apply_complete" {
+						parsedMessage.Hook.IDValue = idStore[address].(string)
+					}
 				}
 
 				payload["projectId"] = auxiliary.StateInstance.PluralithConfig.ProjectId
@@ -210,7 +172,8 @@ var RunApplyCmd = &cobra.Command{
 
 			}
 
-			fmt.Println(parsedMessage.Message)
+			// fmt.Println(parsedMessage["@message"])
+			fmt.Println(message)
 		}
 	},
 }

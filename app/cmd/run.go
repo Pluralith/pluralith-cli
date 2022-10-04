@@ -28,8 +28,9 @@ var runCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(runCmd)
-	runCmd.AddCommand(run.RunApplyCmd)
 	runCmd.AddCommand(run.RunPlanCmd)
+	runCmd.AddCommand(run.RunApplyCmd)
+	runCmd.AddCommand(run.RunDestroyCmd)
 	runCmd.PersistentFlags().String("title", "", "The title for your diagram, will be displayed in the PDF output")
 	runCmd.PersistentFlags().String("version", "", "The diagram version, will be displayed in the PDF output")
 	runCmd.PersistentFlags().String("out-dir", "", "The directory the diagram should be exported to")

@@ -10,6 +10,7 @@ import (
 
 type PluralithConfig struct {
 	ProjectId string `yaml:"project_id"`
+	RunId     string
 	Config    struct {
 		SensitiveAttrs []string `yaml:"sensitive_attrs"`
 		Vars           []string `yaml:"vars"`

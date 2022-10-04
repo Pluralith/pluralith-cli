@@ -2,9 +2,7 @@ package stream
 
 import (
 	"pluralith/pkg/auxiliary"
-	"pluralith/pkg/comdb"
 	"strings"
-	"time"
 )
 
 func ProcessTerraformMessage(message string, command string) DecodedEvent {
@@ -59,21 +57,6 @@ func ProcessTerraformMessage(message string, command string) DecodedEvent {
 			decodedEvent.Address = diagnostic["address"].(string)
 			decodedEvent.Type = eventType
 		}
-	}
-
-	// If address is given -> Resource event
-	if decodedEvent.Address != "" {
-		// Emit current event update to UI
-		comdb.PushComDBEvent(comdb.ComDBEvent{
-			Receiver:  "UI",
-			Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
-			Command:   decodedEvent.Command,
-			Type:      decodedEvent.Type,
-			Address:   decodedEvent.Address,
-			Message:   decodedEvent.Message,
-			Path:      auxiliary.StateInstance.WorkingPath,
-			Received:  false,
-		})
 	}
 
 	return decodedEvent
