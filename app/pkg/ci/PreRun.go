@@ -1,8 +1,9 @@
-package run
+package ci
 
 import (
 	"fmt"
 	"math/rand"
+	"pluralith/pkg/auth"
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/cost"
 	"pluralith/pkg/graph"
@@ -42,7 +43,7 @@ func PreRun(flags *pflag.FlagSet) (map[string]interface{}, map[string]interface{
 		exportArgs["file-name"] = "Run_" + exportArgs["runId"].(string)
 	}
 
-	configValid, projectData, configErr := graph.VerifyConfig(false)
+	configValid, projectData, configErr := auth.VerifyConfig(false)
 	if !configValid {
 		return nil, nil, nil, fmt.Errorf("invalid Pluralith config")
 	}

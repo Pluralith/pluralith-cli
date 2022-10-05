@@ -2,6 +2,7 @@ package run
 
 import (
 	"fmt"
+	"pluralith/pkg/ci"
 	"pluralith/pkg/graph"
 	"pluralith/pkg/ux"
 
@@ -17,7 +18,7 @@ var RunPlanCmd = &cobra.Command{
 		ux.PrintFormatted("⠿", []string{"blue", "bold"})
 		fmt.Println(" Initiating Plan Run ⇢ Posting To Pluralith Dashboard")
 
-		tfArgs, costArgs, exportArgs, preErr := PreRun(cmd.Flags())
+		tfArgs, costArgs, exportArgs, preErr := ci.PreRun(cmd.Flags())
 		if preErr != nil {
 			fmt.Println(preErr)
 		}
@@ -26,7 +27,7 @@ var RunPlanCmd = &cobra.Command{
 			fmt.Println(graphErr)
 		}
 
-		if ciError := graph.HandleCIRun(exportArgs); ciError != nil {
+		if ciError := ci.HandleCIRun(exportArgs, "plan"); ciError != nil {
 			fmt.Println(ciError)
 		}
 	},

@@ -11,7 +11,9 @@ import (
 	"os/exec"
 	"path/filepath"
 	"pluralith/pkg/auxiliary"
+	"pluralith/pkg/ci"
 	"pluralith/pkg/cost"
+	"pluralith/pkg/graph"
 	"pluralith/pkg/install/components"
 	"pluralith/pkg/ux"
 	"strconv"
@@ -29,22 +31,17 @@ var RunApplyCmd = &cobra.Command{
 		fmt.Println(" Initiating Apply Run ⇢ Posting To Pluralith Dashboard")
 
 		// - - - - PreRun - - - -
-		tfArgs, costArgs, exportArgs, preErr := PreRun(cmd.Flags())
+		tfArgs, costArgs, exportArgs, preErr := ci.PreRun(cmd.Flags())
 		if preErr != nil {
 			fmt.Println(preErr, costArgs, exportArgs)
 		}
 
-		// - - - - Infracost Run - - - -
-		if auxiliary.StateInstance.Infracost && costArgs["show-costs"] == true {
-			costSpinner := ux.NewSpinner("Calculating Infrastructure Costs", "Costs Calculated", "Couldn't Calculate Costs", true)
-			costSpinner.Start()
+		if graphErr := graph.RunGraph(tfArgs, costArgs, exportArgs, true); graphErr != nil {
+			fmt.Println(graphErr)
+		}
 
-			if costErr := cost.CalculateCost(costArgs); costErr != nil {
-				fmt.Println(costErr)
-				costSpinner.Fail()
-			}
-
-			costSpinner.Success()
+		if ciError := ci.HandleCIRun(exportArgs, "apply"); ciError != nil {
+			fmt.Println(ciError)
 		}
 
 		// - - - - Load Infracost output - - - -
@@ -65,7 +62,7 @@ var RunApplyCmd = &cobra.Command{
 		// Find costs for given resource
 		for _, project := range costsMap.Projects {
 			for _, resource := range project.Breakdown.Resources {
-				costObject := ApplyEventCosts{}
+				costObject := ci.ApplyEventCosts{}
 
 				if resource.HourlyCost != nil {
 					fmt.Println(resource.HourlyCost)
@@ -154,7 +151,7 @@ var RunApplyCmd = &cobra.Command{
 			// fmt.Println(applyScanner.Text())
 
 			// Parse terraform message
-			parsedMessage := ApplyEvent{}
+			parsedMessage := ci.ApplyEvent{}
 			parseErr := json.Unmarshal([]byte(message), &parsedMessage)
 			if parseErr != nil {
 				fmt.Println(parseErr)
@@ -165,7 +162,7 @@ var RunApplyCmd = &cobra.Command{
 				payload := make(map[string]interface{})
 
 				if resourceCosts[parsedMessage.Hook.Resource.Addr] != nil {
-					parsedMessage.Hook.Resource.Costs = resourceCosts[parsedMessage.Hook.Resource.Addr].(ApplyEventCosts)
+					parsedMessage.Hook.Resource.Costs = resourceCosts[parsedMessage.Hook.Resource.Addr].(ci.ApplyEventCosts)
 					fmt.Println(payload)
 				}
 

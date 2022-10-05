@@ -1,4 +1,4 @@
-package run
+package ci
 
 type ApplyEventCosts struct {
 	Hourly  float64 `json:"hourly"`

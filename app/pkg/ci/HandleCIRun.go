@@ -1,4 +1,4 @@
-package graph
+package ci
 
 import (
 	"encoding/json"
@@ -9,7 +9,7 @@ import (
 	"pluralith/pkg/ux"
 )
 
-func HandleCIRun(exportArgs map[string]interface{}) error {
+func HandleCIRun(exportArgs map[string]interface{}, runType string) error {
 	functionName := "HandleCIRun"
 
 	// Check for missing project ID
@@ -40,12 +40,13 @@ func HandleCIRun(exportArgs map[string]interface{}) error {
 
 	// Populate run cache data with additional attributes
 	runCache["id"] = exportArgs["runId"]
+	runCache["projectId"] = auxiliary.StateInstance.PluralithConfig.ProjectId
 	runCache["branch"] = exportArgs["branch"]
+	runCache["type"] = runType
 
-	if exportArgs["post-apply"] == true {
-		runCache["type"] = "apply"
-	} else {
-		runCache["type"] = "plan"
+	// If apply or destroy event -> Init an empty events array to receive apply/destroy events
+	if runType != "plan" {
+		runCache["events"] = []string{}
 	}
 
 	config := make(map[string]interface{})

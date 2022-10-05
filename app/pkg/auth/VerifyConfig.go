@@ -1,8 +1,7 @@
-package graph
+package auth
 
 import (
 	"fmt"
-	"pluralith/pkg/auth"
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/ux"
 )
@@ -15,7 +14,7 @@ func VerifyConfig(noProject bool) (bool, map[string]interface{}, error) {
 	// fmt.Println()
 
 	// Verify API key with backend
-	apiKeyValid, apiKeyErr := auth.VerifyAPIKey(auxiliary.StateInstance.APIKey, false)
+	apiKeyValid, apiKeyErr := VerifyAPIKey(auxiliary.StateInstance.APIKey, false)
 	if !apiKeyValid {
 		return false, nil, nil
 	}
@@ -24,7 +23,7 @@ func VerifyConfig(noProject bool) (bool, map[string]interface{}, error) {
 	}
 
 	if !noProject {
-		projectData, projectErr := auth.VerifyProject(auxiliary.StateInstance.PluralithConfig.ProjectId)
+		projectData, projectErr := VerifyProject(auxiliary.StateInstance.PluralithConfig.ProjectId)
 		if projectData == nil {
 			return false, nil, fmt.Errorf("no project data given -> %v", functionName)
 		}

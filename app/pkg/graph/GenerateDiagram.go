@@ -7,29 +7,10 @@ import (
 	"os/exec"
 	"path/filepath"
 	"pluralith/pkg/auxiliary"
-	"pluralith/pkg/ci"
 	"pluralith/pkg/ux"
 	"strconv"
 	"strings"
 )
-
-func GenerateComment(runCache map[string]interface{}) error {
-	functionName := "preparePRComment"
-
-	// Generate pull request comment markdown
-	commentMD, commentErr := ci.GenerateComment(runCache["urls"].(map[string]interface{}), runCache["changes"].(map[string]interface{}))
-	if commentErr != nil {
-		return fmt.Errorf("generating PR comment markdown failed -> %v: %w", functionName, commentErr)
-	}
-
-	// Write markdown to file system for usage by pipeline
-	commentPath := filepath.Join(auxiliary.StateInstance.WorkingPath, "comment.md")
-	if writeErr := os.WriteFile(commentPath, []byte(commentMD), 0700); writeErr != nil {
-		return fmt.Errorf("writing PR comment markdown to filesystem failed -> %v: %w", functionName, writeErr)
-	}
-
-	return nil
-}
 
 func GenerateDiagram(exportArgs map[string]interface{}, costArgs map[string]interface{}) error {
 	functionName := "GenerateDiagram"

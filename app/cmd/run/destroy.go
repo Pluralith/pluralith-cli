@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"pluralith/pkg/auxiliary"
+	"pluralith/pkg/ci"
 	"pluralith/pkg/install/components"
 	"pluralith/pkg/ux"
 
@@ -27,7 +28,7 @@ var RunDestroyCmd = &cobra.Command{
 
 		var idStore = make(map[string]interface{})
 
-		tfArgs, costArgs, exportArgs, preErr := PreRun(cmd.Flags())
+		tfArgs, costArgs, exportArgs, preErr := ci.PreRun(cmd.Flags())
 		if preErr != nil {
 			fmt.Println(preErr, costArgs, exportArgs)
 		}
@@ -108,7 +109,7 @@ var RunDestroyCmd = &cobra.Command{
 			message := applyScanner.Text()
 
 			// Parse terraform message
-			parsedMessage := ApplyEvent{}
+			parsedMessage := ci.ApplyEvent{}
 			parseErr := json.Unmarshal([]byte(message), &parsedMessage)
 			if parseErr != nil {
 				fmt.Println(parseErr)

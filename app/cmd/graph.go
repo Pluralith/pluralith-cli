@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"pluralith/pkg/auth"
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/cost"
 	"pluralith/pkg/graph"
@@ -39,7 +40,7 @@ var graphCmd = &cobra.Command{
 		exportArgs := graph.ConstructExportArgs(cmd.Flags())
 		exportArgs["export-pdf"] = true // Always export pdf when running locally
 
-		configValid, _, configErr := graph.VerifyConfig(true)
+		configValid, _, configErr := auth.VerifyConfig(true)
 		if !configValid {
 			return
 		}
