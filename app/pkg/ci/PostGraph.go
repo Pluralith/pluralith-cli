@@ -9,8 +9,8 @@ import (
 	"pluralith/pkg/ux"
 )
 
-func HandleCIRun(exportArgs map[string]interface{}, runType string) error {
-	functionName := "HandleCIRun"
+func PostGraph(runType string, exportArgs map[string]interface{}) error {
+	functionName := "PostGraph"
 
 	// Check for missing project ID
 	if auxiliary.StateInstance.PluralithConfig.ProjectId == "" {

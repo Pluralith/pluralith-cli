@@ -14,20 +14,22 @@ var RunPlanCmd = &cobra.Command{
 	Short: "Run terraform plan and push updates to Pluralith",
 	Long:  `Run terraform plan and push updates to Pluralith`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// Print UX head
 		ux.PrintFormatted("⠿", []string{"blue", "bold"})
 		fmt.Println(" Initiating Plan Run ⇢ Posting To Pluralith Dashboard")
 
+		// - - Prepare for Run - -
 		tfArgs, costArgs, exportArgs, preErr := ci.PreRun(cmd.Flags())
 		if preErr != nil {
 			fmt.Println(preErr)
 		}
 
-		if graphErr := graph.RunGraph(tfArgs, costArgs, exportArgs, true); graphErr != nil {
+		// - - Generate Graph - -
+		if graphErr := graph.GenerateGraph(tfArgs, costArgs, exportArgs, true); graphErr != nil {
 			fmt.Println(graphErr)
 		}
 
-		if ciError := ci.HandleCIRun(exportArgs, "plan"); ciError != nil {
+		// - - Post Graph - -
+		if ciError := ci.PostGraph("plan", exportArgs); ciError != nil {
 			fmt.Println(ciError)
 		}
 	},

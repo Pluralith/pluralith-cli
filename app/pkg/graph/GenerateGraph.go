@@ -12,8 +12,8 @@ import (
 	"pluralith/pkg/ux"
 )
 
-func RunGraph(tfArgs map[string]interface{}, costArgs map[string]interface{}, exportArgs map[string]interface{}, runAsCI bool) error {
-	functionName := "RunGraph"
+func GenerateGraph(tfArgs map[string]interface{}, costArgs map[string]interface{}, exportArgs map[string]interface{}, runAsCI bool) error {
+	functionName := "GenerateGraph"
 
 	// Check if graph module installed, if not -> install
 	_, versionErr := exec.Command(filepath.Join(auxiliary.StateInstance.BinPath, "pluralith-cli-graphing"), "version").Output()

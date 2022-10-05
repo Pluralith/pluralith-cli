@@ -7,11 +7,6 @@ import (
 	"pluralith/pkg/auxiliary"
 )
 
-// func GenerateComment(urls map[string]interface{}, changeActions map[string]interface{}) (string, error) {
-
-// 	return comment, nil
-// }
-
 func GenerateComment(runCache map[string]interface{}) error {
 	functionName := "GenerateComment"
 
