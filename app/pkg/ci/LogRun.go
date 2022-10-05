@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"pluralith/pkg/auxiliary"
 )
@@ -31,7 +31,7 @@ func LogRun(runCache map[string]interface{}) error {
 	}
 
 	// Parse response for file URLs
-	responseBody, readErr := ioutil.ReadAll(response.Body)
+	responseBody, readErr := io.ReadAll(response.Body)
 	if readErr != nil {
 		return fmt.Errorf("%v: %w", functionName, readErr)
 	}

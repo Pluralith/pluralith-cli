@@ -5,18 +5,29 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/cost"
+	"pluralith/pkg/ux"
 	"strconv"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 func PostEvents(command string, tfArgs map[string]interface{}, costArgs map[string]interface{}, exportArgs map[string]interface{}) error {
 	functionName := "PostEvents"
+
+	caser := cases.Title(language.English)
+
+	ux.PrintFormatted("\n→ ", []string{"blue", "bold"})
+	ux.PrintFormatted(caser.String(command), []string{"white", "bold"})
+	ux.PrintFormatted("\n  → ", []string{"blue"})
+	fmt.Print("Terraform " + caser.String(command) + " Output: \n\n")
 
 	var idStore = make(map[string]interface{})
 
@@ -40,7 +51,6 @@ func PostEvents(command string, tfArgs map[string]interface{}, costArgs map[stri
 			costObject := ApplyEventCosts{}
 
 			if resource.HourlyCost != nil {
-				fmt.Println(resource.HourlyCost)
 				costObject.Hourly, _ = strconv.ParseFloat(resource.HourlyCost.(string), 64)
 				costObject.Monthly, _ = strconv.ParseFloat(resource.MonthlyCost.(string), 64)
 			}
@@ -101,6 +111,11 @@ func PostEvents(command string, tfArgs map[string]interface{}, costArgs map[stri
 			return fmt.Errorf("parsing terraform apply event failed -> %v: %w", functionName, parseErr)
 		}
 
+		// Print original Terraform apply event message
+		if parsedMessage.Type != "version" && parsedMessage.Type != "planned_change" && parsedMessage.Type != "change_summary" {
+			fmt.Println("    " + parsedMessage.Message)
+		}
+
 		// Filter for relevant apply events
 		if parsedMessage.Type == "apply_start" || parsedMessage.Type == "apply_complete" || parsedMessage.Type == "apply_errored" {
 			payload := make(map[string]interface{})
@@ -141,7 +156,7 @@ func PostEvents(command string, tfArgs map[string]interface{}, costArgs map[stri
 			}
 
 			// Parse response for file URLs
-			responseBody, readErr := ioutil.ReadAll(response.Body)
+			responseBody, readErr := io.ReadAll(response.Body)
 			if readErr != nil {
 				return fmt.Errorf("reading resource update response failed -> %v: %w", functionName, readErr)
 			}
@@ -153,6 +168,9 @@ func PostEvents(command string, tfArgs map[string]interface{}, costArgs map[stri
 			}
 		}
 	}
+
+	ux.PrintFormatted("\n✔ ", []string{"blue", "bold"})
+	fmt.Print(caser.String(command) + " complete\n\n")
 
 	return nil
 }

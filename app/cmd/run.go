@@ -17,12 +17,12 @@ var runCmd = &cobra.Command{
 		ux.PrintHead()
 
 		ux.PrintFormatted("⠿ ", []string{"blue"})
-		fmt.Println("Append the Terraform command you'd like to run:\n")
+		fmt.Print("Append the Terraform command you'd like to run:\n\n")
 
 		ux.PrintFormatted("→", []string{"blue", "bold"})
 		fmt.Println(" pluralith run plan")
 		ux.PrintFormatted("→", []string{"blue", "bold"})
-		fmt.Println(" pluralith run apply\n")
+		fmt.Print(" pluralith run apply\n\n")
 	},
 }
 

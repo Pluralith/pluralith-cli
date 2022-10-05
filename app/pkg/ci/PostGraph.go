@@ -17,7 +17,7 @@ func PostGraph(runType string, exportArgs map[string]interface{}) error {
 		ux.PrintFormatted("\n✘", []string{"red", "bold"})
 		fmt.Print(" No project ID set → Run ")
 		ux.PrintFormatted("pluralith init", []string{"blue"})
-		fmt.Println(" or provide a valid config\n")
+		fmt.Print(" or provide a valid config\n\n")
 		return nil
 	}
 

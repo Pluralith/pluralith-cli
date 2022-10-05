@@ -16,7 +16,7 @@ func GenerateDiagram(exportArgs map[string]interface{}, costArgs map[string]inte
 	functionName := "GenerateDiagram"
 
 	ux.PrintFormatted("\n→", []string{"blue", "bold"})
-	ux.PrintFormatted(" Export\n", []string{"white", "bold"})
+	ux.PrintFormatted(" Graph\n", []string{"white", "bold"})
 
 	graphModulePath := filepath.Join(auxiliary.StateInstance.BinPath, "pluralith-cli-graphing")
 
