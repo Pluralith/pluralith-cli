@@ -8,9 +8,41 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/strip"
 	"pluralith/pkg/ux"
 )
+
+func SplitJsonPlan(planJsonString string) ([]string, error) {
+	functionName := "SplitJsonPlan"
+
+	var plans []string
+	bracketsOpened := 0
+	bracketsClosed := 0
+	subString := ""
+
+	for _, char := range planJsonString {
+		subString += string(char)
+		if char == '{' {
+			bracketsOpened++
+		} else if char == '}' {
+			bracketsClosed++
+		}
+
+		if bracketsOpened > 0 && bracketsOpened == bracketsClosed {
+			bracketsClosed = 0
+			bracketsOpened = 0
+			_, parseErr := auxiliary.ParseJson(subString)
+			if parseErr != nil {
+				return nil, fmt.Errorf("%v: %w", functionName, parseErr)
+			}
+			plans = append(plans, subString)
+			subString = ""
+		}
+	}
+
+	return plans, nil
+}
 
 func ConvertBinaryPlanToJson(planPath string) (string, error) {
 	functionName := "ConvertBinaryPlanToJson"
@@ -71,22 +103,47 @@ func CreatePlanJson(planPath string, isJson bool) (string, []string, error) {
 		planJsonString = planJsonStringTemp
 	}
 
-	// Strip secrets from plan state json
-	strippedState, stripErr := strip.StripSecrets(planJsonString)
-	if stripErr != nil {
+	// Split json plans
+	jsonPlans, splitError := SplitJsonPlan(planJsonString)
+	if splitError != nil {
 		stripSpinner.Fail()
-		return "", []string{}, fmt.Errorf("failed to strip secrets -> %v: %w", functionName, stripErr)
+		return "", []string{}, fmt.Errorf("failed to split json plan -> %v: %w", functionName, splitError)
 	}
 
-	// Fetch providers present in state
-	providers, providerErr := FetchProviders(planJsonString)
-	if providerErr != nil {
-		stripSpinner.Fail()
-		return "", []string{}, fmt.Errorf("failed to fetch providers -> %v: %w", functionName, providerErr)
+	// Strip secrets from plan states json
+	var strippedStates []string
+	for _, jsonPlan := range jsonPlans {
+		strippedState, stripErr := strip.StripSecrets(jsonPlan)
+		if stripErr != nil {
+			stripSpinner.Fail()
+			return "", []string{}, fmt.Errorf("failed to strip secrets -> %v: %w", functionName, stripErr)
+		}
+		strippedStates = append(strippedStates, strippedState)
 	}
+
+	// Fetch providers present in states json
+	var providers []string
+	for _, jsonPlan := range jsonPlans {
+		providersTemp, providerErr := FetchProviders(jsonPlan)
+		if providerErr != nil {
+			stripSpinner.Fail()
+			return "", []string{}, fmt.Errorf("failed to fetch providers -> %v: %w", functionName, providerErr)
+		}
+		providers = append(providers, providersTemp...)
+	}
+
+	// Merge plans
+	strippedStatesMerged := "["
+	for index, jsonPlan := range strippedStates {
+		strippedStatesMerged += jsonPlan
+		if index < len(strippedStates)-1 {
+			strippedStatesMerged += ","
+		}
+	}
+	strippedStatesMerged += "]"
 
 	// Write stripped state to file
-	if writeErr := ioutil.WriteFile(strippedPath, []byte(strippedState), 0700); writeErr != nil {
+	if writeErr := ioutil.WriteFile(strippedPath, []byte(strippedStatesMerged), 0700); writeErr != nil {
 		stripSpinner.Fail()
 		return "", providers, fmt.Errorf("%v: %w", functionName, writeErr)
 	}
