@@ -20,24 +20,30 @@ func SplitJsonPlan(planJsonString string) ([]string, error) {
 	bracketsOpened := 0
 	bracketsClosed := 0
 	subString := ""
+	objectStarted := false
 
 	for _, char := range planJsonString {
-		subString += string(char)
 		if char == '{' {
+			objectStarted = true
 			bracketsOpened++
 		} else if char == '}' {
 			bracketsClosed++
 		}
 
-		if bracketsOpened > 0 && bracketsOpened == bracketsClosed {
-			bracketsClosed = 0
-			bracketsOpened = 0
+		if objectStarted {
+			subString += string(char)
+		}
+
+		if objectStarted && bracketsOpened > 0 && bracketsOpened == bracketsClosed {
 			_, parseErr := auxiliary.ParseJson(subString)
 			if parseErr != nil {
 				return nil, fmt.Errorf("%v: %w", functionName, parseErr)
 			}
 			plans = append(plans, subString)
 			subString = ""
+			objectStarted = false
+			bracketsClosed = 0
+			bracketsOpened = 0
 		}
 	}
 
