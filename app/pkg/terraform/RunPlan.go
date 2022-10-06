@@ -31,6 +31,7 @@ func RunPlan(command string, tfArgs map[string]interface{}, costArgs map[string]
 	}
 
 	// Construct execution plan path
+	workingPlanIsJson := false
 	workingPlan := filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith", "pluralith.plan.bin")
 
 	ux.PrintFormatted("\n→", []string{"blue", "bold"})
@@ -52,7 +53,24 @@ func RunPlan(command string, tfArgs map[string]interface{}, costArgs map[string]
 		}
 
 		ux.PrintFormatted("  -", []string{"blue", "bold"})
-		fmt.Println(" Using Existing Execution Plan")
+		fmt.Println(" Using Existing Execution Plan Binary File")
+	} else if tfArgs["plan-file-json"] != "" {
+		workingPlanIsJson = true
+		workingPlan = tfArgs["plan-file-json"].(string)
+
+		if !silent {
+			comdb.PushComDBEvent(comdb.ComDBEvent{
+				Receiver:  "UI",
+				Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
+				Command:   "plan",
+				Type:      "begin",
+				Path:      auxiliary.StateInstance.WorkingPath,
+				Received:  false,
+			})
+		}
+
+		ux.PrintFormatted("  -", []string{"blue", "bold"})
+		fmt.Println(" Using Existing Execution Plan Json File")
 	} else {
 		// Construct terraform args
 		allArgs := []string{
@@ -124,7 +142,7 @@ func RunPlan(command string, tfArgs map[string]interface{}, costArgs map[string]
 	}
 
 	// Create JSON output for graphing
-	_, providers, planJsonErr := plan.CreatePlanJson(workingPlan)
+	_, providers, planJsonErr := plan.CreatePlanJson(workingPlan, workingPlanIsJson)
 	if planJsonErr != nil {
 		return "", fmt.Errorf("creating terraform plan json failed -> %v: %w", functionName, planJsonErr)
 	}

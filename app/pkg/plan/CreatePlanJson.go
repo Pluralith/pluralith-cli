@@ -12,21 +12,8 @@ import (
 	"pluralith/pkg/ux"
 )
 
-func CreatePlanJson(planPath string) (string, []string, error) {
-	functionName := "CreatePlanJson"
-
-	// Instantiate spinner
-	stripSpinner := ux.NewSpinner("Stripping Secrets", "Secrets Stripped", "Stripping Secrets Failed", true)
-	stripSpinner.Start()
-
-	// Get working directory
-	workingDir, workingErr := os.Getwd()
-	if workingErr != nil {
-		stripSpinner.Fail()
-		return "", []string{}, fmt.Errorf("%v: %w", functionName, workingErr)
-	}
-	// Construct file path for stripped state
-	strippedPath := filepath.Join(workingDir, ".pluralith", "pluralith.state.json")
+func ConvertBinaryPlanToJson(planPath string) (string, error) {
+	functionName := "ConvertBinaryPlanToJson"
 
 	// Constructing command to execute
 	cmd := exec.Command("terraform", append([]string{"show", "-json", planPath})...)
@@ -42,20 +29,57 @@ func CreatePlanJson(planPath string) (string, []string, error) {
 
 	// Run terraform command
 	if err := cmd.Run(); err != nil {
+		return "", fmt.Errorf("terraform command failed -> %v: %w", functionName, err)
+	}
+
+	return outputSink.String(), nil
+}
+
+func CreatePlanJson(planPath string, isJson bool) (string, []string, error) {
+	functionName := "CreatePlanJson"
+
+	// Instantiate spinner
+	stripSpinner := ux.NewSpinner("Stripping Secrets", "Secrets Stripped", "Stripping Secrets Failed", true)
+	stripSpinner.Start()
+
+	// Get working directory
+	workingDir, workingErr := os.Getwd()
+	if workingErr != nil {
 		stripSpinner.Fail()
-		fmt.Println("\n" + errorSink.String())
-		return errorSink.String(), []string{}, fmt.Errorf("terraform command failed -> %v: %w", functionName, err)
+		return "", []string{}, fmt.Errorf("%v: %w", functionName, workingErr)
+	}
+
+	// Construct file path for stripped state
+	strippedPath := filepath.Join(workingDir, ".pluralith", "pluralith.state.json")
+
+	planJsonString := ""
+	if isJson {
+		// Read json file
+		file, readErr := ioutil.ReadFile(planPath)
+		if readErr != nil {
+			stripSpinner.Fail()
+			return "", []string{}, fmt.Errorf("failed to open json plan -> %v: %w", functionName, readErr)
+		}
+		planJsonString = string(file)
+	} else {
+		// Convert binary plan to json
+		planJsonStringTemp, convertErr := ConvertBinaryPlanToJson(planPath)
+		if convertErr != nil {
+			stripSpinner.Fail()
+			return "", []string{}, fmt.Errorf("failed to strip secrets -> %v: %w", functionName, convertErr)
+		}
+		planJsonString = planJsonStringTemp
 	}
 
 	// Strip secrets from plan state json
-	strippedState, stripErr := strip.StripSecrets(outputSink.String())
+	strippedState, stripErr := strip.StripSecrets(planJsonString)
 	if stripErr != nil {
 		stripSpinner.Fail()
 		return "", []string{}, fmt.Errorf("failed to strip secrets -> %v: %w", functionName, stripErr)
 	}
 
 	// Fetch providers present in state
-	providers, providerErr := FetchProviders(outputSink.String())
+	providers, providerErr := FetchProviders(planJsonString)
 	if providerErr != nil {
 		stripSpinner.Fail()
 		return "", []string{}, fmt.Errorf("failed to fetch providers -> %v: %w", functionName, providerErr)
