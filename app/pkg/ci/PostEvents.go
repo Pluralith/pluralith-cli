@@ -23,7 +23,6 @@ func PostEvents(command string, tfArgs map[string]interface{}, costArgs map[stri
 	functionName := "PostEvents"
 
 	caser := cases.Title(language.English)
-
 	ux.PrintFormatted("\n→ ", []string{"blue", "bold"})
 	ux.PrintFormatted(caser.String(command), []string{"white", "bold"})
 	ux.PrintFormatted("\n  → ", []string{"blue"})
@@ -31,12 +30,11 @@ func PostEvents(command string, tfArgs map[string]interface{}, costArgs map[stri
 
 	var idStore = make(map[string]interface{})
 
+	// Load cost cache
 	costsByte, costsErr := os.ReadFile(filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith", "pluralith.costs.json"))
 	if costsErr != nil {
 		return fmt.Errorf("loading infracost output failed -> %v: %w", functionName, costsErr)
 	}
-
-	// Unmarshal cache
 	costsMap := cost.CostMap{}
 	if parseErr := json.Unmarshal(costsByte, &costsMap); parseErr != nil {
 		return fmt.Errorf("parsing infracost output failed -> %v: %w", functionName, parseErr)
@@ -139,11 +137,13 @@ func PostEvents(command string, tfArgs map[string]interface{}, costArgs map[stri
 			payload["runId"] = exportArgs["runId"]
 			payload["event"] = parsedMessage
 
+			// Encode payload
 			payloadBytes, marshalErr := json.Marshal(payload)
 			if marshalErr != nil {
 				return fmt.Errorf("encoding terraform apply message failed -> %v: %w", functionName, marshalErr)
 			}
 
+			// Update resource
 			// request, _ := http.NewRequest("POST", "https://api.pluralith.com/v1/resource/update", bytes.NewBuffer(messageBytes))
 			request, _ := http.NewRequest("POST", "http://localhost:8080/v1/resource/update", bytes.NewBuffer(payloadBytes))
 			request.Header.Add("Authorization", "Bearer "+auxiliary.StateInstance.APIKey)
