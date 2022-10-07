@@ -5744,5 +5744,7 @@ func GetStripBlacklist() []string {
 		"vsphere",
 		"tags",
 		"Name",
+		"for_each_expression",
+		"names",
 	}
 }

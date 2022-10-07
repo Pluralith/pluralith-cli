@@ -3,7 +3,7 @@ package install
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/ux"
@@ -37,7 +37,7 @@ func GetGitHubRelease(url string, params map[string]string, currentVersionString
 
 	// Parse request body
 	var bodyObject map[string]interface{}
-	bodyBytes, _ := ioutil.ReadAll(response.Body)
+	bodyBytes, _ := io.ReadAll(response.Body)
 	parseErr := json.Unmarshal(bodyBytes, &bodyObject)
 	if parseErr != nil {
 		checkSpinner.Fail("Parsing request result failed")

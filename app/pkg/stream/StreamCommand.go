@@ -126,6 +126,22 @@ func StreamCommand(command string, tfArgs []string) error {
 	// While command line scan is running
 	for applyScanner.Scan() {
 		event := ProcessTerraformMessage(applyScanner.Text(), command)
+
+		// If address is given -> Resource event
+		if event.Address != "" {
+			// Emit current event update to UI
+			comdb.PushComDBEvent(comdb.ComDBEvent{
+				Receiver:  "UI",
+				Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
+				Command:   event.Command,
+				Type:      event.Type,
+				Address:   event.Address,
+				Message:   event.Message,
+				Path:      auxiliary.StateInstance.WorkingPath,
+				Received:  false,
+			})
+		}
+
 		logEvent := false
 
 		if event.Type == "complete" {
