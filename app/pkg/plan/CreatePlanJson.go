@@ -73,22 +73,20 @@ func ConvertBinaryPlanToJson(planPath string) (string, error) {
 	return outputSink.String(), nil
 }
 
-func CreatePlanJson(planPath string, isJson bool) (string, []string, error) {
+func CreatePlanJson(planPath string, isJson bool) (string, []string, []string, error) {
 	functionName := "CreatePlanJson"
+
+	// Initiate variables
+	var jsonPlans []string
+	var strippedPlans []string
+	var providers []string
+
+	// Construct file path for stripped state
+	strippedPath := filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith", "pluralith.state.json")
 
 	// Instantiate spinner
 	stripSpinner := ux.NewSpinner("Stripping Secrets", "Secrets Stripped", "Stripping Secrets Failed", true)
 	stripSpinner.Start()
-
-	// Get working directory
-	workingDir, workingErr := os.Getwd()
-	if workingErr != nil {
-		stripSpinner.Fail()
-		return "", []string{}, fmt.Errorf("%v: %w", functionName, workingErr)
-	}
-
-	// Construct file path for stripped state
-	strippedPath := filepath.Join(workingDir, ".pluralith", "pluralith.state.json")
 
 	planJsonString := ""
 	if isJson {
@@ -96,7 +94,7 @@ func CreatePlanJson(planPath string, isJson bool) (string, []string, error) {
 		file, readErr := ioutil.ReadFile(planPath)
 		if readErr != nil {
 			stripSpinner.Fail()
-			return "", []string{}, fmt.Errorf("failed to open json plan -> %v: %w", functionName, readErr)
+			return strippedPath, jsonPlans, providers, fmt.Errorf("failed to open json plan -> %v: %w", functionName, readErr)
 		}
 		planJsonString = string(file)
 	} else {
@@ -104,7 +102,7 @@ func CreatePlanJson(planPath string, isJson bool) (string, []string, error) {
 		planJsonStringTemp, convertErr := ConvertBinaryPlanToJson(planPath)
 		if convertErr != nil {
 			stripSpinner.Fail()
-			return "", []string{}, fmt.Errorf("failed to strip secrets -> %v: %w", functionName, convertErr)
+			return strippedPath, jsonPlans, providers, fmt.Errorf("failed to strip secrets -> %v: %w", functionName, convertErr)
 		}
 		planJsonString = planJsonStringTemp
 	}
@@ -113,49 +111,47 @@ func CreatePlanJson(planPath string, isJson bool) (string, []string, error) {
 	jsonPlans, splitError := SplitJsonPlan(planJsonString)
 	if splitError != nil {
 		stripSpinner.Fail()
-		return "", []string{}, fmt.Errorf("failed to split json plan -> %v: %w", functionName, splitError)
+		return strippedPath, jsonPlans, providers, fmt.Errorf("failed to split json plan -> %v: %w", functionName, splitError)
 	}
 
 	// Strip secrets from plan states json
-	var strippedStates []string
 	for _, jsonPlan := range jsonPlans {
-		strippedState, stripErr := strip.StripSecrets(jsonPlan)
+		strippedPlan, stripErr := strip.StripSecrets(jsonPlan)
 		if stripErr != nil {
 			stripSpinner.Fail()
-			return "", []string{}, fmt.Errorf("failed to strip secrets -> %v: %w", functionName, stripErr)
+			return strippedPath, jsonPlans, providers, fmt.Errorf("failed to strip secrets -> %v: %w", functionName, stripErr)
 		}
-		strippedStates = append(strippedStates, strippedState)
+		strippedPlans = append(strippedPlans, strippedPlan)
 	}
 
 	// Fetch providers present in states json
-	var providers []string
 	for _, jsonPlan := range jsonPlans {
 		providersTemp, providerErr := FetchProviders(jsonPlan)
 		if providerErr != nil {
 			stripSpinner.Fail()
-			return "", []string{}, fmt.Errorf("failed to fetch providers -> %v: %w", functionName, providerErr)
+			return strippedPath, jsonPlans, providers, fmt.Errorf("failed to fetch providers -> %v: %w", functionName, providerErr)
 		}
 		providers = append(providers, providersTemp...)
 	}
 
 	// Merge plans
-	strippedStatesMerged := "["
-	for index, jsonPlan := range strippedStates {
-		strippedStatesMerged += jsonPlan
-		if index < len(strippedStates)-1 {
-			strippedStatesMerged += ","
+	strippedPlanString := "["
+	for index, jsonPlan := range strippedPlans {
+		strippedPlanString += jsonPlan
+		if index < len(strippedPlans)-1 {
+			strippedPlanString += ","
 		}
 	}
-	strippedStatesMerged += "]"
+	strippedPlanString += "]"
 
 	// Write stripped state to file
-	if writeErr := ioutil.WriteFile(strippedPath, []byte(strippedStatesMerged), 0700); writeErr != nil {
+	if writeErr := ioutil.WriteFile(strippedPath, []byte(strippedPlanString), 0700); writeErr != nil {
 		stripSpinner.Fail()
-		return "", providers, fmt.Errorf("%v: %w", functionName, writeErr)
+		return strippedPath, jsonPlans, providers, fmt.Errorf("%v: %w", functionName, writeErr)
 	}
 
 	stripSpinner.Success()
 
 	// Return path to execution plan
-	return strippedPath, providers, nil
+	return strippedPath, jsonPlans, providers, nil
 }
