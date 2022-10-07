@@ -4,22 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"pluralith/pkg/auxiliary"
-	"pluralith/pkg/install/components"
 	"pluralith/pkg/terraform"
 	"pluralith/pkg/ux"
 )
 
 func RunGraph(tfArgs map[string]interface{}, costArgs map[string]interface{}, exportArgs map[string]interface{}, runAsCI bool) error {
 	functionName := "RunGraph"
-
-	// Check if graph module installed, if not -> install
-	_, versionErr := exec.Command(filepath.Join(auxiliary.StateInstance.BinPath, "pluralith-cli-graphing"), "version").Output()
-	if versionErr != nil {
-		components.GraphModule()
-	}
 
 	_, planErr := terraform.RunPlan("plan", tfArgs, costArgs, true)
 	if planErr != nil {
