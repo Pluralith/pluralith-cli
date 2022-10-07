@@ -48,7 +48,7 @@ var graphCmd = &cobra.Command{
 			fmt.Println(configErr)
 		}
 
-		if graphErr := graph.GenerateGraph(tfArgs, costArgs, exportArgs, false); graphErr != nil {
+		if graphErr := graph.GenerateGraph("plan", tfArgs, costArgs, exportArgs, false); graphErr != nil {
 			fmt.Println(graphErr)
 		}
 	},

@@ -123,10 +123,14 @@ func PostEvents(command string, tfArgs map[string]interface{}, costArgs map[stri
 			// On delete: Save ID on apply start and append on apply complete (apply complete does not hold ID value anymore)
 			if parsedMessage.Hook.Action == "delete" {
 				if parsedMessage.Type == "apply_start" {
+					fmt.Println(parsedMessage.Hook.IDValue)
 					idStore[parsedMessage.Hook.Resource.Addr] = parsedMessage.Hook.IDValue
+					fmt.Println(idStore)
 				}
 				if parsedMessage.Type == "apply_complete" {
+					fmt.Println("complete match found ------> ", parsedMessage.Hook.Resource.Addr, idStore[parsedMessage.Hook.Resource.Addr])
 					parsedMessage.Hook.IDValue = idStore[parsedMessage.Hook.Resource.Addr].(string)
+					fmt.Println("Inventory ID: ", parsedMessage.Hook.IDValue)
 				}
 			}
 
