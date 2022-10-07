@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/strip"
@@ -99,6 +100,9 @@ func CreatePlanJson(planPath string, isJson bool) (string, []string, error) {
 			return "", []string{}, fmt.Errorf("failed to open json plan -> %v: %w", functionName, readErr)
 		}
 		planJsonString = string(file)
+		// Remove null "bytes" otherwise JSON parsing won't work
+		planJsonString = strings.Replace(planJsonString, "\x00", "", -1)
+
 	} else {
 		// Convert binary plan to json
 		planJsonStringTemp, convertErr := ConvertBinaryPlanToJson(planPath)
