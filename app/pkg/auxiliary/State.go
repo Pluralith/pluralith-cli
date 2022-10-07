@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"pluralith/pkg/ci"
 
 	"runtime"
 	"strings"
@@ -131,12 +130,12 @@ func (S *State) CheckWSL() string {
 
 // Check if running in any of the known CI environments
 func (S *State) CheckCI() {
-	if isCI := ci.CheckEnvVars(); isCI {
+	if isCI := CheckEnvVars(); isCI {
 		S.IsCI = true
 		return
 	}
 
-	if isCI := ci.CheckDocker(); isCI {
+	if isCI := CheckDocker(); isCI {
 		S.IsCI = true
 		return
 	}
@@ -146,7 +145,7 @@ func (S *State) CheckCI() {
 
 // Detect branch name
 func (S *State) GetBranch() {
-	S.Branch = ci.GetBranch()
+	S.Branch = GetBranch()
 }
 
 // Check if Terraform has been initialized

@@ -17,12 +17,12 @@ var installCmd = &cobra.Command{
 		ux.PrintHead()
 
 		ux.PrintFormatted("⠿ ", []string{"blue"})
-		fmt.Println("Pass a component to install:\n")
+		fmt.Print("Pass a component to install:\n\n")
 
 		ux.PrintFormatted("→", []string{"blue", "bold"})
 		fmt.Println(" graph-module")
 		ux.PrintFormatted("→", []string{"blue", "bold"})
-		fmt.Println(" ui (coming soon)\n")
+		fmt.Print(" ui (coming soon)\n\n")
 	},
 }
 

@@ -1,4 +1,4 @@
-package ci
+package auxiliary
 
 type Vendor struct {
 	Name     string      //`json:Name`

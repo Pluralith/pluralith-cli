@@ -1,4 +1,4 @@
-package ci
+package auxiliary
 
 import (
 	"os"
