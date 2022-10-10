@@ -10,21 +10,21 @@ func ProcessTerraformMessage(message string, command string) DecodedEvent {
 	decodedEvent := DecodedEvent{}
 
 	// Parsing terraform message
-	parsedState, parseErr := auxiliary.ParseJson(message)
+	parsedMessage, parseErr := auxiliary.ParseJson(message)
 	if parseErr != nil {
 		return decodedEvent // If message is not valid json that cannot be parsed -> return and do nothing
 	}
 
 	// Get event message
-	decodedEvent.Message = parsedState["@message"].(string)
+	decodedEvent.Message = parsedMessage["@message"].(string)
 
 	// Retrieve event type from parsed state JSON
-	eventType := parsedState["type"].(string)
+	eventType := parsedMessage["type"].(string)
 
 	// Handle apply events
 	if strings.Contains(eventType, "apply") {
 		// Get address of current resource
-		hook := parsedState["hook"].(map[string]interface{})
+		hook := parsedMessage["hook"].(map[string]interface{})
 		resource := hook["resource"].(map[string]interface{})
 
 		address := resource["addr"].(string)
@@ -44,8 +44,8 @@ func ProcessTerraformMessage(message string, command string) DecodedEvent {
 	// Handle diagnostic events
 	if eventType == "diagnostic" {
 		// Get address of current resource
-		diagnostic := parsedState["diagnostic"].(map[string]interface{})
-		eventType := parsedState["@level"].(string)
+		diagnostic := parsedMessage["diagnostic"].(map[string]interface{})
+		eventType := parsedMessage["@level"].(string)
 
 		if eventType == "error" {
 			eventType = "errored"

@@ -35,7 +35,7 @@ func PostEvents(command string, tfArgs map[string]interface{}, costArgs map[stri
 	if costsErr != nil {
 		return fmt.Errorf("loading infracost output failed -> %v: %w", functionName, costsErr)
 	}
-	costsMap := cost.CostMap{}
+	costsMap := []cost.CostMap{}
 	if parseErr := json.Unmarshal(costsByte, &costsMap); parseErr != nil {
 		return fmt.Errorf("parsing infracost output failed -> %v: %w", functionName, parseErr)
 	}
@@ -44,16 +44,18 @@ func PostEvents(command string, tfArgs map[string]interface{}, costArgs map[stri
 	resourceCosts := make(map[string]interface{})
 
 	// Find costs for given resource
-	for _, project := range costsMap.Projects {
-		for _, resource := range project.Breakdown.Resources {
-			costObject := ApplyEventCosts{}
+	for _, plan := range costsMap {
+		for _, project := range plan.Projects {
+			for _, resource := range project.Breakdown.Resources {
+				costObject := ApplyEventCosts{}
 
-			if resource.HourlyCost != nil {
-				costObject.Hourly, _ = strconv.ParseFloat(resource.HourlyCost.(string), 64)
-				costObject.Monthly, _ = strconv.ParseFloat(resource.MonthlyCost.(string), 64)
+				if resource.HourlyCost != nil {
+					costObject.Hourly, _ = strconv.ParseFloat(resource.HourlyCost.(string), 64)
+					costObject.Monthly, _ = strconv.ParseFloat(resource.MonthlyCost.(string), 64)
+				}
+
+				resourceCosts[resource.Name] = costObject
 			}
-
-			resourceCosts[resource.Name] = costObject
 		}
 	}
 
@@ -144,8 +146,8 @@ func PostEvents(command string, tfArgs map[string]interface{}, costArgs map[stri
 			}
 
 			// Update resource
-			// request, _ := http.NewRequest("POST", "https://api.pluralith.com/v1/resource/update", bytes.NewBuffer(messageBytes))
-			request, _ := http.NewRequest("POST", "http://localhost:8080/v1/resource/update", bytes.NewBuffer(payloadBytes))
+			request, _ := http.NewRequest("POST", "https://api.pluralith.com/v1/resource/update", bytes.NewBuffer(payloadBytes))
+			// request, _ := http.NewRequest("POST", "http://localhost:8080/v1/resource/update", bytes.NewBuffer(payloadBytes))
 			request.Header.Add("Authorization", "Bearer "+auxiliary.StateInstance.APIKey)
 			request.Header.Add("Content-Type", "application/json")
 

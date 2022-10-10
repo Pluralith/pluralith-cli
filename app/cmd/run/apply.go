@@ -24,7 +24,7 @@ var RunApplyCmd = &cobra.Command{
 		}
 
 		// - - Generate Graph - -
-		if graphErr := graph.GenerateGraph(tfArgs, costArgs, exportArgs, true); graphErr != nil {
+		if graphErr := graph.GenerateGraph("apply", tfArgs, costArgs, exportArgs, true); graphErr != nil {
 			fmt.Println(graphErr)
 		}
 

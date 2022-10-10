@@ -142,7 +142,7 @@ func RunPlan(command string, tfArgs map[string]interface{}, costArgs map[string]
 	}
 
 	// Create JSON output for graphing
-	_, providers, planJsonErr := plan.CreatePlanJson(workingPlan, workingPlanIsJson)
+	_, planArray, providers, planJsonErr := plan.CreatePlanJson(workingPlan, workingPlanIsJson)
 	if planJsonErr != nil {
 		return "", fmt.Errorf("creating terraform plan json failed -> %v: %w", functionName, planJsonErr)
 	}
@@ -152,7 +152,7 @@ func RunPlan(command string, tfArgs map[string]interface{}, costArgs map[string]
 		costSpinner := ux.NewSpinner("Calculating Infrastructure Costs", "Costs Calculated", "Couldn't Calculate Costs", true)
 		costSpinner.Start()
 
-		if costErr := cost.CalculateCost(costArgs); costErr != nil {
+		if costErr := cost.CalculateCost(costArgs, planArray); costErr != nil {
 			fmt.Println(costErr)
 			costSpinner.Fail()
 		}
