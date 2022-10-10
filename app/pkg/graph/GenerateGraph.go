@@ -10,10 +10,10 @@ import (
 	"pluralith/pkg/ux"
 )
 
-func GenerateGraph(tfArgs map[string]interface{}, costArgs map[string]interface{}, exportArgs map[string]interface{}, runAsCI bool) error {
+func GenerateGraph(command string, tfArgs map[string]interface{}, costArgs map[string]interface{}, exportArgs map[string]interface{}, runAsCI bool) error {
 	functionName := "GenerateGraph"
 
-	_, planErr := terraform.RunPlan("plan", tfArgs, costArgs, true)
+	_, planErr := terraform.RunPlan(command, tfArgs, costArgs, true)
 	if planErr != nil {
 		return fmt.Errorf("running terraform plan failed -> %v: %w", functionName, planErr)
 	}
