@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func GraphModule() {
+func GraphModule(silentCheck bool) {
 	// Construct url
 	url := "https://api.pluralith.com/v1/dist/download/cli/graphing"
 	params := map[string]string{"os": runtime.GOOS, "arch": runtime.GOARCH}
@@ -31,7 +31,7 @@ func GraphModule() {
 	}
 
 	// Get Github release
-	downloadUrl, shouldDownload, checkErr := install.GetGitHubRelease(url, params, currentVersion)
+	downloadUrl, shouldDownload, checkErr := install.GetGitHubRelease(url, params, currentVersion, silentCheck)
 	if checkErr != nil {
 		fmt.Println(checkErr)
 	}

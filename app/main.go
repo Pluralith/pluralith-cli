@@ -29,7 +29,7 @@ func initApp() {
 	}
 
 	// Check for and install potential graph module update
-	components.GraphModule()
+	components.GraphModule(true)
 
 	auxiliary.StateInstance.CheckCI()
 	auxiliary.StateInstance.GetBranch()

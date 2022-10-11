@@ -37,7 +37,7 @@ var installGraphModule = &cobra.Command{
 		fmt.Print("Installing Latest ")
 		ux.PrintFormatted("Graph Module\n\n", []string{"bold", "blue"})
 
-		components.GraphModule()
+		components.GraphModule(false)
 	},
 }
 

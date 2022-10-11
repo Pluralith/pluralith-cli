@@ -11,11 +11,14 @@ import (
 	"github.com/hashicorp/go-version"
 )
 
-func GetGitHubRelease(url string, params map[string]string, currentVersionString string) (string, bool, error) {
+func GetGitHubRelease(url string, params map[string]string, currentVersionString string, silent bool) (string, bool, error) {
 	functionName := "GetGitHubRelease"
 
 	checkSpinner := ux.NewSpinner("Checking for update", "You are on the latest version!\n", "Checking for update failed, try again!\n", false)
-	checkSpinner.Start()
+
+	if !silent {
+		checkSpinner.Start()
+	}
 
 	request, _ := http.NewRequest("GET", url, nil)
 	request.Header.Add("Authorization", "Bearer "+auxiliary.StateInstance.APIKey)
@@ -31,7 +34,9 @@ func GetGitHubRelease(url string, params map[string]string, currentVersionString
 	response, responseErr := client.Do(request)
 
 	if responseErr != nil || response.StatusCode != 200 {
-		checkSpinner.Fail("Fetching latest version failed")
+		if !silent {
+			checkSpinner.Fail("Fetching latest version failed")
+		}
 		return "", false, fmt.Errorf("fetching latest version failed -> %v: %w", functionName, responseErr)
 	}
 
@@ -40,7 +45,9 @@ func GetGitHubRelease(url string, params map[string]string, currentVersionString
 	bodyBytes, _ := io.ReadAll(response.Body)
 	parseErr := json.Unmarshal(bodyBytes, &bodyObject)
 	if parseErr != nil {
-		checkSpinner.Fail("Parsing request result failed")
+		if !silent {
+			checkSpinner.Fail("Parsing request result failed")
+		}
 		return "", false, fmt.Errorf("parsing response failed -> %v: %w", functionName, responseErr)
 	}
 
@@ -73,11 +80,13 @@ func GetGitHubRelease(url string, params map[string]string, currentVersionString
 	}
 
 	// Else show that latest version is installed
-	checkSpinner.Success("You are on the latest version")
+	if !silent {
+		checkSpinner.Success("You are on the latest version")
 
-	ux.PrintFormatted("⠿ ", []string{"bold", "blue"})
-	fmt.Print("Version: ")
-	ux.PrintFormatted(currentVersion.Original()+"\n\n", []string{"bold", "blue"})
+		ux.PrintFormatted("⠿ ", []string{"bold", "blue"})
+		fmt.Print("Version: ")
+		ux.PrintFormatted(currentVersion.Original()+"\n\n", []string{"bold", "blue"})
+	}
 
 	return "", false, nil
 }
