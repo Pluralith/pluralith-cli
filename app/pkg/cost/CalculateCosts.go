@@ -32,8 +32,8 @@ func CalculateCost(costArgs map[string]interface{}, planArray []string) error {
 			"--format=json",
 		}
 
-		if costArgs["usage-file-path"] != nil {
-			allArgs = append(allArgs, "--usage-file="+costArgs["usage-file-path"].(string))
+		if costArgs["cost-usage-file"] != nil {
+			allArgs = append(allArgs, "--usage-file="+costArgs["cost-usage-file"].(string))
 		}
 
 		costCmd := exec.Command("infracost", allArgs...)

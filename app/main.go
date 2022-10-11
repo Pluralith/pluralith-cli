@@ -5,8 +5,6 @@ package main
 
 import (
 	"fmt"
-	"os/exec"
-	"path/filepath"
 	"pluralith/cmd"
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/dblock"
@@ -30,11 +28,8 @@ func initApp() {
 		fmt.Println(fmt.Errorf("setting API key failed -> %v: %w", functionName, setAPIKeyErr))
 	}
 
-	// Check if graph module installed, if not -> install
-	_, versionErr := exec.Command(filepath.Join(auxiliary.StateInstance.BinPath, "pluralith-cli-graphing"), "version").Output()
-	if versionErr != nil {
-		components.GraphModule()
-	}
+	// Check for and install potential graph module update
+	components.GraphModule(true)
 
 	auxiliary.StateInstance.CheckCI()
 	auxiliary.StateInstance.GetBranch()

@@ -36,7 +36,7 @@ var updateCmd = &cobra.Command{
 		url := "https://api.pluralith.com/v1/dist/download/cli"
 		params := map[string]string{"os": runtime.GOOS, "arch": runtime.GOARCH}
 
-		updateUrl, shouldUpdate, checkErr := install.GetGitHubRelease(url, params, auxiliary.StateInstance.CLIVersion)
+		updateUrl, shouldUpdate, checkErr := install.GetGitHubRelease(url, params, auxiliary.StateInstance.CLIVersion, false)
 		if checkErr != nil {
 			fmt.Println(fmt.Errorf("failed to get latest release -> %w", checkErr))
 			return
@@ -100,7 +100,7 @@ var updateGraphModule = &cobra.Command{
 		fmt.Print("Installing Latest ")
 		ux.PrintFormatted("Graph Module\n\n", []string{"bold", "blue"})
 
-		components.GraphModule()
+		components.GraphModule(false)
 	},
 }
 

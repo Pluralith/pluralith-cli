@@ -14,10 +14,17 @@ import (
 	"pluralith/pkg/ux"
 )
 
-func SplitJsonPlan(planJsonString string) ([]string, error) {
+func SplitJsonPlan(planJsonString string, terraformShowPlan bool) ([]string, error) {
 	functionName := "SplitJsonPlan"
 
 	var plans []string
+
+	if terraformShowPlan {
+		// No splitting necessary
+		plans = append(plans, planJsonString)
+		return plans, nil
+	}
+
 	bracketsOpened := 0
 	bracketsClosed := 0
 	subString := ""
@@ -86,15 +93,15 @@ func CreatePlanJson(planPath string, isJson bool) (string, []string, []string, e
 	strippedPath := filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith", "pluralith.state.json")
 
 	// Instantiate spinner
-	stripSpinner := ux.NewSpinner("Stripping Secrets", "Secrets Stripped", "Stripping Secrets Failed", true)
-	stripSpinner.Start()
+	planSpinner := ux.NewSpinner("Creating JSON Plan", "JSON Plan Created", "Creating JSON Plan Failed", true)
+	planSpinner.Start()
 
 	planJsonString := ""
 	if isJson {
 		// Read json file
 		file, readErr := ioutil.ReadFile(planPath)
 		if readErr != nil {
-			stripSpinner.Fail()
+			planSpinner.Fail()
 			return strippedPath, jsonPlans, providers, fmt.Errorf("failed to open json plan -> %v: %w", functionName, readErr)
 		}
 		planJsonString = string(file)
@@ -105,18 +112,24 @@ func CreatePlanJson(planPath string, isJson bool) (string, []string, []string, e
 		// Convert binary plan to json
 		planJsonStringTemp, convertErr := ConvertBinaryPlanToJson(planPath)
 		if convertErr != nil {
-			stripSpinner.Fail()
+			planSpinner.Fail()
 			return strippedPath, jsonPlans, providers, fmt.Errorf("failed to strip secrets -> %v: %w", functionName, convertErr)
 		}
 		planJsonString = planJsonStringTemp
 	}
 
 	// Split json plans
-	jsonPlans, splitError := SplitJsonPlan(planJsonString)
+	jsonPlans, splitError := SplitJsonPlan(planJsonString, !isJson)
 	if splitError != nil {
-		stripSpinner.Fail()
+		planSpinner.Fail()
 		return strippedPath, jsonPlans, providers, fmt.Errorf("failed to split json plan -> %v: %w", functionName, splitError)
 	}
+
+	planSpinner.Success()
+
+	// Instantiate spinner
+	stripSpinner := ux.NewSpinner("Stripping Secrets", "Secrets Stripped", "Stripping Secrets Failed", true)
+	stripSpinner.Start()
 
 	// Strip secrets from plan states json
 	for _, jsonPlan := range jsonPlans {
