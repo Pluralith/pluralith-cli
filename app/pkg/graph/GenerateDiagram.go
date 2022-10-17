@@ -46,6 +46,7 @@ func GenerateDiagram(exportArgs map[string]interface{}, costArgs map[string]inte
 		"--show-changes", strconv.FormatBool(exportArgs["show-changes"].(bool)),
 		"--show-drift", strconv.FormatBool(exportArgs["show-drift"].(bool)),
 		"--show-costs", strconv.FormatBool(exportArgs["show-costs"].(bool)),
+		"--wsl", strconv.FormatBool(auxiliary.StateInstance.IsWSL),
 
 		"--cost-mode", costArgs["cost-mode"].(string),
 		"--cost-period", costArgs["cost-period"].(string),
