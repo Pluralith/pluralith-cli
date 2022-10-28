@@ -93,7 +93,7 @@ func CreatePlanJson(planPath string, isJson bool) (string, []string, []string, e
 	strippedPath := filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith", "pluralith.state.json")
 
 	// Instantiate spinner
-	planSpinner := ux.NewSpinner("Creating JSON Plan", "JSON Plan Created", "Creating JSON Plan Failed", true)
+	planSpinner := ux.NewSpinner("Creating Plan Cache", "Plan Cache Created", "Creating Plan Cache Failed", true)
 	planSpinner.Start()
 
 	planJsonString := ""
