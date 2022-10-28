@@ -5,15 +5,11 @@ import (
 	"bytes"
 	"fmt"
 	"os/exec"
-	"strconv"
-	"strings"
 	"time"
 
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/comdb"
 	"pluralith/pkg/ux"
-
-	"github.com/fatih/color"
 )
 
 func PadEventLogs(address string, newEvent []string, eventLog *[][]string, currentPadding *int) {
@@ -102,26 +98,8 @@ func StreamCommand(command string, tfArgs []string) error {
 	applyScanner := bufio.NewScanner(outStream)
 	applyScanner.Split(bufio.ScanLines)
 
-	eventLog := [][]string{}
-	eventPadding := 0
-
-	errorCount := 0
-	errorPrint := color.New(color.Bold, color.FgHiRed)
-
-	successCount := 0
-	successMode := "Created"
-	successPrint := color.New(color.Bold, color.FgHiGreen)
-
-	if command == "destroy" {
-		successMode = "Destroyed"
-		successPrint = color.New(color.Bold, color.FgHiBlue)
-	}
-
 	// Deactivate cursor
-	fmt.Print("\033[?25l")
-
-	ux.PrintFormatted("  → ", []string{"bold", "blue"})
-	fmt.Printf("Running → %s %s / %s Errored", successPrint.Sprint(strconv.Itoa(successCount)), successMode, errorPrint.Sprint(strconv.Itoa(errorCount)))
+	fmt.Print("\033[?25l\n")
 
 	// While command line scan is running
 	for applyScanner.Scan() {
@@ -134,7 +112,7 @@ func StreamCommand(command string, tfArgs []string) error {
 				Receiver:  "UI",
 				Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
 				Command:   event.Command,
-				Type:      event.Type,
+				Type:      event.ParsedType,
 				Address:   event.Address,
 				Message:   event.Message,
 				Path:      auxiliary.StateInstance.WorkingPath,
@@ -142,34 +120,16 @@ func StreamCommand(command string, tfArgs []string) error {
 			})
 		}
 
-		logEvent := false
-
-		if event.Type == "complete" {
-			logEvent = true
-			successCount += 1
-			newEvent := []string{successPrint.Sprint("    ✔ "), event.Address, "", successPrint.Sprint(successMode)}
-			PadEventLogs(event.Address, newEvent, &eventLog, &eventPadding)
+		if event.Type != "version" && event.Type != "planned_change" && event.Type != "outputs" {
+			fmt.Println("    " + event.Message)
 		}
 
-		if event.Type == "errored" {
-			logEvent = true
-			errorCount += 1
-			newEvent := []string{errorPrint.Sprint("    ✘ "), event.Address, "", errorPrint.Sprint("Errored  ")}
-			PadEventLogs(event.Address, newEvent, &eventLog, &eventPadding)
-		}
-
-		// fmt.Println(messageString)
-		if event.Address != "" && logEvent {
-			for line := 1; line < len(eventLog); line++ {
-				fmt.Printf("\033[A")
-			}
-
-			ux.PrintFormatted("\r  → ", []string{"bold", "blue"})
-			fmt.Printf("Running → %s %s / %s Errored", successPrint.Sprint(strconv.Itoa(successCount)), successMode, errorPrint.Sprint(strconv.Itoa(errorCount)))
-			fmt.Printf("\033F")
-
-			for _, log := range eventLog {
-				fmt.Print("\n" + strings.Join(log, ""))
+		if event.Type == "outputs" {
+			ux.PrintFormatted("\n  → ", []string{"bold", "blue"})
+			ux.PrintFormatted(event.Message, []string{"bold"})
+			for outputName, outputObject := range event.Outputs {
+				ux.PrintFormatted("\n    → ", []string{"bold"})
+				fmt.Println(outputName+" =", outputObject.(map[string]interface{})["value"])
 			}
 		}
 	}
