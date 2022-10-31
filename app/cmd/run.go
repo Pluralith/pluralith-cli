@@ -44,5 +44,7 @@ func init() {
 	runCmd.PersistentFlags().String("cost-period", "month", "Determines over which period costs are aggregated. Can be 'hour' or 'month'")
 	runCmd.PersistentFlags().StringArray("var-file", []string{}, "Path to a var file to pass to Terraform. Can be specified multiple times.")
 	runCmd.PersistentFlags().StringArray("var", []string{}, "A variable to pass to Terraform. Can be specified multiple times. (Format: --var='NAME=VALUE')")
+	runCmd.PersistentFlags().String("plan-file", "", "Path to an execution plan binary file. If passed, this will skip a plan run under the hood.")
+	runCmd.PersistentFlags().String("plan-file-json", "", "Path to an execution plan json file. If passed, this will skip a plan run under the hood.")
 	runCmd.PersistentFlags().String("cost-usage-file", "", "Path to an infracost usage file to be used for the cost breakdown")
 }

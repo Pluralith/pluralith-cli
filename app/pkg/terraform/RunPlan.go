@@ -70,7 +70,7 @@ func RunPlan(command string, tfArgs map[string]interface{}, costArgs map[string]
 		}
 
 		ux.PrintFormatted("  -", []string{"blue", "bold"})
-		fmt.Println(" Using Existing Execution Plan Json File")
+		fmt.Println(" Using Existing Execution Plan JSON File")
 	} else {
 		// Construct terraform args
 		allArgs := []string{
