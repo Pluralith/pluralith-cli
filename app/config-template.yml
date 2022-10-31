@@ -9,6 +9,8 @@
 # Learn more about it at https://docs.pluralith.com/config
 
 project_id: 0
+config:
+  store_in_backend: true
 # config:
 #   senitive_attrs:
 #     - "attribute_name"
