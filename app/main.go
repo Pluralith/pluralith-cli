@@ -33,7 +33,6 @@ func initApp() {
 
 	auxiliary.StateInstance.CheckCI()
 	auxiliary.StateInstance.GetBranch()
-	auxiliary.StateInstance.CheckTerraformInit()
 	auxiliary.StateInstance.CheckInfracost()
 
 	if getConfigErr := auxiliary.StateInstance.GetConfig(); getConfigErr != nil {
