@@ -1,11 +1,7 @@
 package backends
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
-	"path/filepath"
-	"pluralith/pkg/auxiliary"
 )
 
 type TerraformState struct {
@@ -25,49 +21,32 @@ type TerraformState struct {
 	} `json:"modules"`
 }
 
-func LoadBackendConfig() (interface{}, error) {
-	functionName := "LoadBackendConfig"
+func StoreInBackend() error {
+	functionName := "PushDiagramToBackend"
 
-	// Read terraform state for backend information
-	tfStatePath := filepath.Join(auxiliary.StateInstance.WorkingPath, ".terraform", "terraform.tfstate")
-	tfStateByte, configErr := os.ReadFile(tfStatePath)
-	if configErr != nil {
-		return nil, fmt.Errorf("failed to read working directory config -> %v: %w", functionName, configErr)
-	}
-
-	// Parse terraform state
-	tfState := TerraformState{}
-	jsonErr := json.Unmarshal(tfStateByte, &tfState)
-	if jsonErr != nil {
-		return nil, fmt.Errorf("failed to unmarshal terraform state information -> %v: %w", functionName, jsonErr)
+	backendConfig, backendErr := LoadBackendConfig()
+	if backendErr != nil {
+		return fmt.Errorf("could not load backend -> %v: %w", functionName, backendErr)
 	}
 
 	// Detect which backend is uses
-	if tfState.Backend.Type == "aws" {
-		// azureConfig := LoadAzureBackendConfig()
-		// return azureConfig, nil
+	if backendConfig.Backend.Type == "aws" {
+		if awsErr := PushToAWSBackend(backendConfig); awsErr != nil {
+			return fmt.Errorf("failed to push to aws backend -> %v: %w", functionName, awsErr)
+		}
+	}
+	if backendConfig.Backend.Type == "azurerm" {
+		if azureErr := PushToAzureBackend(backendConfig); azureErr != nil {
+			return fmt.Errorf("failed to push to azure backend -> %v: %w", functionName, azureErr)
+		}
+	}
+	if backendConfig.Backend.Type == "google" {
+		if googleErr := PushToAzureBackend(backendConfig); googleErr != nil {
+			return fmt.Errorf("failed to push to google backend -> %v: %w", functionName, googleErr)
+		}
 	}
 
-	if tfState.Backend.Type == "azurerm" {
-		azureConfig := LoadAzureBackendConfig(tfState)
-		return azureConfig, nil
-	}
-
-	if tfState.Backend.Type == "google" {
-		// azureConfig := LoadAzureBackendConfig()
-		// return azureConfig, nil
-	}
-
-	return nil, nil
-}
-
-func PushDiagramToBackend() error {
-	config, err := LoadBackendConfig()
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(config)
+	// fmt.Println(config)
 	// TODOs here:
 	// - Detect state backend
 	// - Get credentials

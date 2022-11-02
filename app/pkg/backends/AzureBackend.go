@@ -1,10 +1,6 @@
 package backends
 
-import (
-	"fmt"
-
-	"github.com/mitchellh/mapstructure"
-)
+import "fmt"
 
 type AzureBackendConfig struct {
 	AccessKey                 string `json:"access_key"`
@@ -28,28 +24,16 @@ type AzureBackendConfig struct {
 	UseMsi                    string `json:"use_msi"`
 }
 
-func LoadAzureBackendConfig(tfState TerraformState) interface{} {
+func PushToAzureBackend(config TerraformState) error {
+	functionName := "PushToAzureBackend"
+
 	azureConfig := AzureBackendConfig{}
+	backendErr := MapBackendConfig(config, &azureConfig)
+	if backendErr != nil {
+		return fmt.Errorf("loading azure backend information failed -> %v: %w", functionName, backendErr)
+	}
 
-	config := &mapstructure.DecoderConfig{TagName: "json"}
-	config.Result = &azureConfig
-
-	decoder, _ := mapstructure.NewDecoder(config)
-	decoder.Decode(tfState.Backend.Config)
-
-	return azureConfig
-}
-
-func InitAzureBackend(tfState TerraformState) {
-	azureConfig := LoadAzureBackendConfig(tfState)
 	fmt.Println(azureConfig)
-	// credential, err := azidentity.NewDefaultAzureCredential(nil)
-	// if err != nil {
-	// 	log.Fatal("Invalid credentials with error: " + err.Error())
-	// }
 
-	// serviceClient, err := azblob.NewClient(url, credential, nil)
-	// if err != nil {
-	// 	log.Fatal("Invalid credentials with error: " + err.Error())
-	// }
+	return nil
 }
