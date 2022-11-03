@@ -39,8 +39,8 @@ func PreRun(flags *pflag.FlagSet) (map[string]interface{}, map[string]interface{
 
 	// Set defaults for export
 	if exportArgs["title"] == "" {
-		exportArgs["title"] = "Run #" + exportArgs["runId"].(string)
-		exportArgs["file-name"] = "Run_" + exportArgs["runId"].(string)
+		exportArgs["title"] = "Infrastructure Diagram"     //+ exportArgs["runId"].(string)
+		exportArgs["file-name"] = "Infrastructure_Diagram" //+ exportArgs["runId"].(string)
 	}
 
 	configValid, projectData, configErr := auth.VerifyConfig(false)

@@ -30,7 +30,7 @@ func StoreInBackend() error {
 	}
 
 	// Detect which backend is uses
-	if backendConfig.Backend.Type == "aws" {
+	if backendConfig.Backend.Type == "s3" {
 		if awsErr := PushToAWSBackend(backendConfig); awsErr != nil {
 			return fmt.Errorf("failed to push to aws backend -> %v: %w", functionName, awsErr)
 		}
@@ -40,7 +40,7 @@ func StoreInBackend() error {
 			return fmt.Errorf("failed to push to azure backend -> %v: %w", functionName, azureErr)
 		}
 	}
-	if backendConfig.Backend.Type == "google" {
+	if backendConfig.Backend.Type == "gcs" {
 		if googleErr := PushToAzureBackend(backendConfig); googleErr != nil {
 			return fmt.Errorf("failed to push to google backend -> %v: %w", functionName, googleErr)
 		}

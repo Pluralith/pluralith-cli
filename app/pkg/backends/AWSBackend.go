@@ -45,5 +45,7 @@ func PushToAWSBackend(config TerraformState) error {
 		return fmt.Errorf("loading aws backend information failed -> %v: %w", functionName, backendErr)
 	}
 
+	fmt.Println(awsConfig)
+
 	return nil
 }
