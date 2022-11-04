@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"pluralith/pkg/auxiliary"
+	"pluralith/pkg/ux"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
@@ -36,42 +37,46 @@ type AzureBackendConfig struct {
 func PushToAzureBackend(config TerraformState) error {
 	functionName := "PushToAzureBackend"
 
+	uploadSpinner := ux.NewSpinner("Uploading To State Backend", "Diagram Uploaded To State Backend", "Diagram Upload Failed!", true)
+	uploadSpinner.Start()
+
 	azureConfig := AzureBackendConfig{}
 	backendErr := MapBackendConfig(config, &azureConfig)
 	if backendErr != nil {
+		uploadSpinner.Fail()
 		return fmt.Errorf("loading azure backend information failed -> %v: %w", functionName, backendErr)
 	}
-
-	fmt.Println(azureConfig)
-
-	fmt.Printf("Azure Blob storage quick start sample\n")
 
 	url := "https://" + azureConfig.StorageAccountName + ".blob.core.windows.net/" //replace <StorageAccountName> with your Azure storage account name
 	ctx := context.Background()
 
-	fmt.Println(url)
-
 	// Create a default request pipeline using your storage account name and account key.
 	credential, credentialErr := azidentity.NewDefaultAzureCredential(nil)
 	if credentialErr != nil {
+		uploadSpinner.Fail()
 		return fmt.Errorf("invalid credentials with error -> %v: %w", functionName, credentialErr)
 	}
 
 	blobClient, clientErr := azblob.NewClient(url, credential, nil)
 	if clientErr != nil {
+		uploadSpinner.Fail()
 		return fmt.Errorf("creating new azure blob client failed -> %v: %w", functionName, clientErr)
 	}
 
 	diagram, diagramErr := os.ReadFile(filepath.Join(auxiliary.StateInstance.WorkingPath, "Infrastructure_Diagram.pdf"))
 	if diagramErr != nil {
+		uploadSpinner.Fail()
 		return fmt.Errorf("reading diagram from disk failed -> %v: %w", functionName, diagramErr)
 	}
 
 	// Upload to data to blob storage
 	_, uploadErr := blobClient.UploadBuffer(ctx, azureConfig.ContainerName, "Infrastructure_Diagram.pdf", diagram, nil)
 	if uploadErr != nil {
+		uploadSpinner.Fail()
 		return fmt.Errorf("uploading diagram to azure blob storage failed -> %v: %w", functionName, uploadErr)
 	}
+
+	uploadSpinner.Success()
 
 	return nil
 }
