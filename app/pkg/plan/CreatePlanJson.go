@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"pluralith/pkg/auxiliary"
@@ -15,7 +16,7 @@ import (
 )
 
 func SplitJsonPlan(planJsonString string, terraformShowPlan bool) ([]string, error) {
-	functionName := "SplitJsonPlan"
+	//functionName := "SplitJsonPlan"
 
 	var plans []string
 
@@ -25,34 +26,17 @@ func SplitJsonPlan(planJsonString string, terraformShowPlan bool) ([]string, err
 		return plans, nil
 	}
 
-	bracketsOpened := 0
-	bracketsClosed := 0
-	subString := ""
-	objectStarted := false
-
-	for _, char := range planJsonString {
-		if char == '{' {
-			objectStarted = true
-			bracketsOpened++
-		} else if char == '}' {
-			bracketsClosed++
+	var jsonEndPattern string = `}[\n\r\s]*{`
+	subPlan := planJsonString
+	for {
+		sent := regexp.MustCompile(jsonEndPattern)
+		match := sent.FindStringIndex(subPlan)
+		if match == nil {
+			plans = append(plans, subPlan)
+			break
 		}
-
-		if objectStarted {
-			subString += string(char)
-		}
-
-		if objectStarted && bracketsOpened > 0 && bracketsOpened == bracketsClosed {
-			_, parseErr := auxiliary.ParseJson(subString)
-			if parseErr != nil {
-				return nil, fmt.Errorf("%v: %w", functionName, parseErr)
-			}
-			plans = append(plans, subString)
-			subString = ""
-			objectStarted = false
-			bracketsClosed = 0
-			bracketsOpened = 0
-		}
+		plans = append(plans, subPlan[:match[0]+1])
+		subPlan = subPlan[match[1]-1:]
 	}
 
 	return plans, nil
