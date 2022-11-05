@@ -1,8 +1,17 @@
 package backends
 
 import (
+	"bytes"
+	"context"
 	"fmt"
+	"os"
+	"path/filepath"
+	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/ux"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
 type S3BackendConfig struct {
@@ -48,7 +57,40 @@ func PushToS3Backend(config TerraformState) error {
 	s3Config := S3BackendConfig{}
 	backendErr := MapBackendConfig(config, &s3Config)
 	if backendErr != nil {
+		uploadSpinner.Fail()
 		return fmt.Errorf("loading s3 backend information failed -> %v: %w", functionName, backendErr)
+	}
+
+	s3BucketConfig := &aws.Config{Region: aws.String(s3Config.Region)}
+	s3Session, s3Error := session.NewSession(s3BucketConfig)
+	if s3Error != nil {
+		uploadSpinner.Fail()
+		return fmt.Errorf("establishing s3 session failed -> %v: %w", functionName, backendErr)
+	}
+
+	uploader := s3manager.NewUploader(s3Session)
+
+	diagram, diagramErr := os.ReadFile(filepath.Join(auxiliary.StateInstance.WorkingPath, "Infrastructure_Diagram.pdf"))
+	if diagramErr != nil {
+		uploadSpinner.Fail()
+		return fmt.Errorf("reading diagram from disk failed -> %v: %w", functionName, diagramErr)
+	}
+
+	// Store diagram at same key "directory" as state
+	keyPath := filepath.Dir(s3Config.Key)
+	diagramPath := filepath.Join(keyPath, "Infrastructure_Diagram.pdf")
+
+	s3Input := &s3manager.UploadInput{
+		Bucket:      &s3Config.Bucket,
+		Key:         &diagramPath,
+		Body:        bytes.NewReader(diagram),
+		ContentType: aws.String("application/pdf"),
+	}
+
+	_, uploadErr := uploader.UploadWithContext(context.Background(), s3Input)
+	if uploadErr != nil {
+		uploadSpinner.Fail()
+		return fmt.Errorf("uploading diagram to s3 bucket failed -> %v: %w", functionName, uploadErr)
 	}
 
 	uploadSpinner.Success()

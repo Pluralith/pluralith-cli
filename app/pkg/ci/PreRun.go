@@ -45,7 +45,7 @@ func PreRun(flags *pflag.FlagSet) (map[string]interface{}, map[string]interface{
 
 	configValid, projectData, configErr := auth.VerifyConfig(false)
 	if !configValid {
-		return nil, nil, nil, fmt.Errorf("invalid Pluralith config")
+		return nil, nil, nil, fmt.Errorf("")
 	}
 	if configErr != nil {
 		return nil, nil, nil, fmt.Errorf("%v: %w", functionName, configErr)

@@ -68,6 +68,7 @@ func PushToAzureBackend(config TerraformState) error {
 		return fmt.Errorf("reading diagram from disk failed -> %v: %w", functionName, diagramErr)
 	}
 
+	// Store diagram at same key "directory" as state
 	keyPath := filepath.Dir(azureConfig.Key)
 	diagramPath := filepath.Join(keyPath, "Infrastructure_Diagram.pdf")
 
