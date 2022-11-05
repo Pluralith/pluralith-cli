@@ -68,7 +68,10 @@ func PushToAzureBackend(config TerraformState) error {
 		return fmt.Errorf("reading diagram from disk failed -> %v: %w", functionName, diagramErr)
 	}
 
-	_, uploadErr := blobClient.UploadBuffer(ctx, azureConfig.ContainerName, "Infrastructure_Diagram.pdf", diagram, nil)
+	keyPath := filepath.Dir(azureConfig.Key)
+	diagramPath := filepath.Join(keyPath, "Infrastructure_Diagram.pdf")
+
+	_, uploadErr := blobClient.UploadBuffer(ctx, azureConfig.ContainerName, diagramPath, diagram, nil)
 	if uploadErr != nil {
 		uploadSpinner.Fail()
 		return fmt.Errorf("uploading diagram to azure blob storage failed -> %v: %w", functionName, uploadErr)
