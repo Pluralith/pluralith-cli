@@ -21,21 +21,25 @@ var RunDestroyCmd = &cobra.Command{
 		tfArgs, costArgs, exportArgs, preErr := ci.PreRun(cmd.Flags())
 		if preErr != nil {
 			fmt.Println(preErr)
+			return
 		}
 
 		// - - Generate Graph - -
 		if graphErr := graph.GenerateGraph("destroy", tfArgs, costArgs, exportArgs, true); graphErr != nil {
 			fmt.Println(graphErr)
+			return
 		}
 
 		// - - Post Graph - -
 		if ciError := ci.PostGraph("destroy", exportArgs); ciError != nil {
 			fmt.Println(ciError)
+			return
 		}
 
 		// - - Run Destroy - -
 		if eventErr := ci.PostEvents("destroy", tfArgs, costArgs, exportArgs); eventErr != nil {
 			fmt.Println(eventErr)
+			return
 		}
 	},
 }

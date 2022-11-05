@@ -21,21 +21,25 @@ var RunApplyCmd = &cobra.Command{
 		tfArgs, costArgs, exportArgs, preErr := ci.PreRun(cmd.Flags())
 		if preErr != nil {
 			fmt.Println(preErr)
+			return
 		}
 
 		// - - Generate Graph - -
 		if graphErr := graph.GenerateGraph("apply", tfArgs, costArgs, exportArgs, true); graphErr != nil {
 			fmt.Println(graphErr)
+			return
 		}
 
 		// - - Post Graph - -
 		if ciError := ci.PostGraph("apply", exportArgs); ciError != nil {
 			fmt.Println(ciError)
+			return
 		}
 
 		// - - Run Apply - -
 		if eventErr := ci.PostEvents("apply", tfArgs, costArgs, exportArgs); eventErr != nil {
 			fmt.Println(eventErr)
+			return
 		}
 	},
 }
