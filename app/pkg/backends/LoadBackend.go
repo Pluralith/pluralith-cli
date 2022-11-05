@@ -38,7 +38,7 @@ func LoadBackendConfig() (TerraformState, error) {
 
 	// Check if backend config exists
 	if _, err := os.Stat(tfStatePath); errors.Is(err, os.ErrNotExist) {
-		ux.PrintFormatted("  ✘", []string{"red", "bold"})
+		ux.PrintFormatted("  ✘", []string{"yellow", "bold"})
 		fmt.Println(" Couldn't sync diagram to remote backend. No remote backend detected.")
 		return tfState, nil
 	}

@@ -2,6 +2,7 @@ package backends
 
 import (
 	"fmt"
+	"pluralith/pkg/ux"
 )
 
 type TerraformState struct {
@@ -46,10 +47,12 @@ func StoreInBackend() error {
 		}
 	}
 
-	// fmt.Println(config)
-	// TODOs here:
-	// - Detect state backend
-	// - Get credentials
-	// - Upload file to backend
+	if backendConfig.Backend.Type != "" {
+		ux.PrintFormatted("  ✘", []string{"yellow", "bold"})
+		fmt.Print(" Backend type ")
+		ux.PrintFormatted(backendConfig.Backend.Type, []string{"white", "bold"})
+		fmt.Println(" isn't supported. Pluralith currently supports s3, gcs and azurerm.")
+	}
+
 	return nil
 }
