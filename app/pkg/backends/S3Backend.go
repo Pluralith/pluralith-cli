@@ -62,10 +62,10 @@ func PushToS3Backend(config TerraformState) error {
 	}
 
 	s3BucketConfig := &aws.Config{Region: aws.String(s3Config.Region)}
-	s3Session, s3Error := session.NewSession(s3BucketConfig)
-	if s3Error != nil {
+	s3Session, sessionErr := session.NewSession(s3BucketConfig)
+	if sessionErr != nil {
 		uploadSpinner.Fail()
-		return fmt.Errorf("establishing s3 session failed -> %v: %w", functionName, backendErr)
+		return fmt.Errorf("establishing s3 session failed -> %v: %w", functionName, sessionErr)
 	}
 
 	uploader := s3manager.NewUploader(s3Session)
