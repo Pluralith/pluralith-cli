@@ -1,8 +1,11 @@
 package backends
 
-import "fmt"
+import (
+	"fmt"
+	"pluralith/pkg/ux"
+)
 
-type GCPBackendConfig struct {
+type GCSBackendConfig struct {
 	AccessToken                        string `json:"access_token"`
 	Bucket                             string `json:"bucket"`
 	Credentials                        string `json:"credentials"`
@@ -12,14 +15,18 @@ type GCPBackendConfig struct {
 	Prefix                             string `json:"prefix"`
 }
 
-func PushToGCPBackend(config TerraformState) error {
-	functionName := "PushToGCPBackend"
+func PushToGCSBackend(config TerraformState) error {
+	functionName := "PushToGCSBackend"
 
-	gcpConfig := GCPBackendConfig{}
-	backendErr := MapBackendConfig(config, &gcpConfig)
+	uploadSpinner := ux.NewSpinner("Uploading To GCS State Backend", "Diagram Uploaded To GCS State Backend", "Diagram Upload Failed!", true)
+	uploadSpinner.Start()
+
+	gcsConfig := GCSBackendConfig{}
+	backendErr := MapBackendConfig(config, &gcsConfig)
 	if backendErr != nil {
-		return fmt.Errorf("loading gcp backend information failed -> %v: %w", functionName, backendErr)
+		return fmt.Errorf("loading gcs backend information failed -> %v: %w", functionName, backendErr)
 	}
 
+	uploadSpinner.Success()
 	return nil
 }

@@ -37,7 +37,7 @@ type AzureBackendConfig struct {
 func PushToAzureBackend(config TerraformState) error {
 	functionName := "PushToAzureBackend"
 
-	uploadSpinner := ux.NewSpinner("Uploading To State Backend", "Diagram Uploaded To State Backend", "Diagram Upload Failed!", true)
+	uploadSpinner := ux.NewSpinner("Uploading To Azure State Backend", "Diagram Uploaded To Azure State Backend", "Diagram Upload Failed!", true)
 	uploadSpinner.Start()
 
 	azureConfig := AzureBackendConfig{}

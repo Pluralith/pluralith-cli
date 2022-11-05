@@ -1,8 +1,11 @@
 package backends
 
-import "fmt"
+import (
+	"fmt"
+	"pluralith/pkg/ux"
+)
 
-type AWSBackendConfig struct {
+type S3BackendConfig struct {
 	AccessKey                   string `json:"access_key"`
 	ACL                         string `json:"acl"`
 	AssumeRoleDurationSeconds   string `json:"assume_role_duration_seconds"`
@@ -36,16 +39,18 @@ type AWSBackendConfig struct {
 	WorkspaceKeyPrefix          string `json:"workspace_key_prefix"`
 }
 
-func PushToAWSBackend(config TerraformState) error {
-	functionName := "PushToAWSBackend"
+func PushToS3Backend(config TerraformState) error {
+	functionName := "PushToS3Backend"
 
-	awsConfig := AWSBackendConfig{}
-	backendErr := MapBackendConfig(config, &awsConfig)
+	uploadSpinner := ux.NewSpinner("Uploading To S3 State Backend", "Diagram Uploaded To S3 State Backend", "Diagram Upload Failed!", true)
+	uploadSpinner.Start()
+
+	s3Config := S3BackendConfig{}
+	backendErr := MapBackendConfig(config, &s3Config)
 	if backendErr != nil {
-		return fmt.Errorf("loading aws backend information failed -> %v: %w", functionName, backendErr)
+		return fmt.Errorf("loading s3 backend information failed -> %v: %w", functionName, backendErr)
 	}
 
-	fmt.Println(awsConfig)
-
+	uploadSpinner.Success()
 	return nil
 }
