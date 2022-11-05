@@ -2,10 +2,12 @@ package backends
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"pluralith/pkg/auxiliary"
+	"pluralith/pkg/ux"
 
 	"github.com/mitchellh/mapstructure"
 )
@@ -32,9 +34,16 @@ func MapBackendConfig(tfState TerraformState, configObject interface{}) error {
 func LoadBackendConfig() (TerraformState, error) {
 	functionName := "LoadBackendConfig"
 	tfState := TerraformState{}
+	tfStatePath := filepath.Join(auxiliary.StateInstance.WorkingPath, ".terraform", "terraform.tfstate")
+
+	// Check if backend config exists
+	if _, err := os.Stat(tfStatePath); errors.Is(err, os.ErrNotExist) {
+		ux.PrintFormatted("  ✘", []string{"red", "bold"})
+		fmt.Println(" Couldn't sync diagram to remote backend. No remote backend detected.")
+		return tfState, nil
+	}
 
 	// Read terraform state for backend information
-	tfStatePath := filepath.Join(auxiliary.StateInstance.WorkingPath, ".terraform", "terraform.tfstate")
 	tfStateByte, configErr := os.ReadFile(tfStatePath)
 	if configErr != nil {
 		return tfState, fmt.Errorf("failed to read working directory config -> %v: %w", functionName, configErr)
