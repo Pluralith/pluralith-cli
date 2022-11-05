@@ -50,7 +50,6 @@ func PushToAzureBackend(config TerraformState) error {
 	url := "https://" + azureConfig.StorageAccountName + ".blob.core.windows.net/" //replace <StorageAccountName> with your Azure storage account name
 	ctx := context.Background()
 
-	// Create a default request pipeline using your storage account name and account key.
 	credential, credentialErr := azidentity.NewDefaultAzureCredential(nil)
 	if credentialErr != nil {
 		uploadSpinner.Fail()
@@ -69,7 +68,6 @@ func PushToAzureBackend(config TerraformState) error {
 		return fmt.Errorf("reading diagram from disk failed -> %v: %w", functionName, diagramErr)
 	}
 
-	// Upload to data to blob storage
 	_, uploadErr := blobClient.UploadBuffer(ctx, azureConfig.ContainerName, "Infrastructure_Diagram.pdf", diagram, nil)
 	if uploadErr != nil {
 		uploadSpinner.Fail()
@@ -77,6 +75,5 @@ func PushToAzureBackend(config TerraformState) error {
 	}
 
 	uploadSpinner.Success()
-
 	return nil
 }

@@ -43,6 +43,7 @@ func GenerateDiagram(exportArgs map[string]interface{}, costArgs map[string]inte
 		"--plan-json-path", exportArgs["plan-json-path"].(string),
 		"--cost-json-path", exportArgs["cost-json-path"].(string),
 		"--export-pdf", strconv.FormatBool(exportArgs["export-pdf"].(bool)),
+		"--sync-to-backend", strconv.FormatBool(exportArgs["sync-to-backend"].(bool)),
 		"--show-changes", strconv.FormatBool(exportArgs["show-changes"].(bool)),
 		"--show-drift", strconv.FormatBool(exportArgs["show-drift"].(bool)),
 		"--show-costs", strconv.FormatBool(exportArgs["show-costs"].(bool)),

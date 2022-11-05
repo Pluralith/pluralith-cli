@@ -35,8 +35,10 @@ var RunPlanCmd = &cobra.Command{
 		}
 
 		// - - Push Diagram to State Backend - -
-		if pushErr := backends.StoreInBackend(); pushErr != nil {
-			fmt.Println(pushErr)
+		if exportArgs["sync-to-backend"] == true {
+			if pushErr := backends.StoreInBackend(); pushErr != nil {
+				fmt.Println(pushErr)
+			}
 		}
 	},
 }
