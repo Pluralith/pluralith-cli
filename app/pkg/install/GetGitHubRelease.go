@@ -33,13 +33,6 @@ func GetGitHubRelease(url string, params map[string]string, currentVersionString
 	client := &http.Client{}
 	response, responseErr := client.Do(request)
 
-	if responseErr != nil || response.StatusCode != 200 {
-		if !silent {
-			checkSpinner.Fail("Fetching latest version failed")
-		}
-		return "", false, fmt.Errorf("fetching latest version failed -> %v: %w", functionName, responseErr)
-	}
-
 	// Parse request body
 	var bodyObject map[string]interface{}
 	bodyBytes, _ := io.ReadAll(response.Body)
@@ -49,6 +42,13 @@ func GetGitHubRelease(url string, params map[string]string, currentVersionString
 			checkSpinner.Fail("Parsing request result failed")
 		}
 		return "", false, fmt.Errorf("parsing response failed -> %v: %w", functionName, responseErr)
+	}
+
+	if responseErr != nil || response.StatusCode != 200 {
+		if !silent {
+			checkSpinner.Fail("Fetching latest version failed")
+		}
+		return "", false, fmt.Errorf("fetching latest version failed -> %v: %w", functionName, responseErr)
 	}
 
 	versionData := bodyObject["data"].(map[string]interface{})

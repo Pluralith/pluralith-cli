@@ -13,6 +13,7 @@ import (
 func GraphModule(silentCheck bool) {
 	// Construct url
 	url := "https://api.pluralith.com/v1/dist/download/cli/graphing"
+	// url := "http://localhost:8080/v1/dist/download/cli/graphing"
 	params := map[string]string{"os": runtime.GOOS, "arch": runtime.GOARCH}
 
 	// Generate install path
