@@ -17,12 +17,10 @@ func ProcessTerraformMessage(message string, command string) DecodedEvent {
 
 	// Get event message
 	decodedEvent.Message = parsedMessage["@message"].(string)
-
-	// Retrieve event type from parsed state JSON
-	eventType := parsedMessage["type"].(string)
+	decodedEvent.Type = parsedMessage["type"].(string)
 
 	// Handle apply events
-	if strings.Contains(eventType, "apply") {
+	if strings.Contains(decodedEvent.Type, "apply") {
 		// Get address of current resource
 		hook := parsedMessage["hook"].(map[string]interface{})
 		resource := hook["resource"].(map[string]interface{})
@@ -38,11 +36,11 @@ func ProcessTerraformMessage(message string, command string) DecodedEvent {
 		// Set address and type
 		decodedEvent.Command = command
 		decodedEvent.Address = address
-		decodedEvent.Type = strings.Split(eventType, "_")[1]
+		decodedEvent.ParsedType = strings.Split(decodedEvent.Type, "_")[1]
 	}
 
 	// Handle diagnostic events
-	if eventType == "diagnostic" {
+	if decodedEvent.Type == "diagnostic" {
 		// Get address of current resource
 		diagnostic := parsedMessage["diagnostic"].(map[string]interface{})
 		eventType := parsedMessage["@level"].(string)
@@ -57,6 +55,11 @@ func ProcessTerraformMessage(message string, command string) DecodedEvent {
 			decodedEvent.Address = diagnostic["address"].(string)
 			decodedEvent.Type = eventType
 		}
+	}
+
+	// Handle output events
+	if decodedEvent.Type == "outputs" {
+		decodedEvent.Outputs = parsedMessage["outputs"].(map[string]interface{})
 	}
 
 	return decodedEvent

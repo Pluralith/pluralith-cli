@@ -16,7 +16,7 @@ func initApp() {
 	functionName := "initApp"
 
 	dblock.LockInstance.GenerateLock()
-	auxiliary.StateInstance.CLIVersion = "0.1.17"
+	auxiliary.StateInstance.CLIVersion = "0.1.18"
 
 	if pathGenErr := auxiliary.StateInstance.GeneratePaths(); pathGenErr != nil {
 		fmt.Println(fmt.Errorf("generating application paths failed -> %v: %w", functionName, pathGenErr))
@@ -33,7 +33,6 @@ func initApp() {
 
 	auxiliary.StateInstance.CheckCI()
 	auxiliary.StateInstance.GetBranch()
-	auxiliary.StateInstance.CheckTerraformInit()
 	auxiliary.StateInstance.CheckInfracost()
 
 	if getConfigErr := auxiliary.StateInstance.GetConfig(); getConfigErr != nil {
