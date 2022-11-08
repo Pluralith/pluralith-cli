@@ -37,6 +37,7 @@ func init() {
 	runCmd.PersistentFlags().String("file-name", "", "The name of the exported PDF")
 	runCmd.PersistentFlags().Bool("post-apply", false, "Determines whether this run is after an apply and should update the latest docs for this infrastructure project")
 	runCmd.PersistentFlags().Bool("export-pdf", false, "Determines whether a PDF export of the run Diagram is generated locally")
+	runCmd.PersistentFlags().Bool("sync-to-backend", false, "Determines whether a PDF export is stored in your state backend of choice alongside your state. (Currently supports azurerm, gcs and s3)")
 	runCmd.PersistentFlags().Bool("show-changes", false, "Determines whether the exported diagram highlights changes made in the latest Terraform plan or outputs a general diagram of the infrastructure")
 	runCmd.PersistentFlags().Bool("show-drift", false, "Determines whether the exported diagram highlights resource drift detected by Terraform")
 	runCmd.PersistentFlags().Bool("show-costs", false, "Determines whether the exported diagram includes cost information")

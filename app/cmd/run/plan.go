@@ -2,6 +2,7 @@ package run
 
 import (
 	"fmt"
+	"pluralith/pkg/backends"
 	"pluralith/pkg/ci"
 	"pluralith/pkg/graph"
 	"pluralith/pkg/ux"
@@ -21,16 +22,27 @@ var RunPlanCmd = &cobra.Command{
 		tfArgs, costArgs, exportArgs, preErr := ci.PreRun(cmd.Flags())
 		if preErr != nil {
 			fmt.Println(preErr)
+			return
 		}
 
 		// - - Generate Graph - -
 		if graphErr := graph.GenerateGraph("plan", tfArgs, costArgs, exportArgs, true); graphErr != nil {
 			fmt.Println(graphErr)
+			return
 		}
 
 		// - - Post Graph - -
 		if ciError := ci.PostGraph("plan", exportArgs); ciError != nil {
 			fmt.Println(ciError)
+			return
+		}
+
+		// - - Push Diagram to State Backend - -
+		if exportArgs["sync-to-backend"] == true {
+			if pushErr := backends.StoreInBackend(); pushErr != nil {
+				fmt.Println(pushErr)
+				return
+			}
 		}
 	},
 }
