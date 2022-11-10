@@ -6,33 +6,31 @@ import (
 	"pluralith/pkg/ux"
 )
 
-func VerifyConfig(noProject bool) (bool, map[string]interface{}, error) {
+func VerifyConfig(noProject bool) (bool, OrgResponse, error) {
 	functionName := "VerifyConfig"
+	orgData := OrgResponse{}
 
 	ux.PrintFormatted("→ ", []string{"blue", "bold"})
 	ux.PrintFormatted("Verify\n", []string{"white", "bold"})
-	// fmt.Println()
 
 	// Verify API key with backend
 	apiKeyValid, apiKeyErr := VerifyAPIKey(auxiliary.StateInstance.APIKey, false)
 	if !apiKeyValid {
-		return false, nil, nil
+		return false, orgData, nil
 	}
 	if apiKeyErr != nil {
-		return false, nil, fmt.Errorf("verifying API key failed -> %v: %w", functionName, apiKeyErr)
+		return false, orgData, fmt.Errorf("verifying API key failed -> %v: %w", functionName, apiKeyErr)
 	}
 
 	if !noProject {
-		projectData, projectErr := VerifyProject(auxiliary.StateInstance.PluralithConfig.ProjectId)
-		if projectData == nil {
-			return false, nil, fmt.Errorf("no project data given -> %v", functionName)
+		orgData, orgErr := VerifyOrg(auxiliary.StateInstance.PluralithConfig.OrgId)
+		if orgData.Data.ID == "" {
+			return false, orgData, fmt.Errorf("no project data given -> %v", functionName)
 		}
-		if projectErr != nil {
-			return false, nil, fmt.Errorf("failed to verify project id -> %v: %w", functionName, projectErr)
+		if orgErr != nil {
+			return false, orgData, fmt.Errorf("failed to verify project id -> %v: %w", functionName, orgErr)
 		}
-
-		return true, projectData, nil
 	}
 
-	return true, nil, nil
+	return true, orgData, nil
 }

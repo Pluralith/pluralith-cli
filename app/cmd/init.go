@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/initialization"
 	"pluralith/pkg/ux"
 
@@ -20,34 +19,18 @@ var initCmd = &cobra.Command{
 		fmt.Print("Welcome to ")
 		ux.PrintFormatted("Pluralith!\n", []string{"blue"})
 
-		APIKey := ""
-		projectId := ""
-
 		// Get flag values
-		isEmpty, emptyError := cmd.Flags().GetBool("empty")
-		if emptyError != nil {
-			fmt.Println(fmt.Errorf("reading flag failed -> %w", emptyError))
-			return
-		}
+		isEmpty, _ := cmd.Flags().GetBool("empty")
 
-		APIKey, APIKeyError := cmd.Flags().GetString("api-key")
-		if APIKeyError != nil {
-			fmt.Println(fmt.Errorf("reading flag failed -> %w", APIKeyError))
-			return
-		}
+		initData := initialization.InitData{}
 
-		// If no API key is passed, set to existing API key value in state (can be "" as well)
-		if APIKey == "" {
-			APIKey = auxiliary.StateInstance.APIKey
-		}
+		initData.APIKey, _ = cmd.Flags().GetString("api-key")
+		initData.OrgId, _ = cmd.Flags().GetString("org-id")
+		initData.ProjectId, _ = cmd.Flags().GetString("project-id")
+		initData.ProjectName, _ = cmd.Flags().GetString("project-name")
 
-		projectId, projectIdErr := cmd.Flags().GetString("project-id")
-		if APIKeyError != nil {
-			fmt.Println(fmt.Errorf("reading flag failed -> %w", projectIdErr))
-			return
-		}
-
-		if initErr := initialization.RunInit(isEmpty, APIKey, projectId); initErr != nil {
+		_, initErr := initialization.RunInit(isEmpty, initData)
+		if initErr != nil {
 			fmt.Println(fmt.Errorf("pluralith init failed -> %w", initErr))
 		}
 	},
@@ -55,7 +38,9 @@ var initCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(initCmd)
-	initCmd.PersistentFlags().String("api-key", "", "Your Pluralith API key passed directly, to skip user prompt (for automation)")
-	initCmd.PersistentFlags().String("project-id", "", "Your project id passed directly, to skip user prompt (for automation)")
+	initCmd.PersistentFlags().String("api-key", "", "Your Pluralith API key. Pass via flag to skip user prompt and override pluralith.yml")
+	initCmd.PersistentFlags().String("org-id", "", "Your Org Id (Can be found in your Pluralith dashboard). Pass via flag to skip user prompt and override pluralith.yml")
+	initCmd.PersistentFlags().String("project-id", "", "Your Project Id (If no project with passed Id exists, one gets created). Pass via flag to skip user prompt and override pluralith.yml")
+	initCmd.PersistentFlags().String("project-name", "", "Your Project name. Pass via flag to skip user prompt and override pluralith.yml")
 	initCmd.PersistentFlags().Bool("empty", false, "Creates an empty pluralith.yml config file in the current directory")
 }

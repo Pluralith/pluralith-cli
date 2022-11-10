@@ -9,9 +9,11 @@ import (
 )
 
 type PluralithConfig struct {
-	ProjectId string `yaml:"project_id"`
-	RunId     string
-	Config    struct {
+	OrgId       string `yaml:"org_id"`
+	ProjectId   string `yaml:"project_id"`
+	ProjectName string `yaml:"project_name"`
+	RunId       string
+	Config      struct {
 		StoreInBackend bool     `yaml:"store_in_backend"`
 		SensitiveAttrs []string `yaml:"sensitive_attrs"`
 		Vars           []string `yaml:"vars"`
@@ -26,7 +28,7 @@ type PluralithConfig struct {
 }
 
 func (S *State) GetConfig() error {
-	functionName := "GetSecretConfig"
+	functionName := "GetConfig"
 
 	// Initialize variables
 	var configByte []byte

@@ -3,14 +3,12 @@ package ci
 import (
 	"fmt"
 	"math/rand"
-	"pluralith/pkg/auth"
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/cost"
 	"pluralith/pkg/graph"
+	"pluralith/pkg/initialization"
 	"pluralith/pkg/terraform"
 	"pluralith/pkg/ux"
-	"reflect"
-	"strconv"
 
 	"github.com/spf13/pflag"
 )
@@ -43,23 +41,30 @@ func PreRun(flags *pflag.FlagSet) (map[string]interface{}, map[string]interface{
 		exportArgs["file-name"] = "Infrastructure_Diagram" //+ exportArgs["runId"].(string)
 	}
 
-	configValid, projectData, configErr := auth.VerifyConfig(false)
-	if !configValid {
-		return nil, nil, nil, fmt.Errorf("")
-	}
-	if configErr != nil {
-		return nil, nil, nil, fmt.Errorf("%v: %w", functionName, configErr)
+	initData, initErr := initialization.RunInit(false, initialization.InitData{})
+	if initErr != nil {
+		return nil, nil, nil, fmt.Errorf("%v: %w", functionName, costErr)
 	}
 
-	projectData = projectData["data"].(map[string]interface{})
-	// Failsafe for when orgId is a string
-	if reflect.TypeOf(projectData["orgId"]).Kind() == reflect.String {
-		exportArgs["orgId"] = projectData["orgId"]
-	} else {
-		exportArgs["orgId"] = strconv.Itoa(int(projectData["orgId"].(float64)))
-	}
+	// configValid, projectData, configErr := auth.VerifyConfig(false)
+	// if !configValid {
+	// 	return nil, nil, nil, fmt.Errorf("")
+	// }
+	// if configErr != nil {
+	// 	return nil, nil, nil, fmt.Errorf("%v: %w", functionName, configErr)
+	// }
 
-	exportArgs["projectId"] = auxiliary.StateInstance.PluralithConfig.ProjectId
+	// projectData = projectData["data"].(map[string]interface{})
+	// // Failsafe for when orgId is a string
+	// if reflect.TypeOf(projectData["orgId"]).Kind() == reflect.String {
+	// 	exportArgs["orgId"] = projectData["orgId"]
+	// } else {
+	// 	exportArgs["orgId"] = strconv.Itoa(int(projectData["orgId"].(float64)))
+	// }
+
+	exportArgs["orgId"] = initData.OrgId
+	exportArgs["projectId"] = initData.ProjectId
+	exportArgs["projectName"] = initData.ProjectName
 
 	return tfArgs, costArgs, exportArgs, nil
 }

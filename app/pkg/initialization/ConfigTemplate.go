@@ -11,7 +11,9 @@ var ConfigTemplate = `
 # This is your Pluralith config file
 # Learn more about it at https://docs.pluralith.com/config
 
-project_id: %d
+org_id: $PLR_ORG_ID
+project_id: $PLR_PROJECT_ID
+project_name: $PLR_PROJECT_NAME
 # config:
 #   sensitive_attrs:
 #     - "attribute_name"
@@ -41,6 +43,7 @@ var EmtpyConfig = `
 # This is your Pluralith config file
 # Learn more about it at https://docs.pluralith.com/config
 
+# org_id: null
 # project_id: null
 # config:
 #   sensitive_attrs:
