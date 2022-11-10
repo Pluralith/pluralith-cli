@@ -15,21 +15,21 @@ func WriteConfig(initData InitData) error {
 
 	// Insert org id
 	// if initData.OrgId != "" && !isEmpty {
-	configString = strings.ReplaceAll(ConfigTemplate, "$PLR_ORG_ID", initData.OrgId)
+	configString = strings.ReplaceAll(configString, "$PLR_ORG_ID", initData.OrgId)
 	// } else {
 	// 	configString = strings.ReplaceAll(ConfigTemplate, "$PLR_ORG_ID", "null")
 	// }
 
 	// Insert project id
 	// if initData.ProjectId != "" && !isEmpty {
-	configString = strings.ReplaceAll(ConfigTemplate, "$PLR_PROJECT_ID", initData.ProjectId)
+	configString = strings.ReplaceAll(configString, "$PLR_PROJECT_ID", initData.ProjectId)
 	// } else {
 	// 	configString = strings.ReplaceAll(ConfigTemplate, "$PLR_PROJECT_ID", "null")
 	// }
 
 	// Insert project name
 	// if initData.ProjectName != "" && !isEmpty {
-	configString = strings.ReplaceAll(ConfigTemplate, "$PLR_PROJECT_NAME", initData.ProjectName)
+	configString = strings.ReplaceAll(configString, "$PLR_PROJECT_NAME", initData.ProjectName)
 	// } else {
 	// 	configString = strings.ReplaceAll(ConfigTemplate, "$PLR_PROJECT_NAME", "null")
 	// }

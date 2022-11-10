@@ -1,9 +1,9 @@
-package auth
+package initialization
 
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/ux"
@@ -17,7 +17,8 @@ func VerifyProject(orgId string, projectId string) (bool, error) {
 	verificationSpinner.Start()
 
 	// Construct key verification request
-	request, _ := http.NewRequest("GET", "https://api.pluralith.com/v1/project/get", nil)
+	// request, _ := http.NewRequest("GET", "https://api.pluralith.com/v1/project/get", nil)
+	request, _ := http.NewRequest("GET", "http://localhost:8080/v1/project/get", nil)
 	request.Header.Add("Authorization", "Bearer "+auxiliary.StateInstance.APIKey)
 
 	// Add project id query string
@@ -34,7 +35,7 @@ func VerifyProject(orgId string, projectId string) (bool, error) {
 	}
 
 	// Parse response for file URLs
-	responseBody, readErr := ioutil.ReadAll(response.Body)
+	responseBody, readErr := io.ReadAll(response.Body)
 	if readErr != nil {
 		return false, fmt.Errorf("%v: %w", functionName, readErr)
 	}

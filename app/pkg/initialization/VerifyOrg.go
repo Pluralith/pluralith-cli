@@ -1,9 +1,9 @@
-package auth
+package initialization
 
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/ux"
@@ -29,17 +29,20 @@ func VerifyOrg(orgId string) (bool, error) {
 	client := &http.Client{}
 	response, responseErr := client.Do(request)
 	if responseErr != nil {
+		verificationSpinner.Fail()
 		return false, fmt.Errorf("%v: %w", functionName, responseErr)
 	}
 
 	// Parse response for file URLs
-	responseBody, readErr := ioutil.ReadAll(response.Body)
+	responseBody, readErr := io.ReadAll(response.Body)
 	if readErr != nil {
+		verificationSpinner.Fail()
 		return false, fmt.Errorf("%v: %w", functionName, readErr)
 	}
 
 	parseErr := json.Unmarshal(responseBody, &verificationResponse)
 	if parseErr != nil {
+		verificationSpinner.Fail()
 		return false, fmt.Errorf("parsing response failed -> %v: %w", functionName, parseErr)
 	}
 

@@ -67,24 +67,35 @@ func RunInit(isEmpty bool, initData InitData) (InitData, error) {
 		fmt.Scanln(&initData.OrgId) // Capture user input
 	}
 
-	orgFound, orgErr := auth.VerifyOrg(auxiliary.StateInstance.PluralithConfig.OrgId)
-	if !orgFound {
-		return initData, nil
-	}
+	orgFound, orgErr := VerifyOrg(initData.OrgId)
 	if orgErr != nil {
 		return initData, fmt.Errorf("failed to verify org id -> %v: %w", functionName, orgErr)
+	}
+	if !orgFound {
+		return initData, nil
 	}
 
 	if initData.ProjectId == "" {
 		fmt.Print("  Enter Project Id: ")
 		fmt.Scanln(&initData.ProjectId) // Capture user input
 	}
-	auth.VerifyProject(initData.OrgId, initData.ProjectId)
 
-	if initData.ProjectName == "" {
-		fmt.Print("  Enter Project Name: ")
-		fmt.Scanln(&initData.ProjectName) // Capture user input
+	projectFound, projectErr := VerifyProject(initData.OrgId, initData.ProjectId)
+	if projectErr != nil {
+		return initData, fmt.Errorf("failed to verify org id -> %v: %w", functionName, projectErr)
 	}
+
+	// Handle non-existent project
+	if !projectFound {
+		// return initData, nil
+
+		if initData.ProjectName == "" {
+			fmt.Print("  Enter Project Name: ")
+			fmt.Scanln(&initData.ProjectName) // Capture user input
+		}
+	}
+
+	// request, _ := http.NewRequest("GET", "https://api.pluralith.com/v1/project/get", nil)
 
 	// // ask for input if
 
