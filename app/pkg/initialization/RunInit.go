@@ -66,7 +66,14 @@ func RunInit(isEmpty bool, initData InitData) (InitData, error) {
 		fmt.Print("  Enter Org Id: ")
 		fmt.Scanln(&initData.OrgId) // Capture user input
 	}
-	auth.VerifyOrg(initData.OrgId)
+
+	orgFound, orgErr := auth.VerifyOrg(auxiliary.StateInstance.PluralithConfig.OrgId)
+	if !orgFound {
+		return initData, nil
+	}
+	if orgErr != nil {
+		return initData, fmt.Errorf("failed to verify org id -> %v: %w", functionName, orgErr)
+	}
 
 	if initData.ProjectId == "" {
 		fmt.Print("  Enter Project Id: ")

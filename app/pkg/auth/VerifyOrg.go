@@ -9,7 +9,7 @@ import (
 	"pluralith/pkg/ux"
 )
 
-func VerifyOrg(orgId string) (OrgResponse, error) {
+func VerifyOrg(orgId string) (bool, error) {
 	functionName := "VerifyOrg"
 	verificationResponse := OrgResponse{}
 
@@ -29,27 +29,27 @@ func VerifyOrg(orgId string) (OrgResponse, error) {
 	client := &http.Client{}
 	response, responseErr := client.Do(request)
 	if responseErr != nil {
-		return verificationResponse, fmt.Errorf("%v: %w", functionName, responseErr)
+		return false, fmt.Errorf("%v: %w", functionName, responseErr)
 	}
 
 	// Parse response for file URLs
 	responseBody, readErr := ioutil.ReadAll(response.Body)
 	if readErr != nil {
-		return verificationResponse, fmt.Errorf("%v: %w", functionName, readErr)
+		return false, fmt.Errorf("%v: %w", functionName, readErr)
 	}
 
 	parseErr := json.Unmarshal(responseBody, &verificationResponse)
 	if parseErr != nil {
-		return verificationResponse, fmt.Errorf("parsing response failed -> %v: %w", functionName, parseErr)
+		return false, fmt.Errorf("parsing response failed -> %v: %w", functionName, parseErr)
 	}
 
 	if response.StatusCode == 200 {
 		verificationSpinner.Success("Org Found")
-		return verificationResponse, nil
+		return true, nil
 	}
 
 	verificationSpinner.Fail()
-	return verificationResponse, nil
+	return false, nil
 }
 
 // func VerifyOrg(orgId string) (map[string]interface{}, error) {

@@ -9,7 +9,7 @@ import (
 	"pluralith/pkg/ux"
 )
 
-func VerifyProject(orgId string, projectId string) (ProjectResponse, error) {
+func VerifyProject(orgId string, projectId string) (bool, error) {
 	functionName := "VerifyProject"
 	verificationResponse := ProjectResponse{}
 
@@ -30,31 +30,31 @@ func VerifyProject(orgId string, projectId string) (ProjectResponse, error) {
 	client := &http.Client{}
 	response, responseErr := client.Do(request)
 	if responseErr != nil {
-		return verificationResponse, fmt.Errorf("%v: %w", functionName, responseErr)
+		return false, fmt.Errorf("%v: %w", functionName, responseErr)
 	}
 
 	// Parse response for file URLs
 	responseBody, readErr := ioutil.ReadAll(response.Body)
 	if readErr != nil {
-		return verificationResponse, fmt.Errorf("%v: %w", functionName, readErr)
+		return false, fmt.Errorf("%v: %w", functionName, readErr)
 	}
 
 	parseErr := json.Unmarshal(responseBody, &verificationResponse)
 	if parseErr != nil {
-		return verificationResponse, fmt.Errorf("parsing response failed -> %v: %w", functionName, parseErr)
+		return false, fmt.Errorf("parsing response failed -> %v: %w", functionName, parseErr)
 	}
 
 	if response.StatusCode == 200 {
 		verificationSpinner.Success("Existing Project Found")
-		return verificationResponse, nil
+		return true, nil
 	} else if response.StatusCode == 404 {
 		verificationSpinner.Fail("No Project Found")
-		return verificationResponse, nil
+		return false, nil
 	} else if response.StatusCode == 401 {
 		verificationSpinner.Fail("Not Authorized To Access This Project")
-		return verificationResponse, nil
+		return false, nil
 	}
 
 	verificationSpinner.Fail()
-	return verificationResponse, nil
+	return false, nil
 }

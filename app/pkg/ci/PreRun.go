@@ -19,10 +19,10 @@ func PreRun(flags *pflag.FlagSet) (map[string]interface{}, map[string]interface{
 	if auxiliary.StateInstance.Branch != "none" {
 		ux.PrintFormatted(" →", []string{"blue", "bold"})
 		fmt.Print(" Branch detected: ")
-		ux.PrintFormatted(auxiliary.StateInstance.Branch+"\n\n", []string{"blue"})
+		ux.PrintFormatted(auxiliary.StateInstance.Branch+"\n", []string{"blue"})
 	} else {
 		ux.PrintFormatted(" →", []string{"blue", "bold"})
-		fmt.Print(" Could not detect branch\n\n")
+		fmt.Print(" Could not detect branch\n")
 	}
 
 	tfArgs := terraform.ConstructTerraformArgs(flags)
