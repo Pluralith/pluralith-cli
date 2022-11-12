@@ -1,6 +1,8 @@
 package auxiliary
 
-import "os"
+import (
+	"os"
+)
 
 func (S *State) GetEnvVars() error {
 	// functionName := "GetEnvVars"

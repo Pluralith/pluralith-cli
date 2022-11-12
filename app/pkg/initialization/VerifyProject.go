@@ -56,7 +56,7 @@ func VerifyProject(orgId string, projectId string) (bool, string, error) {
 	}
 
 	if response.StatusCode == 404 {
-		verificationSpinner.Success("No Project Found")
+		verificationSpinner.Success("No Project Found → Creating One")
 		return true, "", nil
 	}
 

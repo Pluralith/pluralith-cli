@@ -34,11 +34,12 @@ func initApp() {
 	auxiliary.StateInstance.CheckCI()
 	auxiliary.StateInstance.GetBranch()
 	auxiliary.StateInstance.CheckInfracost()
-	auxiliary.StateInstance.GetEnvVars()
 
 	if getConfigErr := auxiliary.StateInstance.GetConfig(); getConfigErr != nil {
 		fmt.Println(fmt.Errorf("fetching pluralith config failed -> %v: %w", functionName, getConfigErr))
 	}
+
+	auxiliary.StateInstance.GetEnvVars()
 }
 
 func main() {

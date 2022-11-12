@@ -9,7 +9,7 @@ import (
 	"pluralith/pkg/ux"
 )
 
-func compileInitData(initData InitData) InitData {
+func CompileInitData(initData InitData) InitData {
 	// functionName := "compileInitData"
 
 	// Set init data variables from config or env variables if none passed from flags
@@ -33,7 +33,7 @@ func RunInit(askInputs bool, initData InitData) (InitData, error) {
 	functionName := "RunInit"
 
 	// Compile init data from various sources
-	initData = compileInitData(initData)
+	initData = CompileInitData(initData)
 
 	// Authentication
 	ux.PrintFormatted("\n→", []string{"blue", "bold"})
@@ -83,15 +83,20 @@ func RunInit(askInputs bool, initData InitData) (InitData, error) {
 
 	// Handle non-existent project
 	if projectValid {
-		initData.ProjectName = projectName // Set name in init data if existing project is found
+		if initData.ProjectName == "" { // If at this point project name is still empty and command run is pluralith init -> ask for user's input
+			initData.ProjectName = projectName // Set name in init data if existing project is found
 
-		if initData.ProjectName == "" && askInputs { // If at this point project name is still empty and command run is pluralith init -> ask for user's input
-			ux.PrintFormatted("\n  ⠿", []string{"blue", "bold"})
-			fmt.Print(" Enter Project Name: ")
+			if askInputs {
+				ux.PrintFormatted("\n  ⠿", []string{"blue", "bold"})
+				fmt.Print(" Enter Project Name: ")
 
-			scanner := bufio.NewScanner(os.Stdin)
-			if scanner.Scan() {
-				initData.ProjectName = scanner.Text() // Capture user input
+				scanner := bufio.NewScanner(os.Stdin)
+				if scanner.Scan() {
+					initData.ProjectName = scanner.Text() // Capture user input
+				}
+			} else {
+				ux.PrintFormatted("  ✘", []string{"red", "bold"})
+				fmt.Println(" No Project Name Given → Pass A Name To Create A New Project")
 			}
 		}
 
@@ -100,65 +105,8 @@ func RunInit(askInputs bool, initData InitData) (InitData, error) {
 		}
 	}
 
-	// request, _ := http.NewRequest("GET", "https://api.pluralith.com/v1/project/get", nil)
-
-	// // ask for input if
-
-	// if initData.APIKey == "" {
-	// 	ux.PrintFormatted("  ⠿ ", []string{"blue"})
-	// 	fmt.Println("We noticed you are not authenticated!")
-	// 	ux.PrintFormatted("  →", []string{"blue", "bold"})
-	// 	fmt.Print(" Enter your API Key: ")
-
-	// 	// Capture user input
-	// 	fmt.Scanln(&initData.APIKey)
-	// }
-
-	// // Run login routine and set credentials file
-	// loginValid, loginErr := auth.RunLogin(initData.APIKey)
-	// if !loginValid {
-	// 	return nil
-	// }
-	// if loginErr != nil {
-	// 	return fmt.Errorf("failed to authenticate -> %v: %w", functionName, loginErr)
-	// }
-
-	// ux.PrintFormatted("\n→", []string{"blue", "bold"})
-	// ux.PrintFormatted(" Project Setup\n", []string{"white", "bold"})
-
-	// if orgId == "" {
-	// 	ux.PrintFormatted("  →", []string{"blue", "bold"})
-	// 	fmt.Print(" Enter Org Id: ")
-
-	// 	// Capture user input
-	// 	fmt.Scanln(&orgId)
-	// }
-
-	// if projectId == "" {
-	// 	ux.PrintFormatted("  →", []string{"blue", "bold"})
-	// 	fmt.Print(" Enter Project Id: ")
-
-	// 	// Capture user input
-	// 	fmt.Scanln(&projectId)
-	// }
-
-	// orgData, projectErr := auth.VerifyOrg(orgId)
-	// if orgData == nil {
-	// 	return nil
-	// }
-
-	// projectData, projectErr := auth.VerifyProject(orgId, projectId)
-	// if projectData == nil {
-	// 	return nil
-	// }
-	// if projectErr != nil {
-	// 	return fmt.Errorf("failed to verify project id -> %v: %w", functionName, projectErr)
-	// }
-
-	// fmt.Print("  ") // Formatting gimmick
-
-	fmt.Println()
 	if askInputs {
+		fmt.Println()
 		if writeErr := WriteConfig(initData); writeErr != nil {
 			return initData, fmt.Errorf("failed to create config template -> %v: %w", functionName, writeErr)
 		}
