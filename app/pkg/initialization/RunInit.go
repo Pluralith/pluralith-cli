@@ -27,15 +27,8 @@ func compileInitData(initData InitData) InitData {
 	return initData
 }
 
-func RunInit(isEmpty bool, initData InitData) (InitData, error) {
+func RunInit(initData InitData) (InitData, error) {
 	functionName := "RunInit"
-
-	if isEmpty {
-		if writeErr := WriteConfig(initData); writeErr != nil {
-			return initData, fmt.Errorf("failed to create config template -> %v: %w", functionName, writeErr)
-		}
-		return initData, nil
-	}
 
 	// Compile init data from various sources
 	initData = compileInitData(initData)

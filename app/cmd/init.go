@@ -20,16 +20,22 @@ var initCmd = &cobra.Command{
 		ux.PrintFormatted("Pluralith!\n", []string{"blue"})
 
 		// Get flag values
+		initData := initialization.InitData{}
 		isEmpty, _ := cmd.Flags().GetBool("empty")
 
-		initData := initialization.InitData{}
+		if isEmpty {
+			if writeErr := initialization.WriteConfig(initData); writeErr != nil {
+				fmt.Println(fmt.Errorf("failed to create config template -> %w", writeErr))
+			}
+			return
+		}
 
 		initData.APIKey, _ = cmd.Flags().GetString("api-key")
 		initData.OrgId, _ = cmd.Flags().GetString("org-id")
 		initData.ProjectId, _ = cmd.Flags().GetString("project-id")
 		initData.ProjectName, _ = cmd.Flags().GetString("project-name")
 
-		_, initErr := initialization.RunInit(isEmpty, initData)
+		_, initErr := initialization.RunInit(initData)
 		if initErr != nil {
 			fmt.Println(fmt.Errorf("pluralith init failed -> %w", initErr))
 		}

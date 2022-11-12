@@ -41,7 +41,7 @@ func PreRun(flags *pflag.FlagSet) (map[string]interface{}, map[string]interface{
 		exportArgs["file-name"] = "Infrastructure_Diagram" //+ exportArgs["runId"].(string)
 	}
 
-	initData, initErr := initialization.RunInit(false, initialization.InitData{})
+	initData, initErr := initialization.RunInit(initialization.InitData{})
 	if initErr != nil {
 		return nil, nil, nil, fmt.Errorf("%v: %w", functionName, costErr)
 	}
