@@ -46,22 +46,6 @@ func PreRun(flags *pflag.FlagSet) (map[string]interface{}, map[string]interface{
 		return nil, nil, nil, fmt.Errorf("%v: %w", functionName, costErr)
 	}
 
-	// configValid, projectData, configErr := auth.VerifyConfig(false)
-	// if !configValid {
-	// 	return nil, nil, nil, fmt.Errorf("")
-	// }
-	// if configErr != nil {
-	// 	return nil, nil, nil, fmt.Errorf("%v: %w", functionName, configErr)
-	// }
-
-	// projectData = projectData["data"].(map[string]interface{})
-	// // Failsafe for when orgId is a string
-	// if reflect.TypeOf(projectData["orgId"]).Kind() == reflect.String {
-	// 	exportArgs["orgId"] = projectData["orgId"]
-	// } else {
-	// 	exportArgs["orgId"] = strconv.Itoa(int(projectData["orgId"].(float64)))
-	// }
-
 	exportArgs["orgId"] = initData.OrgId
 	exportArgs["projectId"] = initData.ProjectId
 	exportArgs["projectName"] = initData.ProjectName
