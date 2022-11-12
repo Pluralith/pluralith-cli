@@ -1,7 +1,9 @@
 package initialization
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"pluralith/pkg/auth"
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/ux"
@@ -74,22 +76,28 @@ func RunInit(askInputs bool, initData InitData) (InitData, error) {
 		fmt.Scanln(&initData.ProjectId) // Capture user input
 	}
 
-	projectFound, projectTitle, projectErr := VerifyProject(initData.OrgId, initData.ProjectId)
+	projectValid, projectName, projectErr := VerifyProject(initData.OrgId, initData.ProjectId)
 	if projectErr != nil {
 		return initData, fmt.Errorf("failed to verify org id -> %v: %w", functionName, projectErr)
 	}
 
 	// Handle non-existent project
-	if !projectFound {
-		// return initData, nil
+	if projectValid {
+		initData.ProjectName = projectName // Set name in init data if existing project is found
 
-		if initData.ProjectName == "" && askInputs {
+		if initData.ProjectName == "" && askInputs { // If at this point project name is still empty and command run is pluralith init -> ask for user's input
 			ux.PrintFormatted("\n  ⠿", []string{"blue", "bold"})
 			fmt.Print(" Enter Project Name: ")
-			fmt.Scanln(&initData.ProjectName) // Capture user input
+
+			scanner := bufio.NewScanner(os.Stdin)
+			if scanner.Scan() {
+				initData.ProjectName = scanner.Text() // Capture user input
+			}
 		}
-	} else {
-		initData.ProjectName = projectTitle
+
+		if projectName == "" { // If project is not in existence -> create project
+			CreateProject(initData)
+		}
 	}
 
 	// request, _ := http.NewRequest("GET", "https://api.pluralith.com/v1/project/get", nil)

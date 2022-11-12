@@ -13,7 +13,7 @@ func VerifyOrg(orgId string) (bool, error) {
 	functionName := "VerifyOrg"
 	verificationResponse := OrgResponse{}
 
-	verificationSpinner := ux.NewSpinner("Verifying Org ID", "Org ID is valid!", "No org with this ID exists, try again!", true)
+	verificationSpinner := ux.NewSpinner("Verifying Org ID", "Org ID Is Valid", "No org with this ID exists, try again!", true)
 	verificationSpinner.Start()
 
 	if orgId == "" {

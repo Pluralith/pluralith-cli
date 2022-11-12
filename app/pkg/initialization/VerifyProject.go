@@ -13,7 +13,7 @@ func VerifyProject(orgId string, projectId string) (bool, string, error) {
 	functionName := "VerifyProject"
 	verificationResponse := ProjectResponse{}
 
-	verificationSpinner := ux.NewSpinner("Verifying Project ID", "Project ID is valid!", "No project with this ID exists, try again!", true)
+	verificationSpinner := ux.NewSpinner("Verifying Project ID", "Project ID Is Valid", "No project with this ID exists, try again!", true)
 	verificationSpinner.Start()
 
 	if projectId == "" {
@@ -53,10 +53,14 @@ func VerifyProject(orgId string, projectId string) (bool, string, error) {
 	if response.StatusCode == 200 {
 		verificationSpinner.Success("Existing Project Found")
 		return true, verificationResponse.Data.Name, nil
-	} else if response.StatusCode == 404 {
-		verificationSpinner.Fail("No Project Found")
-		return false, "", nil
-	} else if response.StatusCode == 401 {
+	}
+
+	if response.StatusCode == 404 {
+		verificationSpinner.Success("No Project Found")
+		return true, "", nil
+	}
+
+	if response.StatusCode == 401 {
 		verificationSpinner.Fail("Not Authorized To Access This Project")
 		return false, "", nil
 	}
