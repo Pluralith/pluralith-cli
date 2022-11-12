@@ -27,19 +27,18 @@ func compileInitData(initData InitData) InitData {
 	return initData
 }
 
-func RunInit(initData InitData) (InitData, error) {
+func RunInit(askInputs bool, initData InitData) (InitData, error) {
 	functionName := "RunInit"
 
 	// Compile init data from various sources
 	initData = compileInitData(initData)
 
-	// Handle user inputs
-
 	// Authentication
 	ux.PrintFormatted("\n→", []string{"blue", "bold"})
 	ux.PrintFormatted(" Authentication\n", []string{"white", "bold"})
-	if initData.APIKey == "" {
-		fmt.Print("  Enter API Key: ")
+	if initData.APIKey == "" && askInputs {
+		ux.PrintFormatted("  ⠿", []string{"blue", "bold"})
+		fmt.Print(" Enter API Key: ")
 		fmt.Scanln(&initData.APIKey) // Capture user input
 	}
 
@@ -55,8 +54,9 @@ func RunInit(initData InitData) (InitData, error) {
 	// Project Setup
 	ux.PrintFormatted("\n→", []string{"blue", "bold"})
 	ux.PrintFormatted(" Project Setup\n", []string{"white", "bold"})
-	if initData.OrgId == "" {
-		fmt.Print("  Enter Org Id: ")
+	if initData.OrgId == "" && askInputs {
+		ux.PrintFormatted("  ⠿", []string{"blue", "bold"})
+		fmt.Print(" Enter Org Id: ")
 		fmt.Scanln(&initData.OrgId) // Capture user input
 	}
 
@@ -68,12 +68,13 @@ func RunInit(initData InitData) (InitData, error) {
 		return initData, nil
 	}
 
-	if initData.ProjectId == "" {
-		fmt.Print("  Enter Project Id: ")
+	if initData.ProjectId == "" && askInputs {
+		ux.PrintFormatted("\n  ⠿", []string{"blue", "bold"})
+		fmt.Print(" Enter Project Id: ")
 		fmt.Scanln(&initData.ProjectId) // Capture user input
 	}
 
-	projectFound, projectErr := VerifyProject(initData.OrgId, initData.ProjectId)
+	projectFound, projectTitle, projectErr := VerifyProject(initData.OrgId, initData.ProjectId)
 	if projectErr != nil {
 		return initData, fmt.Errorf("failed to verify org id -> %v: %w", functionName, projectErr)
 	}
@@ -82,10 +83,13 @@ func RunInit(initData InitData) (InitData, error) {
 	if !projectFound {
 		// return initData, nil
 
-		if initData.ProjectName == "" {
-			fmt.Print("  Enter Project Name: ")
+		if initData.ProjectName == "" && askInputs {
+			ux.PrintFormatted("\n  ⠿", []string{"blue", "bold"})
+			fmt.Print(" Enter Project Name: ")
 			fmt.Scanln(&initData.ProjectName) // Capture user input
 		}
+	} else {
+		initData.ProjectName = projectTitle
 	}
 
 	// request, _ := http.NewRequest("GET", "https://api.pluralith.com/v1/project/get", nil)
@@ -145,9 +149,12 @@ func RunInit(initData InitData) (InitData, error) {
 
 	// fmt.Print("  ") // Formatting gimmick
 
-	// if writeErr := WriteConfig(projectId); writeErr != nil {
-	// 	return fmt.Errorf("failed to create config template -> %v: %w", functionName, writeErr)
-	// }
+	fmt.Println()
+	if askInputs {
+		if writeErr := WriteConfig(initData); writeErr != nil {
+			return initData, fmt.Errorf("failed to create config template -> %v: %w", functionName, writeErr)
+		}
+	}
 
 	return initData, nil
 }

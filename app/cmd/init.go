@@ -35,7 +35,7 @@ var initCmd = &cobra.Command{
 		initData.ProjectId, _ = cmd.Flags().GetString("project-id")
 		initData.ProjectName, _ = cmd.Flags().GetString("project-name")
 
-		_, initErr := initialization.RunInit(initData)
+		_, initErr := initialization.RunInit(true, initData)
 		if initErr != nil {
 			fmt.Println(fmt.Errorf("pluralith init failed -> %w", initErr))
 		}

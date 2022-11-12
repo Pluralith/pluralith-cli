@@ -16,6 +16,11 @@ func VerifyOrg(orgId string) (bool, error) {
 	verificationSpinner := ux.NewSpinner("Verifying Org ID", "Org ID is valid!", "No org with this ID exists, try again!", true)
 	verificationSpinner.Start()
 
+	if orgId == "" {
+		verificationSpinner.Fail("No Org ID given")
+		return false, nil
+	}
+
 	// Construct key verification request
 	request, _ := http.NewRequest("GET", "https://api.pluralith.com/v1/org/get", nil)
 	request.Header.Add("Authorization", "Bearer "+auxiliary.StateInstance.APIKey)
@@ -47,7 +52,7 @@ func VerifyOrg(orgId string) (bool, error) {
 	}
 
 	if response.StatusCode == 200 {
-		verificationSpinner.Success("Org Found")
+		verificationSpinner.Success("Existing Org Found")
 		return true, nil
 	}
 
