@@ -44,7 +44,7 @@ var initCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(initCmd)
-	initCmd.PersistentFlags().String("api-key", "", "Your Pluralith API key. Pass via flag to skip user prompt and override pluralith.yml")
+	initCmd.PersistentFlags().String("api-key", "", "Your Pluralith API key. Pass via flag to skip user prompt.")
 	initCmd.PersistentFlags().String("org-id", "", "Your Org Id (Can be found in your Pluralith dashboard). Pass via flag to skip user prompt and override pluralith.yml")
 	initCmd.PersistentFlags().String("project-id", "", "Your Project Id (If no project with passed Id exists, one gets created). Pass via flag to skip user prompt and override pluralith.yml")
 	initCmd.PersistentFlags().String("project-name", "", "Your Project name. Pass via flag to skip user prompt and override pluralith.yml")
