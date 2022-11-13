@@ -14,7 +14,7 @@ type PluralithConfig struct {
 	ProjectName string `yaml:"project_name"`
 	RunId       string
 	Config      struct {
-		StoreInBackend bool     `yaml:"store_in_backend"`
+		SyncToBackend  bool     `yaml:"sync_to_backend"`
 		SensitiveAttrs []string `yaml:"sensitive_attrs"`
 		Vars           []string `yaml:"vars"`
 		VarFiles       []string `yaml:"var_files"`

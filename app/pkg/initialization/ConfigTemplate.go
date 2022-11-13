@@ -9,12 +9,13 @@ var ConfigTemplate = `
 # https://www.pluralith.com
 #
 # This is your Pluralith config file
-# Learn more about it at https://docs.pluralith.com/config
+# Learn more about it at https://docs.pluralith.com/docs/more/config
 
 org_id: $PLR_ORG_ID
 project_id: $PLR_PROJECT_ID
 project_name: $PLR_PROJECT_NAME
 # config:
+#   sync_to_backend: false
 #   sensitive_attrs:
 #     - "attribute_name"
 #     - "attribute_name"
