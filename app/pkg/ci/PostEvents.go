@@ -135,6 +135,7 @@ func PostEvents(command string, tfArgs map[string]interface{}, costArgs map[stri
 				parsedMessage.Hook.Resource.Costs = resourceCosts[parsedMessage.Hook.Resource.Addr].(ApplyEventCosts)
 			}
 
+			payload["orgId"] = auxiliary.StateInstance.PluralithConfig.OrgId
 			payload["projectId"] = auxiliary.StateInstance.PluralithConfig.ProjectId
 			payload["runId"] = exportArgs["runId"]
 			payload["event"] = parsedMessage

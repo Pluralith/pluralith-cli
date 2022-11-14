@@ -6,13 +6,14 @@
 # https://www.pluralith.com
 #
 # This is your Pluralith config file
-# Learn more about it at https://docs.pluralith.com/config
+# Learn more about it at https://docs.pluralith.com/docs/more/config
 
-project_id: 0
-config:
-  store_in_backend: true
+org_id: $PLR_ORG_ID
+project_id: $PLR_PROJECT_ID
+project_name: $PLR_PROJECT_NAME
 # config:
-#   senitive_attrs:
+#   sync_to_backend: false
+#   sensitive_attrs:
 #     - "attribute_name"
 #     - "attribute_name"
 #   vars:

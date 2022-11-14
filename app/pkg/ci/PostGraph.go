@@ -41,6 +41,7 @@ func PostGraph(runType string, exportArgs map[string]interface{}) error {
 	// Populate run cache data with additional attributes
 	runCache["id"] = exportArgs["runId"]
 	runCache["projectId"] = auxiliary.StateInstance.PluralithConfig.ProjectId
+	runCache["orgId"] = auxiliary.StateInstance.PluralithConfig.OrgId
 	runCache["branch"] = exportArgs["branch"]
 	runCache["type"] = runType
 

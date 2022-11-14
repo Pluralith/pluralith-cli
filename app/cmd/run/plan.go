@@ -2,6 +2,7 @@ package run
 
 import (
 	"fmt"
+	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/backends"
 	"pluralith/pkg/ci"
 	"pluralith/pkg/graph"
@@ -38,8 +39,8 @@ var RunPlanCmd = &cobra.Command{
 		}
 
 		// - - Push Diagram to State Backend - -
-		if exportArgs["sync-to-backend"] == true {
-			if pushErr := backends.StoreInBackend(); pushErr != nil {
+		if exportArgs["sync-to-backend"] == true || auxiliary.StateInstance.PluralithConfig.Config.SyncToBackend {
+			if pushErr := backends.SyncToBackend(); pushErr != nil {
 				fmt.Println(pushErr)
 				return
 			}
