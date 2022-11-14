@@ -29,7 +29,7 @@ func CompileInitData(initData InitData) InitData {
 	return initData
 }
 
-func RunInit(askInputs bool, initData InitData) (InitData, error) {
+func RunInit(askInputs bool, initData InitData) (bool, InitData, error) {
 	functionName := "RunInit"
 
 	// Compile init data from various sources
@@ -46,11 +46,11 @@ func RunInit(askInputs bool, initData InitData) (InitData, error) {
 
 	// Run login routine and set credentials file
 	loginValid, loginErr := auth.RunLogin(initData.APIKey)
-	if !loginValid {
-		return initData, nil
-	}
 	if loginErr != nil {
-		return initData, fmt.Errorf("failed to authenticate -> %v: %w", functionName, loginErr)
+		return false, initData, fmt.Errorf("failed to authenticate -> %v: %w", functionName, loginErr)
+	}
+	if !loginValid {
+		return false, initData, nil
 	}
 
 	// Project Setup
@@ -64,10 +64,10 @@ func RunInit(askInputs bool, initData InitData) (InitData, error) {
 
 	orgFound, orgErr := VerifyOrg(initData.OrgId)
 	if orgErr != nil {
-		return initData, fmt.Errorf("failed to verify org id -> %v: %w", functionName, orgErr)
+		return false, initData, fmt.Errorf("failed to verify org id -> %v: %w", functionName, orgErr)
 	}
 	if !orgFound {
-		return initData, nil
+		return false, initData, nil
 	}
 
 	if initData.ProjectId == "" && askInputs {
@@ -78,7 +78,7 @@ func RunInit(askInputs bool, initData InitData) (InitData, error) {
 
 	projectValid, projectName, projectErr := VerifyProject(initData.OrgId, initData.ProjectId)
 	if projectErr != nil {
-		return initData, fmt.Errorf("failed to verify org id -> %v: %w", functionName, projectErr)
+		return false, initData, fmt.Errorf("failed to verify org id -> %v: %w", functionName, projectErr)
 	}
 
 	// Handle non-existent project
@@ -108,9 +108,9 @@ func RunInit(askInputs bool, initData InitData) (InitData, error) {
 	if askInputs {
 		fmt.Println()
 		if writeErr := WriteConfig(initData); writeErr != nil {
-			return initData, fmt.Errorf("failed to create config template -> %v: %w", functionName, writeErr)
+			return false, initData, fmt.Errorf("failed to create config template -> %v: %w", functionName, writeErr)
 		}
 	}
 
-	return initData, nil
+	return true, initData, nil
 }

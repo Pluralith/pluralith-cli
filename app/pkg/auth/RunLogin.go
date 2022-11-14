@@ -18,7 +18,7 @@ func RunLogin(APIKey string) (bool, error) {
 			return false, fmt.Errorf("setting API key in credentials file failed -> %v: %w", functionName, setErr)
 		}
 	} else {
-		return false, fmt.Errorf("invalid API key -> %v", functionName)
+		return false, nil
 	}
 
 	return true, nil

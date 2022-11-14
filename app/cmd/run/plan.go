@@ -20,9 +20,12 @@ var RunPlanCmd = &cobra.Command{
 		fmt.Println(" Initiating Plan Run ⇢ Posting To Pluralith Dashboard")
 
 		// - - Prepare for Run - -
-		tfArgs, costArgs, exportArgs, preErr := ci.PreRun(cmd.Flags())
+		preValid, tfArgs, costArgs, exportArgs, preErr := ci.PreRun(cmd.Flags())
 		if preErr != nil {
-			fmt.Println(preErr)
+			fmt.Println("lel", preErr)
+			return
+		}
+		if !preValid {
 			return
 		}
 

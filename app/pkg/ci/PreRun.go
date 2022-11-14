@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/pflag"
 )
 
-func PreRun(flags *pflag.FlagSet) (map[string]interface{}, map[string]interface{}, map[string]interface{}, error) {
+func PreRun(flags *pflag.FlagSet) (bool, map[string]interface{}, map[string]interface{}, map[string]interface{}, error) {
 	functionName := "PreRun"
 
 	if auxiliary.StateInstance.Branch != "none" {
@@ -28,7 +28,7 @@ func PreRun(flags *pflag.FlagSet) (map[string]interface{}, map[string]interface{
 	tfArgs := terraform.ConstructTerraformArgs(flags)
 	costArgs, costErr := cost.ConstructInfracostArgs(flags)
 	if costErr != nil {
-		return nil, nil, nil, fmt.Errorf("%v: %w", functionName, costErr)
+		return false, nil, nil, nil, fmt.Errorf("%v: %w", functionName, costErr)
 	}
 
 	exportArgs := graph.ConstructExportArgs(flags)
@@ -41,14 +41,17 @@ func PreRun(flags *pflag.FlagSet) (map[string]interface{}, map[string]interface{
 		exportArgs["file-name"] = "Infrastructure_Diagram" //+ exportArgs["runId"].(string)
 	}
 
-	initData, initErr := initialization.RunInit(false, initialization.InitData{})
+	initValid, initData, initErr := initialization.RunInit(false, initialization.InitData{})
 	if initErr != nil {
-		return nil, nil, nil, fmt.Errorf("%v: %w", functionName, costErr)
+		return false, nil, nil, nil, fmt.Errorf("%v: %w", functionName, initErr)
+	}
+	if !initValid {
+		return false, nil, nil, nil, nil
 	}
 
 	exportArgs["orgId"] = initData.OrgId
 	exportArgs["projectId"] = initData.ProjectId
 	exportArgs["projectName"] = initData.ProjectName
 
-	return tfArgs, costArgs, exportArgs, nil
+	return true, tfArgs, costArgs, exportArgs, nil
 }
