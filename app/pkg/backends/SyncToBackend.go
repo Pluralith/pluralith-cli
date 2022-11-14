@@ -22,7 +22,7 @@ type TerraformState struct {
 	} `json:"modules"`
 }
 
-func StoreInBackend() error {
+func SyncToBackend() error {
 	functionName := "PushDiagramToBackend"
 
 	backendConfig, backendErr := LoadBackendConfig()

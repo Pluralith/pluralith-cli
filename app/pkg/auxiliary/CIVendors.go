@@ -1,11 +1,12 @@
 package auxiliary
 
 type Vendor struct {
-	Name     string      //`json:Name`
-	Constant string      //`json:Constant`
-	Env      []string    //`json:Env`
-	Pr       interface{} //`json:"pr,omitempty"`
-	Branch   string
+	Name       string      //`json:Name`
+	Constant   string      //`json:Constant`
+	Env        []string    //`json:Env`
+	Pr         interface{} //`json:"pr,omitempty"`
+	Branch     string      //`json:"branch,omitempty"`
+	PipelineId string      //`json:"branch,omitempty"`
 }
 
 var GeneralEnvVars = []string{
@@ -18,6 +19,24 @@ var GeneralEnvVars = []string{
 }
 
 var CIVendors = []Vendor{
+	{
+		Name:     "GitHub Actions",
+		Constant: "GITHUB_ACTIONS",
+		Env:      []string{"GITHUB_ACTIONS"},
+		Pr: map[string]interface{}{
+			"GITHUB_EVENT_NAME": "pull_request",
+		},
+		Branch:     "GITHUB_HEAD_REF",
+		PipelineId: "GITHUB_RUN_ID",
+	},
+	{
+		Name:       "GitLab CI",
+		Constant:   "GITLAB",
+		Env:        []string{"GITLAB_CI"},
+		Pr:         "CI_MERGE_REQUEST_ID",
+		Branch:     "CI_MERGE_REQUEST_SOURCE_BRANCH_NAME",
+		PipelineId: "CI_PIPELINE_ID",
+	},
 	{
 		Name:     "AppVeyor",
 		Constant: "APPVEYOR",
@@ -117,22 +136,6 @@ var CIVendors = []Vendor{
 		Name:     "Expo Application Services",
 		Constant: "EAS",
 		Env:      []string{"EAS_BUILD"},
-	},
-	{
-		Name:     "GitHub Actions",
-		Constant: "GITHUB_ACTIONS",
-		Env:      []string{"GITHUB_ACTIONS"},
-		Pr: map[string]interface{}{
-			"GITHUB_EVENT_NAME": "pull_request",
-		},
-		Branch: "GITHUB_HEAD_REF",
-	},
-	{
-		Name:     "GitLab CI",
-		Constant: "GITLAB",
-		Env:      []string{"GITLAB_CI"},
-		Pr:       "CI_MERGE_REQUEST_ID",
-		Branch:   "CI_MERGE_REQUEST_SOURCE_BRANCH_NAME",
 	},
 	{
 		Name:     "GoCD",

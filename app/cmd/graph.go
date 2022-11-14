@@ -28,7 +28,7 @@ var graphCmd = &cobra.Command{
 		}
 
 		ux.PrintFormatted("⠿", []string{"blue", "bold"})
-		fmt.Print(" Exporting Diagram\n\n")
+		fmt.Print(" Exporting Diagram\n")
 
 		tfArgs := terraform.ConstructTerraformArgs(cmd.Flags())
 		costArgs, costErr := cost.ConstructInfracostArgs(cmd.Flags())
@@ -40,12 +40,14 @@ var graphCmd = &cobra.Command{
 		exportArgs := graph.ConstructExportArgs(cmd.Flags())
 		exportArgs["export-pdf"] = true // Always export pdf when running locally
 
-		configValid, _, configErr := auth.VerifyConfig(true)
-		if !configValid {
+		ux.PrintFormatted("\n→", []string{"blue", "bold"})
+		ux.PrintFormatted(" Authentication\n", []string{"white", "bold"})
+		apiKeyValid, apiKeyErr := auth.VerifyAPIKey(auxiliary.StateInstance.APIKey, false)
+		if !apiKeyValid {
 			return
 		}
-		if configErr != nil {
-			fmt.Println(configErr)
+		if apiKeyErr != nil {
+			fmt.Println(apiKeyErr)
 		}
 
 		if graphErr := graph.GenerateGraph("plan", tfArgs, costArgs, exportArgs, false); graphErr != nil {
