@@ -28,8 +28,8 @@ func CreateProject(initData InitData) error {
 		return fmt.Errorf("creating project json string failed -> %v: %w", functionName, marshalErr)
 	}
 
-	// request, _ := http.NewRequest("POST", "https://api.pluralith.com/v1/project/create", bytes.NewBuffer(projectDataBytes))
-	request, _ := http.NewRequest("POST", "http://localhost:8080/v1/project/create", bytes.NewBuffer(projectDataBytes))
+	request, _ := http.NewRequest("POST", "https://api.pluralith.com/v1/project/create", bytes.NewBuffer(projectDataBytes))
+	// request, _ := http.NewRequest("POST", "http://localhost:8080/v1/project/create", bytes.NewBuffer(projectDataBytes))
 	request.Header.Add("Authorization", "Bearer "+auxiliary.StateInstance.APIKey)
 	request.Header.Add("Content-Type", "application/json")
 

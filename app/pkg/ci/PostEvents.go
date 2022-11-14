@@ -147,8 +147,8 @@ func PostEvents(command string, tfArgs map[string]interface{}, costArgs map[stri
 			}
 
 			// Update resource
-			// request, _ := http.NewRequest("POST", "https://api.pluralith.com/v1/resource/update", bytes.NewBuffer(payloadBytes))
-			request, _ := http.NewRequest("POST", "http://localhost:8080/v1/resource/update", bytes.NewBuffer(payloadBytes))
+			request, _ := http.NewRequest("POST", "https://api.pluralith.com/v1/resource/update", bytes.NewBuffer(payloadBytes))
+			// request, _ := http.NewRequest("POST", "http://localhost:8080/v1/resource/update", bytes.NewBuffer(payloadBytes))
 			request.Header.Add("Authorization", "Bearer "+auxiliary.StateInstance.APIKey)
 			request.Header.Add("Content-Type", "application/json")
 
