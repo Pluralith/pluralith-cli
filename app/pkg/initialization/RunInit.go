@@ -81,28 +81,28 @@ func RunInit(noInputs bool, initData InitData) (bool, InitData, error) {
 		return false, initData, fmt.Errorf("failed to verify org id -> %v: %w", functionName, projectErr)
 	}
 
+	// Set name in init data if existing project is found
+	if projectName != "" {
+		initData.ProjectName = projectName
+	}
+
 	// Handle non-existent project
-	if projectValid {
-		if initData.ProjectName == "" { // If at this point project name is still empty and command run is pluralith init -> ask for user's input
-			initData.ProjectName = projectName // Set name in init data if existing project is found
+	if projectValid && projectName == "" {
+		// If at this point project name is still empty and command run is pluralith init -> ask for user's input
+		if initData.ProjectName == "" && !noInputs {
+			ux.PrintFormatted("\n  ⠿", []string{"blue", "bold"})
+			fmt.Print(" Enter Project Name: ")
 
-			if !noInputs {
-				ux.PrintFormatted("\n  ⠿", []string{"blue", "bold"})
-				fmt.Print(" Enter Project Name: ")
-
-				scanner := bufio.NewScanner(os.Stdin)
-				if scanner.Scan() {
-					initData.ProjectName = scanner.Text() // Capture user input
-				}
-			} else {
-				ux.PrintFormatted("  ✘", []string{"red", "bold"})
-				fmt.Println(" No Project Name Given → Pass A Name To Create A New Project")
+			scanner := bufio.NewScanner(os.Stdin)
+			if scanner.Scan() {
+				initData.ProjectName = scanner.Text() // Capture user input
 			}
+		} else {
+			ux.PrintFormatted("  ✘", []string{"red", "bold"})
+			fmt.Println(" No Project Name Given → Pass A Name To Create A New Project")
 		}
 
-		if projectName == "" { // If project is not in existence -> create project
-			CreateProject(initData)
-		}
+		CreateProject(initData)
 	}
 
 	if !noInputs {
