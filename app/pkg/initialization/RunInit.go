@@ -29,7 +29,7 @@ func CompileInitData(initData InitData) InitData {
 	return initData
 }
 
-func RunInit(askInputs bool, initData InitData) (bool, InitData, error) {
+func RunInit(noInputs bool, initData InitData) (bool, InitData, error) {
 	functionName := "RunInit"
 
 	// Compile init data from various sources
@@ -38,7 +38,7 @@ func RunInit(askInputs bool, initData InitData) (bool, InitData, error) {
 	// Authentication
 	ux.PrintFormatted("\n→", []string{"blue", "bold"})
 	ux.PrintFormatted(" Authentication\n", []string{"white", "bold"})
-	if initData.APIKey == "" && askInputs {
+	if initData.APIKey == "" && !noInputs {
 		ux.PrintFormatted("  ⠿", []string{"blue", "bold"})
 		fmt.Print(" Enter API Key: ")
 		fmt.Scanln(&initData.APIKey) // Capture user input
@@ -56,7 +56,7 @@ func RunInit(askInputs bool, initData InitData) (bool, InitData, error) {
 	// Project Setup
 	ux.PrintFormatted("\n→", []string{"blue", "bold"})
 	ux.PrintFormatted(" Project Setup\n", []string{"white", "bold"})
-	if initData.OrgId == "" && askInputs {
+	if initData.OrgId == "" && !noInputs {
 		ux.PrintFormatted("  ⠿", []string{"blue", "bold"})
 		fmt.Print(" Enter Org Id: ")
 		fmt.Scanln(&initData.OrgId) // Capture user input
@@ -70,7 +70,7 @@ func RunInit(askInputs bool, initData InitData) (bool, InitData, error) {
 		return false, initData, nil
 	}
 
-	if initData.ProjectId == "" && askInputs {
+	if initData.ProjectId == "" && !noInputs {
 		ux.PrintFormatted("\n  ⠿", []string{"blue", "bold"})
 		fmt.Print(" Enter Project Id: ")
 		fmt.Scanln(&initData.ProjectId) // Capture user input
@@ -86,7 +86,7 @@ func RunInit(askInputs bool, initData InitData) (bool, InitData, error) {
 		if initData.ProjectName == "" { // If at this point project name is still empty and command run is pluralith init -> ask for user's input
 			initData.ProjectName = projectName // Set name in init data if existing project is found
 
-			if askInputs {
+			if !noInputs {
 				ux.PrintFormatted("\n  ⠿", []string{"blue", "bold"})
 				fmt.Print(" Enter Project Name: ")
 
@@ -105,7 +105,7 @@ func RunInit(askInputs bool, initData InitData) (bool, InitData, error) {
 		}
 	}
 
-	if askInputs {
+	if !noInputs {
 		fmt.Println()
 		if writeErr := WriteConfig(initData); writeErr != nil {
 			return false, initData, fmt.Errorf("failed to create config template -> %v: %w", functionName, writeErr)
