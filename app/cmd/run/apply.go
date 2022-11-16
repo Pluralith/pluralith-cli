@@ -20,9 +20,12 @@ var RunApplyCmd = &cobra.Command{
 		fmt.Println(" Initiating Apply Run ⇢ Posting To Pluralith Dashboard")
 
 		// - - Prepare for Run - -
-		tfArgs, costArgs, exportArgs, preErr := ci.PreRun(cmd.Flags())
+		preValid, tfArgs, costArgs, exportArgs, preErr := ci.PreRun(cmd.Flags())
 		if preErr != nil {
 			fmt.Println(preErr)
+			return
+		}
+		if !preValid {
 			return
 		}
 

@@ -29,7 +29,7 @@ func CompileInitData(initData InitData) InitData {
 	return initData
 }
 
-func RunInit(askInputs bool, initData InitData) (InitData, error) {
+func RunInit(noInputs bool, initData InitData) (bool, InitData, error) {
 	functionName := "RunInit"
 
 	// Compile init data from various sources
@@ -38,7 +38,7 @@ func RunInit(askInputs bool, initData InitData) (InitData, error) {
 	// Authentication
 	ux.PrintFormatted("\n→", []string{"blue", "bold"})
 	ux.PrintFormatted(" Authentication\n", []string{"white", "bold"})
-	if initData.APIKey == "" && askInputs {
+	if initData.APIKey == "" && !noInputs {
 		ux.PrintFormatted("  ⠿", []string{"blue", "bold"})
 		fmt.Print(" Enter API Key: ")
 		fmt.Scanln(&initData.APIKey) // Capture user input
@@ -46,17 +46,17 @@ func RunInit(askInputs bool, initData InitData) (InitData, error) {
 
 	// Run login routine and set credentials file
 	loginValid, loginErr := auth.RunLogin(initData.APIKey)
-	if !loginValid {
-		return initData, nil
-	}
 	if loginErr != nil {
-		return initData, fmt.Errorf("failed to authenticate -> %v: %w", functionName, loginErr)
+		return false, initData, fmt.Errorf("failed to authenticate -> %v: %w", functionName, loginErr)
+	}
+	if !loginValid {
+		return false, initData, nil
 	}
 
 	// Project Setup
 	ux.PrintFormatted("\n→", []string{"blue", "bold"})
 	ux.PrintFormatted(" Project Setup\n", []string{"white", "bold"})
-	if initData.OrgId == "" && askInputs {
+	if initData.OrgId == "" && !noInputs {
 		ux.PrintFormatted("  ⠿", []string{"blue", "bold"})
 		fmt.Print(" Enter Org Id: ")
 		fmt.Scanln(&initData.OrgId) // Capture user input
@@ -64,13 +64,13 @@ func RunInit(askInputs bool, initData InitData) (InitData, error) {
 
 	orgFound, orgErr := VerifyOrg(initData.OrgId)
 	if orgErr != nil {
-		return initData, fmt.Errorf("failed to verify org id -> %v: %w", functionName, orgErr)
+		return false, initData, fmt.Errorf("failed to verify org id -> %v: %w", functionName, orgErr)
 	}
 	if !orgFound {
-		return initData, nil
+		return false, initData, nil
 	}
 
-	if initData.ProjectId == "" && askInputs {
+	if initData.ProjectId == "" && !noInputs {
 		ux.PrintFormatted("\n  ⠿", []string{"blue", "bold"})
 		fmt.Print(" Enter Project Id: ")
 		fmt.Scanln(&initData.ProjectId) // Capture user input
@@ -78,39 +78,39 @@ func RunInit(askInputs bool, initData InitData) (InitData, error) {
 
 	projectValid, projectName, projectErr := VerifyProject(initData.OrgId, initData.ProjectId)
 	if projectErr != nil {
-		return initData, fmt.Errorf("failed to verify org id -> %v: %w", functionName, projectErr)
+		return false, initData, fmt.Errorf("failed to verify org id -> %v: %w", functionName, projectErr)
+	}
+
+	// Set name in init data if existing project is found
+	if projectName != "" {
+		initData.ProjectName = projectName
 	}
 
 	// Handle non-existent project
-	if projectValid {
-		if initData.ProjectName == "" { // If at this point project name is still empty and command run is pluralith init -> ask for user's input
-			initData.ProjectName = projectName // Set name in init data if existing project is found
+	if projectValid && projectName == "" {
+		// If at this point project name is still empty and command run is pluralith init -> ask for user's input
+		if initData.ProjectName == "" && !noInputs {
+			ux.PrintFormatted("\n  ⠿", []string{"blue", "bold"})
+			fmt.Print(" Enter Project Name: ")
 
-			if askInputs {
-				ux.PrintFormatted("\n  ⠿", []string{"blue", "bold"})
-				fmt.Print(" Enter Project Name: ")
-
-				scanner := bufio.NewScanner(os.Stdin)
-				if scanner.Scan() {
-					initData.ProjectName = scanner.Text() // Capture user input
-				}
-			} else {
-				ux.PrintFormatted("  ✘", []string{"red", "bold"})
-				fmt.Println(" No Project Name Given → Pass A Name To Create A New Project")
+			scanner := bufio.NewScanner(os.Stdin)
+			if scanner.Scan() {
+				initData.ProjectName = scanner.Text() // Capture user input
 			}
+		} else {
+			ux.PrintFormatted("  ✘", []string{"red", "bold"})
+			fmt.Println(" No Project Name Given → Pass A Name To Create A New Project")
 		}
 
-		if projectName == "" { // If project is not in existence -> create project
-			CreateProject(initData)
-		}
+		CreateProject(initData)
 	}
 
-	if askInputs {
+	if !noInputs {
 		fmt.Println()
 		if writeErr := WriteConfig(initData); writeErr != nil {
-			return initData, fmt.Errorf("failed to create config template -> %v: %w", functionName, writeErr)
+			return false, initData, fmt.Errorf("failed to create config template -> %v: %w", functionName, writeErr)
 		}
 	}
 
-	return initData, nil
+	return true, initData, nil
 }

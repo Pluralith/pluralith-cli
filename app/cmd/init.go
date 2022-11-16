@@ -35,7 +35,9 @@ var initCmd = &cobra.Command{
 		initData.ProjectId, _ = cmd.Flags().GetString("project-id")
 		initData.ProjectName, _ = cmd.Flags().GetString("project-name")
 
-		_, initErr := initialization.RunInit(true, initData)
+		noInputs, _ := cmd.Flags().GetBool("no-inputs")
+
+		_, _, initErr := initialization.RunInit(noInputs, initData)
 		if initErr != nil {
 			fmt.Println(fmt.Errorf("pluralith init failed -> %w", initErr))
 		}
@@ -49,4 +51,5 @@ func init() {
 	initCmd.PersistentFlags().String("project-id", "", "Your Project Id (If no project with passed Id exists, one gets created). Pass via flag to skip user prompt and override pluralith.yml")
 	initCmd.PersistentFlags().String("project-name", "", "Your Project name. Pass via flag to skip user prompt and override pluralith.yml")
 	initCmd.PersistentFlags().Bool("empty", false, "Creates an empty pluralith.yml config file in the current directory")
+	initCmd.PersistentFlags().Bool("no-inputs", false, "Run init assuming all necessary parameters are present (for CI)")
 }
