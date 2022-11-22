@@ -5743,6 +5743,7 @@ func GetStripBlacklist() []string {
 		"tls",
 		"vsphere",
 		"tags",
+		"tags_all",
 		"Name",
 		"for_each_expression",
 		"names",
