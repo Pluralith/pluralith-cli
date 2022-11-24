@@ -73,7 +73,11 @@ func RunInit(noInputs bool, initData InitData) (bool, InitData, error) {
 	if initData.ProjectId == "" && !noInputs {
 		ux.PrintFormatted("\n  ⠿", []string{"blue", "bold"})
 		fmt.Print(" Enter Project Id: ")
-		fmt.Scanln(&initData.ProjectId) // Capture user input
+
+		scanner := bufio.NewScanner(os.Stdin)
+		if scanner.Scan() {
+			initData.ProjectId = "" + scanner.Text() // Capture user input
+		}
 	}
 
 	projectValid, projectName, projectErr := VerifyProject(initData.OrgId, initData.ProjectId)
