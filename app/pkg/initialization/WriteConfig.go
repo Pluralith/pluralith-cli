@@ -13,26 +13,10 @@ func WriteConfig(initData InitData) error {
 	configPath := filepath.Join(auxiliary.StateInstance.WorkingPath, "pluralith.yml")
 	configString := ConfigTemplate
 
-	// Insert org id
-	// if initData.OrgId != "" && !isEmpty {
+	// Interpolate values
 	configString = strings.ReplaceAll(configString, "$PLR_ORG_ID", initData.OrgId)
-	// } else {
-	// 	configString = strings.ReplaceAll(ConfigTemplate, "$PLR_ORG_ID", "null")
-	// }
-
-	// Insert project id
-	// if initData.ProjectId != "" && !isEmpty {
 	configString = strings.ReplaceAll(configString, "$PLR_PROJECT_ID", initData.ProjectId)
-	// } else {
-	// 	configString = strings.ReplaceAll(ConfigTemplate, "$PLR_PROJECT_ID", "null")
-	// }
-
-	// Insert project name
-	// if initData.ProjectName != "" && !isEmpty {
 	configString = strings.ReplaceAll(configString, "$PLR_PROJECT_NAME", initData.ProjectName)
-	// } else {
-	// 	configString = strings.ReplaceAll(ConfigTemplate, "$PLR_PROJECT_NAME", "null")
-	// }
 
 	helperWriteErr := os.WriteFile(configPath, []byte(configString), 0700)
 	if helperWriteErr != nil {

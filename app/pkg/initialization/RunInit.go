@@ -93,17 +93,19 @@ func RunInit(noInputs bool, initData InitData) (bool, InitData, error) {
 	// Handle non-existent project
 	if projectValid && projectName == "" {
 		// If at this point project name is still empty and command run is pluralith init -> ask for user's input
-		if initData.ProjectName == "" && !noInputs {
-			ux.PrintFormatted("\n  ⠿", []string{"blue", "bold"})
-			fmt.Print(" Enter Project Name: ")
+		if initData.ProjectName == "" {
+			if !noInputs {
+				ux.PrintFormatted("\n  ⠿", []string{"blue", "bold"})
+				fmt.Print(" Enter Project Name: ")
 
-			scanner := bufio.NewScanner(os.Stdin)
-			if scanner.Scan() {
-				initData.ProjectName = scanner.Text() // Capture user input
+				scanner := bufio.NewScanner(os.Stdin)
+				if scanner.Scan() {
+					initData.ProjectName = scanner.Text() // Capture user input
+				}
+			} else {
+				ux.PrintFormatted("  ✘", []string{"red", "bold"})
+				fmt.Println(" No Project Name Given → Pass A Name To Create A New Project")
 			}
-		} else {
-			ux.PrintFormatted("  ✘", []string{"red", "bold"})
-			fmt.Println(" No Project Name Given → Pass A Name To Create A New Project")
 		}
 
 		CreateProject(initData)
