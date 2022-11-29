@@ -136,6 +136,10 @@ func StripJson(obj interface{}) interface{} {
 
 // Hash a string using som e rules
 func HashString(value string) string {
+
+	if strings.Contains(value, "\n") || strings.HasPrefix(value, "{") || strings.HasPrefix(value, "[") {
+		return Hash(value)
+	}
 	splitString := strings.Split(value, ".")
 
 	for index1 := 0; index1 < len(splitString); index1++ {
