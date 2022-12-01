@@ -174,6 +174,16 @@ func RunPlan(command string, tfArgs map[string]interface{}, costArgs map[string]
 			Received:  false,
 			Providers: providers,
 		})
+
+		// Emit confirm event
+		comdb.PushComDBEvent(comdb.ComDBEvent{
+			Receiver:  "UI",
+			Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
+			Command:   command,
+			Type:      "confirm",
+			Path:      auxiliary.StateInstance.WorkingPath,
+			Received:  false,
+		})
 	}
 
 	return workingPlan, nil
