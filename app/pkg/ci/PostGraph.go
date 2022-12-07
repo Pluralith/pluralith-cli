@@ -44,6 +44,7 @@ func PostGraph(runType string, exportArgs map[string]interface{}) error {
 	runCache["orgId"] = auxiliary.StateInstance.PluralithConfig.OrgId
 	runCache["branch"] = exportArgs["branch"]
 	runCache["type"] = runType
+	runCache["version"] = auxiliary.StateInstance.PluralithConfig.Config.Version
 
 	// If apply or destroy event -> Init an empty events array to receive apply/destroy events
 	if runType != "plan" {
