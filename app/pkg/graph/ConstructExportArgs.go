@@ -22,5 +22,15 @@ func ConstructExportArgs(flags *pflag.FlagSet) map[string]interface{} {
 	flagMap["post-apply"], _ = flags.GetBool("post-apply")
 	flagMap["branch"] = auxiliary.StateInstance.Branch
 
+	// Get title from config if not passed as flag
+	if flagMap["title"] == "" {
+		flagMap["title"] = auxiliary.StateInstance.PluralithConfig.Config.Title
+	}
+
+	// Get version from config if not passed as flag
+	if flagMap["version"] == "" {
+		flagMap["version"] = auxiliary.StateInstance.PluralithConfig.Config.Version
+	}
+
 	return flagMap
 }

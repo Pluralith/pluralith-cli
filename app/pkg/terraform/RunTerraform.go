@@ -43,10 +43,12 @@ func RunTerraform(command string, tfArgs map[string]interface{}, costArgs map[st
 
 	// Line separation between plan and apply message prints
 
-	// Run terraform apply on existing execution plan
-	applyErr := RunApply(command, planPath)
-	if applyErr != nil {
-		return fmt.Errorf("running terraform apply failed -> %v: %w", functionName, applyErr)
+	if command != "plan" {
+		// Run terraform apply on existing execution plan
+		applyErr := RunApply(command, planPath)
+		if applyErr != nil {
+			return fmt.Errorf("running terraform apply failed -> %v: %w", functionName, applyErr)
+		}
 	}
 
 	return nil

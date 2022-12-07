@@ -14,17 +14,14 @@ type PluralithConfig struct {
 	ProjectName string `yaml:"project_name"`
 	RunId       string
 	Config      struct {
+		Title          string   `yaml:"title"`
+		Version        string   `yaml:"version"`
 		SyncToBackend  bool     `yaml:"sync_to_backend"`
 		SensitiveAttrs []string `yaml:"sensitive_attrs"`
 		Vars           []string `yaml:"vars"`
 		VarFiles       []string `yaml:"var_files"`
 		CostUsageFile  string   `yaml:"cost_usage_file"`
 	} `yaml:"config"`
-	Export struct {
-		Title   string `yaml:"title"`
-		Author  string `yaml:"author"`
-		Version string `yaml:"version"`
-	} `yaml:"export"`
 }
 
 func (S *State) GetConfig() error {
