@@ -29,7 +29,7 @@ func CompileInitData(initData InitData) InitData {
 	return initData
 }
 
-func RunInit(noInputs bool, initData InitData) (bool, InitData, error) {
+func RunInit(noInputs bool, initData InitData, localRun bool) (bool, InitData, error) {
 	functionName := "RunInit"
 
 	// Compile init data from various sources
@@ -51,6 +51,10 @@ func RunInit(noInputs bool, initData InitData) (bool, InitData, error) {
 	}
 	if !loginValid {
 		return false, initData, nil
+	}
+
+	if localRun {
+		return true, initData, nil 
 	}
 
 	// Project Setup

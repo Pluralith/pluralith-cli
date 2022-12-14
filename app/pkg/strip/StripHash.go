@@ -24,7 +24,7 @@ func StripAndHash() error {
 	fmt.Println()
 
 	ux.PrintFormatted("→", []string{"blue"})
-	fmt.Println(" We are stripping your plan state of secrets and hashing all values \n  to make it safe to share\n")
+	fmt.Println(" We are stripping your plan state of secrets and hashing all values \n  to make it safe to share")
 
 	stripSpinner := ux.NewSpinner("Stripping and hashing plan state", "Plan state stripped and hashed", "Stripping and hashing plan state failed", false)
 	stripSpinner.Start()
