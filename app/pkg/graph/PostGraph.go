@@ -50,7 +50,9 @@ func PostGraph(runType string, exportArgs map[string]interface{}) error {
 		return fmt.Errorf("posting diagram to pluralith Dashboard failed -> %v: %w", functionName, logErr)
 	}
 
-	runSpinner.Success("Follow This Link To View The Diagram in The Pluralith Dashboard " + runCache["urls"].(map[string]interface{})["pluralithURL"].(string))
+	ux.PrintFormatted("\n"+"  → ", []string{"blue"})
+	fmt.Print("Diagram Pushed To: ")
+	ux.PrintFormatted(runCache["urls"].(map[string]interface{})["pluralithURL"].(string)+"\n", []string{"blue"})
 
 	// Open run in deafult browser
 	auxiliary.OpenBrowser(runCache["urls"].(map[string]interface{})["pluralithURL"].(string))

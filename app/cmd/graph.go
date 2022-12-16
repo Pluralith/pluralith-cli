@@ -33,16 +33,20 @@ var graphCmd = &cobra.Command{
 			return
 		}
 
-		// - - Post Graph - -
-		if ciError := graph.PostGraph("plan", exportArgs); ciError != nil {
-			fmt.Println(ciError)
-			return
+		// Post diagram if local-only flag not set
+		if !exportArgs["export-pdf"].(bool) {
+			// - - Post Graph - -
+			if ciError := graph.PostGraph("plan", exportArgs); ciError != nil {
+				fmt.Println(ciError)
+				return
+			}
 		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(graphCmd)
+	graphCmd.PersistentFlags().Bool("local-only", false, "Diagram will not be pushed to the Pluralith Dashboard. Instead, a PDF export of the Diagram gets generated locally")
 	graphCmd.PersistentFlags().String("title", "Pluralith Diagram", "The title for your diagram, will be displayed in the PDF output")
 	graphCmd.PersistentFlags().String("author", "", "The author/creator of the diagram, will be displayed in the PDF output")
 	graphCmd.PersistentFlags().String("version", "", "The diagram version, will be displayed in the PDF output")

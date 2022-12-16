@@ -23,6 +23,14 @@ func PreGraph(flags *pflag.FlagSet) (bool, map[string]interface{}, map[string]in
 	exportArgs["runId"] = fmt.Sprintf("%07d", rand.Intn(10000000)) // Generate random run id
 	costArgs["show-costs"] = true                                  // Always run infracost if infracost is installed
 
+	// Export pdf if local-only flag set
+	var localOnly, _ = flags.GetBool("local-only")
+	if localOnly {
+		exportArgs["export-pdf"] = true
+	} else {
+		exportArgs["export-pdf"] = false
+	}
+
 	// Set defaults for export
 	if exportArgs["title"] == "" {
 		exportArgs["title"] = "Infrastructure Diagram"     //+ exportArgs["runId"].(string)
