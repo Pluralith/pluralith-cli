@@ -38,7 +38,7 @@ func RunInit(noInputs bool, initData InitData, localRun bool) (bool, InitData, e
 	// Authentication
 	ux.PrintFormatted("\n→", []string{"blue", "bold"})
 	ux.PrintFormatted(" Authentication\n", []string{"white", "bold"})
-	if initData.APIKey == "" && !noInputs {
+	if initData.APIKey == "" && (localRun || !noInputs) {
 		ux.PrintFormatted("  ⠿", []string{"blue", "bold"})
 		fmt.Print(" Enter API Key (You can find it in the Dashboard user settings https://app.pluralith.com/#/user/settings): ")
 		fmt.Scanln(&initData.APIKey) // Capture user input
