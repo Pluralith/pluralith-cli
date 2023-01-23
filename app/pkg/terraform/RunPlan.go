@@ -18,8 +18,8 @@ func RunPlan(command string, tfArgs map[string]interface{}, costArgs map[string]
 
 	// Instantiate spinner
 	var planSpinner = ux.NewSpinner("Generating Execution Plan", "Execution Plan Generated", "Couldn't Generate Execution Plan", true)
-	if(localRun) {
-		planSpinner = ux.NewSpinner("Generating Execution Plan locally", "Execution Plan Generated locally", "Couldn't Generate Execution Plan locally", true)
+	if localRun {
+		planSpinner = ux.NewSpinner("Generating Local Execution Plan", "Local Execution Plan Generated", "Couldn't Generate Local Execution Plan", true)
 	}
 	// Create Pluralith helper directory (.pluralith)
 	_, existErr := os.Stat(filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith"))
@@ -103,8 +103,8 @@ func RunPlan(command string, tfArgs map[string]interface{}, costArgs map[string]
 	if auxiliary.StateInstance.Infracost && costArgs["show-costs"] == true {
 
 		var costSpinner = ux.NewSpinner("Calculating Infrastructure Costs", "Costs Calculated", "Couldn't Calculate Costs", true)
-		if(localRun) {
-			costSpinner = ux.NewSpinner("Calculating Infrastructure Costs locally", "Costs Calculated locally", "Couldn't Calculate Costs locally", true)
+		if localRun {
+			costSpinner = ux.NewSpinner("Calculating Infrastructure Costs", "Costs Calculated", "Couldn't Calculate Costs", true)
 		}
 		costSpinner.Start()
 

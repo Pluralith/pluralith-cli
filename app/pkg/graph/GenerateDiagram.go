@@ -22,7 +22,7 @@ func GenerateDiagram(exportArgs map[string]interface{}, costArgs map[string]inte
 
 	var exportSpinner = ux.NewSpinner("Generating Diagram", "Diagram Generated", "Diagram Generation Failed", true)
 	if localRun {
-		exportSpinner = ux.NewSpinner("Generating Diagram locally", "Diagram Generated locally", "Diagram Generation Failed locally", true)
+		exportSpinner = ux.NewSpinner("Generating Local Diagram", "Local Diagram Generated", "Local Diagram Generation Failed", true)
 	}
 	exportSpinner.Start()
 

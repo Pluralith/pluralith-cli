@@ -11,11 +11,11 @@ import (
 // stripCmd represents the strip command
 var graphCmd = &cobra.Command{
 	Use:   "graph",
-	Short: "Run terraform plan locally and push diagram to Pluralith",
-	Long:  `Run terraform plan locally and push diagram to Pluralith`,
+	Short: "Run terraform plan locally and generate diagram",
+	Long:  `Run terraform plan locally and generate diagram`,
 	Run: func(cmd *cobra.Command, args []string) {
 		ux.PrintFormatted("⠿", []string{"blue", "bold"})
-		fmt.Println(" Initiating Graph locally ⇢ Posting Diagram To Pluralith Dashboard")
+		fmt.Println(" Initiating Graph ⇢ Posting Diagram To Pluralith Dashboard")
 
 		// - - Prepare for Run - -
 		preValid, tfArgs, costArgs, exportArgs, preErr := graph.PreGraph(cmd.Flags())
@@ -46,7 +46,7 @@ var graphCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(graphCmd)
-	graphCmd.PersistentFlags().Bool("local-only", false, "Diagram will not be pushed to the Pluralith Dashboard. Instead, a PDF export of the Diagram gets generated locally")
+	graphCmd.PersistentFlags().Bool("local-only", false, "Diagram will not be pushed to the Pluralith Dashboard. Instead, a PDF export of the Diagram is generated locally")
 	graphCmd.PersistentFlags().String("title", "Pluralith Diagram", "The title for your diagram, will be displayed in the PDF output")
 	graphCmd.PersistentFlags().String("author", "", "The author/creator of the diagram, will be displayed in the PDF output")
 	graphCmd.PersistentFlags().String("version", "", "The diagram version, will be displayed in the PDF output")

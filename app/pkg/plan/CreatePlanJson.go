@@ -79,7 +79,7 @@ func CreatePlanJson(planPath string, isJson bool, localRun bool) (string, []stri
 	// Instantiate spinner
 	var planSpinner = ux.NewSpinner("Creating Plan Cache", "Plan Cache Created", "Creating Plan Cache Failed", true)
 	if localRun {
-		planSpinner = ux.NewSpinner("Creating Plan Cache locally", "Plan Cache Created locally", "Creating Plan Cache Failed locally", true)
+		planSpinner = ux.NewSpinner("Creating Local Plan Cache", "Local Plan Cache Created", "Creating Local Plan Cache Failed", true)
 	}
 	planSpinner.Start()
 
@@ -117,7 +117,7 @@ func CreatePlanJson(planPath string, isJson bool, localRun bool) (string, []stri
 	// Instantiate spinner
 	var stripSpinner = ux.NewSpinner("Stripping Secrets", "Secrets Stripped", "Stripping Secrets Failed", true)
 	if localRun {
-		stripSpinner = ux.NewSpinner("Stripping Secrets locally", "Secrets Stripped locally", "Stripping Secrets Failed locally", true)
+		stripSpinner = ux.NewSpinner("Stripping Secrets", "Secrets Stripped", "Stripping Secrets Failed", true)
 	}
 	stripSpinner.Start()
 
