@@ -65,7 +65,7 @@ func ConvertBinaryPlanToJson(planPath string) (string, error) {
 	return outputSink.String(), nil
 }
 
-func CreatePlanJson(planPath string, isJson bool) (string, []string, []string, error) {
+func CreatePlanJson(planPath string, isJson bool, localRun bool) (string, []string, []string, error) {
 	functionName := "CreatePlanJson"
 
 	// Initiate variables
@@ -77,7 +77,10 @@ func CreatePlanJson(planPath string, isJson bool) (string, []string, []string, e
 	strippedPath := filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith", "pluralith.state.json")
 
 	// Instantiate spinner
-	planSpinner := ux.NewSpinner("Creating Plan Cache", "Plan Cache Created", "Creating Plan Cache Failed", true)
+	var planSpinner = ux.NewSpinner("Creating Plan Cache", "Plan Cache Created", "Creating Plan Cache Failed", true)
+	if localRun {
+		planSpinner = ux.NewSpinner("Creating Local Plan Cache", "Local Plan Cache Created", "Creating Local Plan Cache Failed", true)
+	}
 	planSpinner.Start()
 
 	planJsonString := ""
@@ -112,7 +115,10 @@ func CreatePlanJson(planPath string, isJson bool) (string, []string, []string, e
 	planSpinner.Success()
 
 	// Instantiate spinner
-	stripSpinner := ux.NewSpinner("Stripping Secrets", "Secrets Stripped", "Stripping Secrets Failed", true)
+	var stripSpinner = ux.NewSpinner("Stripping Secrets", "Secrets Stripped", "Stripping Secrets Failed", true)
+	if localRun {
+		stripSpinner = ux.NewSpinner("Stripping Secrets", "Secrets Stripped", "Stripping Secrets Failed", true)
+	}
 	stripSpinner.Start()
 
 	// Strip secrets from plan states json

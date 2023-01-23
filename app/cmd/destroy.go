@@ -2,8 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"pluralith/pkg/cost"
-	"pluralith/pkg/terraform"
+	"pluralith/pkg/ux"
 
 	"github.com/spf13/cobra"
 )
@@ -14,25 +13,11 @@ var destroyCmd = &cobra.Command{
 	Short: "Run terraform destroy and show changes in Pluralith",
 	Long:  `Run terraform destroy and show changes in Pluralith`,
 	Run: func(cmd *cobra.Command, args []string) {
-		tfArgs := terraform.ConstructTerraformArgs(cmd.Flags())
-		costArgs, costErr := cost.ConstructInfracostArgs(cmd.Flags())
-		if costErr != nil {
-			fmt.Println(costErr)
-			return
-		}
-
-		if destroyErr := terraform.RunTerraform("destroy", tfArgs, costArgs); destroyErr != nil {
-			fmt.Println(destroyErr)
-		}
+		ux.PrintFormatted("✘", []string{"red", "bold"})
+		fmt.Print(" The pluralith destroy command is deprecated. Please use the pluralith graph command\n\n")
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(destroyCmd)
-	destroyCmd.PersistentFlags().String("plan-file", "", "Path to an execution plan binary file. If passed, this will skip a plan run under the hood.")
-	destroyCmd.PersistentFlags().String("plan-file-json", "", "Path to an execution plan json file. If passed, this will skip a plan run under the hood.")
-	destroyCmd.PersistentFlags().StringArray("var-file", []string{}, "Path to a var file to pass to Terraform. Can be specified multiple times.")
-	destroyCmd.PersistentFlags().StringArray("var", []string{}, "A variable to pass to Terraform. Can be specified multiple times. (Format: --var='NAME=VALUE')")
-	destroyCmd.PersistentFlags().String("cost-usage-file", "", "Path to an infracost usage file to be used for the cost breakdown")
-	destroyCmd.PersistentFlags().Bool("show-costs", true, "If we detect infracost we automatically run a cost breakdown and show it in the diagram. Use this flag to turn that off")
 }

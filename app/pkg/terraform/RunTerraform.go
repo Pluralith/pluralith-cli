@@ -15,7 +15,7 @@ func RunTerraform(command string, tfArgs map[string]interface{}, costArgs map[st
 		ux.PrintFormatted("⠿", []string{"blue"})
 		fmt.Print(" No Terraform Initialization found ⇢ Run ")
 		ux.PrintFormatted("'terraform init'", []string{"blue", "bold"})
-		fmt.Println(" first\n")
+		fmt.Println(" first")
 		return nil
 	}
 
@@ -29,26 +29,10 @@ func RunTerraform(command string, tfArgs map[string]interface{}, costArgs map[st
 		return fmt.Errorf("deleting old Pluralith state failed -> %v: %w", functionName, removeErr)
 	}
 
-	// Launch Pluralith
-	launchErr := auxiliary.LaunchPluralith()
-	if launchErr != nil {
-		return fmt.Errorf("launching Pluralith failed -> %v: %w", functionName, launchErr)
-	}
-
 	// Run terraform plan to create execution plan
-	planPath, planErr := RunPlan(command, tfArgs, costArgs, false)
+	_, planErr := RunPlan(command, tfArgs, costArgs, false)
 	if planErr != nil {
 		return fmt.Errorf("running terraform plan failed -> %v: %w", functionName, planErr)
-	}
-
-	// Line separation between plan and apply message prints
-
-	if command != "plan" {
-		// Run terraform apply on existing execution plan
-		applyErr := RunApply(command, planPath)
-		if applyErr != nil {
-			return fmt.Errorf("running terraform apply failed -> %v: %w", functionName, applyErr)
-		}
 	}
 
 	return nil
