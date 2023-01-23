@@ -29,7 +29,7 @@ func CompileInitData(initData InitData) InitData {
 	return initData
 }
 
-func RunInit(noInputs bool, initData InitData) (bool, InitData, error) {
+func RunInit(noInputs bool, initData InitData, localRun bool) (bool, InitData, error) {
 	functionName := "RunInit"
 
 	// Compile init data from various sources
@@ -38,9 +38,9 @@ func RunInit(noInputs bool, initData InitData) (bool, InitData, error) {
 	// Authentication
 	ux.PrintFormatted("\n→", []string{"blue", "bold"})
 	ux.PrintFormatted(" Authentication\n", []string{"white", "bold"})
-	if initData.APIKey == "" && !noInputs {
+	if initData.APIKey == "" && (localRun || !noInputs) {
 		ux.PrintFormatted("  ⠿", []string{"blue", "bold"})
-		fmt.Print(" Enter API Key: ")
+		fmt.Print(" Enter API Key (You can find it in the Dashboard user settings https://app.pluralith.com/#/user/settings): ")
 		fmt.Scanln(&initData.APIKey) // Capture user input
 	}
 
@@ -51,6 +51,10 @@ func RunInit(noInputs bool, initData InitData) (bool, InitData, error) {
 	}
 	if !loginValid {
 		return false, initData, nil
+	}
+
+	if localRun {
+		return true, initData, nil
 	}
 
 	// Project Setup

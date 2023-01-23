@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-func GenerateDiagram(exportArgs map[string]interface{}, costArgs map[string]interface{}) error {
+func GenerateDiagram(exportArgs map[string]interface{}, costArgs map[string]interface{}, localRun bool) error {
 	functionName := "GenerateDiagram"
 
 	ux.PrintFormatted("\n→", []string{"blue", "bold"})
@@ -20,7 +20,10 @@ func GenerateDiagram(exportArgs map[string]interface{}, costArgs map[string]inte
 
 	graphModulePath := filepath.Join(auxiliary.StateInstance.BinPath, "pluralith-cli-graphing")
 
-	exportSpinner := ux.NewSpinner("Generating Diagram", "Diagram Generated", "Diagram Generation Failed", true)
+	var exportSpinner = ux.NewSpinner("Generating Diagram", "Diagram Generated", "Diagram Generation Failed", true)
+	if localRun {
+		exportSpinner = ux.NewSpinner("Generating Local Diagram", "Local Diagram Generated", "Local Diagram Generation Failed", true)
+	}
 	exportSpinner.Start()
 
 	// Handle out dir and file name defaults

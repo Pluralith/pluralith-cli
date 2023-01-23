@@ -16,7 +16,7 @@ func VerifyAPIKey(APIKey string, silent bool) (bool, error) {
 
 	// Construct key verification request
 	request, _ := http.NewRequest("GET", "https://api.pluralith.com/v1/auth/key/verify", nil)
-	request.Header.Add("Authorization", "Bearer "+APIKey)
+	request.Header.Add("Authorization", "Bearer "+ APIKey)
 
 	// Execute key verification request
 	client := &http.Client{}

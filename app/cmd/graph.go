@@ -2,11 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"pluralith/pkg/auth"
-	"pluralith/pkg/auxiliary"
-	"pluralith/pkg/cost"
 	"pluralith/pkg/graph"
-	"pluralith/pkg/terraform"
 	"pluralith/pkg/ux"
 
 	"github.com/spf13/cobra"
@@ -15,49 +11,42 @@ import (
 // stripCmd represents the strip command
 var graphCmd = &cobra.Command{
 	Use:   "graph",
-	Short: "Generate and export a diagram of the current plan state as a PDF",
-	Long:  `Generate and export a diagram of the current plan state as a PDF`,
+	Short: "Run terraform plan locally and generate diagram",
+	Long:  `Run terraform plan locally and generate diagram`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// Check for CI environment -> If CI -> Prompt user to use `pluralith run`
-		if auxiliary.StateInstance.IsCI {
-			ux.PrintFormatted("✘", []string{"red", "bold"})
-			fmt.Print(" CI environment detected ⇢ Use ")
-			ux.PrintFormatted("'pluralith run'", []string{"red", "bold"})
-			fmt.Println(" to generate a diagram and post your run")
-			return
-		}
-
 		ux.PrintFormatted("⠿", []string{"blue", "bold"})
-		fmt.Print(" Exporting Diagram\n")
+		fmt.Println(" Initiating Graph ⇢ Posting Diagram To Pluralith Dashboard")
 
-		tfArgs := terraform.ConstructTerraformArgs(cmd.Flags())
-		costArgs, costErr := cost.ConstructInfracostArgs(cmd.Flags())
-		if costErr != nil {
-			fmt.Println(costErr)
+		// - - Prepare for Run - -
+		preValid, tfArgs, costArgs, exportArgs, preErr := graph.PreGraph(cmd.Flags())
+		if preErr != nil {
+			fmt.Println("Error: ", preErr)
+			return
+		}
+		if !preValid {
 			return
 		}
 
-		exportArgs := graph.ConstructExportArgs(cmd.Flags())
-		exportArgs["export-pdf"] = true // Always export pdf when running locally
-
-		ux.PrintFormatted("\n→", []string{"blue", "bold"})
-		ux.PrintFormatted(" Authentication\n", []string{"white", "bold"})
-		apiKeyValid, apiKeyErr := auth.VerifyAPIKey(auxiliary.StateInstance.APIKey, false)
-		if !apiKeyValid {
-			return
-		}
-		if apiKeyErr != nil {
-			fmt.Println(apiKeyErr)
-		}
-
-		if graphErr := graph.GenerateGraph("plan", tfArgs, costArgs, exportArgs, false); graphErr != nil {
+		// - - Generate Graph - -
+		if graphErr := graph.GenerateGraph("plan", tfArgs, costArgs, exportArgs, true, true); graphErr != nil {
 			fmt.Println(graphErr)
+			return
+		}
+
+		// Post diagram if local-only flag not set
+		if !exportArgs["export-pdf"].(bool) {
+			// - - Post Graph - -
+			if ciError := graph.PostGraph("plan", exportArgs); ciError != nil {
+				fmt.Println(ciError)
+				return
+			}
 		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(graphCmd)
+	graphCmd.PersistentFlags().Bool("local-only", false, "Diagram will not be pushed to the Pluralith Dashboard. Instead, a PDF export of the Diagram is generated locally")
 	graphCmd.PersistentFlags().String("title", "Pluralith Diagram", "The title for your diagram, will be displayed in the PDF output")
 	graphCmd.PersistentFlags().String("author", "", "The author/creator of the diagram, will be displayed in the PDF output")
 	graphCmd.PersistentFlags().String("version", "", "The diagram version, will be displayed in the PDF output")

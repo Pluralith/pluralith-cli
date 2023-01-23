@@ -30,7 +30,7 @@ var RunPlanCmd = &cobra.Command{
 		}
 
 		// - - Generate Graph - -
-		if graphErr := graph.GenerateGraph("plan", tfArgs, costArgs, exportArgs, true); graphErr != nil {
+		if graphErr := graph.GenerateGraph("plan", tfArgs, costArgs, exportArgs, true, false); graphErr != nil {
 			fmt.Println(graphErr)
 			return
 		}

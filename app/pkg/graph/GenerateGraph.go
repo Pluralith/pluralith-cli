@@ -10,10 +10,10 @@ import (
 	"pluralith/pkg/ux"
 )
 
-func GenerateGraph(command string, tfArgs map[string]interface{}, costArgs map[string]interface{}, exportArgs map[string]interface{}, runAsCI bool) error {
+func GenerateGraph(command string, tfArgs map[string]interface{}, costArgs map[string]interface{}, exportArgs map[string]interface{}, runAsCI bool, localRun bool) error {
 	functionName := "GenerateGraph"
 
-	_, planErr := terraform.RunPlan(command, tfArgs, costArgs, true)
+	_, planErr := terraform.RunPlan(command, tfArgs, costArgs, localRun)
 	if planErr != nil {
 		return fmt.Errorf("running terraform plan failed -> %v: %w", functionName, planErr)
 	}
@@ -35,7 +35,7 @@ func GenerateGraph(command string, tfArgs map[string]interface{}, costArgs map[s
 	exportArgs["cost-json-path"] = costJsonPath
 
 	// Generate diagram through graphing module
-	if diagramErr := GenerateDiagram(exportArgs, costArgs); diagramErr != nil {
+	if diagramErr := GenerateDiagram(exportArgs, costArgs, localRun); diagramErr != nil {
 		return fmt.Errorf("generating diagram failed -> %v: %w", functionName, diagramErr)
 	}
 

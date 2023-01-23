@@ -9,6 +9,7 @@ import (
 func ConstructExportArgs(flags *pflag.FlagSet) map[string]interface{} {
 	flagMap := make(map[string]interface{})
 
+	flagMap["local-only"], _ = flags.GetBool("local-only")
 	flagMap["title"], _ = flags.GetString("title")
 	flagMap["author"], _ = flags.GetString("author")
 	flagMap["version"], _ = flags.GetString("version")

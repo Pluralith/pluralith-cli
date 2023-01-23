@@ -8,19 +8,19 @@ import (
 	"os/exec"
 	"path/filepath"
 	"pluralith/pkg/auxiliary"
-	"pluralith/pkg/comdb"
 	"pluralith/pkg/cost"
 	"pluralith/pkg/plan"
 	"pluralith/pkg/ux"
-	"time"
 )
 
-func RunPlan(command string, tfArgs map[string]interface{}, costArgs map[string]interface{}, silent bool) (string, error) {
+func RunPlan(command string, tfArgs map[string]interface{}, costArgs map[string]interface{}, localRun bool) (string, error) {
 	functionName := "RunPlan"
 
 	// Instantiate spinner
-	planSpinner := ux.NewSpinner("Generating Execution Plan", "Execution Plan Generated", "Couldn't Generate Execution Plan", true)
-
+	var planSpinner = ux.NewSpinner("Generating Execution Plan", "Execution Plan Generated", "Couldn't Generate Execution Plan", true)
+	if localRun {
+		planSpinner = ux.NewSpinner("Generating Local Execution Plan", "Local Execution Plan Generated", "Couldn't Generate Local Execution Plan", true)
+	}
 	// Create Pluralith helper directory (.pluralith)
 	_, existErr := os.Stat(filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith"))
 	if errors.Is(existErr, os.ErrNotExist) {
@@ -40,35 +40,11 @@ func RunPlan(command string, tfArgs map[string]interface{}, costArgs map[string]
 	// Check if existing plan was passed
 	if tfArgs["plan-file"] != "" {
 		workingPlan = tfArgs["plan-file"].(string)
-
-		if !silent {
-			comdb.PushComDBEvent(comdb.ComDBEvent{
-				Receiver:  "UI",
-				Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
-				Command:   "plan",
-				Type:      "begin",
-				Path:      auxiliary.StateInstance.WorkingPath,
-				Received:  false,
-			})
-		}
-
 		ux.PrintFormatted("  -", []string{"blue", "bold"})
 		fmt.Println(" Using Existing Execution Plan Binary File")
 	} else if tfArgs["plan-file-json"] != "" {
 		workingPlanIsJson = true
 		workingPlan = tfArgs["plan-file-json"].(string)
-
-		if !silent {
-			comdb.PushComDBEvent(comdb.ComDBEvent{
-				Receiver:  "UI",
-				Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
-				Command:   "plan",
-				Type:      "begin",
-				Path:      auxiliary.StateInstance.WorkingPath,
-				Received:  false,
-			})
-		}
-
 		ux.PrintFormatted("  -", []string{"blue", "bold"})
 		fmt.Println(" Using Existing Execution Plan JSON File")
 	} else {
@@ -94,17 +70,6 @@ func RunPlan(command string, tfArgs map[string]interface{}, costArgs map[string]
 		}
 
 		planSpinner.Start()
-		// Emit plan begin update to UI
-		if !silent {
-			comdb.PushComDBEvent(comdb.ComDBEvent{
-				Receiver:  "UI",
-				Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
-				Command:   "plan",
-				Type:      "begin",
-				Path:      auxiliary.StateInstance.WorkingPath,
-				Received:  false,
-			})
-		}
 
 		// Constructing command to execute
 		cmd := exec.Command("terraform", allArgs...)
@@ -121,19 +86,6 @@ func RunPlan(command string, tfArgs map[string]interface{}, costArgs map[string]
 		// Run terraform plan
 		if err := cmd.Run(); err != nil {
 			planSpinner.Fail()
-
-			if !silent {
-				comdb.PushComDBEvent(comdb.ComDBEvent{
-					Receiver:  "UI",
-					Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
-					Command:   "plan",
-					Type:      "failed",
-					Error:     errorSink.String(),
-					Path:      auxiliary.StateInstance.WorkingPath,
-					Received:  false,
-				})
-			}
-
 			fmt.Println(errorSink.String())
 			return errorSink.String(), fmt.Errorf("%v: %w", functionName, err)
 		}
@@ -142,14 +94,18 @@ func RunPlan(command string, tfArgs map[string]interface{}, costArgs map[string]
 	}
 
 	// Create JSON output for graphing
-	_, planArray, providers, planJsonErr := plan.CreatePlanJson(workingPlan, workingPlanIsJson)
+	_, planArray, _, planJsonErr := plan.CreatePlanJson(workingPlan, workingPlanIsJson, localRun)
 	if planJsonErr != nil {
 		return "", fmt.Errorf("creating terraform plan json failed -> %v: %w", functionName, planJsonErr)
 	}
 
 	// Run Infracost
 	if auxiliary.StateInstance.Infracost && costArgs["show-costs"] == true {
-		costSpinner := ux.NewSpinner("Calculating Infrastructure Costs", "Costs Calculated", "Couldn't Calculate Costs", true)
+
+		var costSpinner = ux.NewSpinner("Calculating Infrastructure Costs", "Costs Calculated", "Couldn't Calculate Costs", true)
+		if localRun {
+			costSpinner = ux.NewSpinner("Calculating Infrastructure Costs", "Costs Calculated", "Couldn't Calculate Costs", true)
+		}
 		costSpinner.Start()
 
 		if costErr := cost.CalculateCost(costArgs, planArray); costErr != nil {
@@ -161,29 +117,6 @@ func RunPlan(command string, tfArgs map[string]interface{}, costArgs map[string]
 	} else {
 		ux.PrintFormatted("  -", []string{"blue", "bold"})
 		fmt.Println(" Cost Calculation Skipped")
-	}
-
-	// Emit plan end update to UI
-	if !silent {
-		comdb.PushComDBEvent(comdb.ComDBEvent{
-			Receiver:  "UI",
-			Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
-			Command:   "plan",
-			Type:      "end",
-			Path:      auxiliary.StateInstance.WorkingPath,
-			Received:  false,
-			Providers: providers,
-		})
-
-		// Emit confirm event
-		comdb.PushComDBEvent(comdb.ComDBEvent{
-			Receiver:  "UI",
-			Timestamp: time.Now().UnixNano() / int64(time.Millisecond),
-			Command:   command,
-			Type:      "confirm",
-			Path:      auxiliary.StateInstance.WorkingPath,
-			Received:  false,
-		})
 	}
 
 	return workingPlan, nil

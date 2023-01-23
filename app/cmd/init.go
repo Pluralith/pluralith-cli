@@ -37,7 +37,7 @@ var initCmd = &cobra.Command{
 
 		noInputs, _ := cmd.Flags().GetBool("no-inputs")
 
-		_, _, initErr := initialization.RunInit(noInputs, initData)
+		_, _, initErr := initialization.RunInit(noInputs, initData, false)
 		if initErr != nil {
 			fmt.Println(fmt.Errorf("pluralith init failed -> %w", initErr))
 		}
