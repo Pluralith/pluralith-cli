@@ -15,8 +15,6 @@ func GraphModule(silentCheck bool) {
 	url := auxiliary.StateInstance.PluralithConfig.PluralithAPIEndpoint + "/v1/dist/download/cli/graphing"
 	params := map[string]string{"os": runtime.GOOS, "arch": runtime.GOARCH}
 
-	fmt.Println(url)
-
 	// Generate install path
 	installPath := filepath.Join(auxiliary.StateInstance.BinPath, "pluralith-cli-graphing")
 	if runtime.GOOS == "windows" {

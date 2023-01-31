@@ -68,8 +68,6 @@ func (S *State) GetConfig() error {
 		config.PluralithAPIEndpoint = "https://api.pluralith.com"
 	}
 
-	fmt.Println("api endpoint: ", config.PluralithAPIEndpoint)
-
 	// Set config for global access
 	S.PluralithConfig = config
 

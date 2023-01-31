@@ -36,6 +36,7 @@ func GenerateDiagram(exportArgs map[string]interface{}, costArgs map[string]inte
 
 	commandArgs := []string{
 		"graph",
+		"--api-endpoint", auxiliary.StateInstance.PluralithConfig.PluralithAPIEndpoint,
 		"--api-key", auxiliary.StateInstance.APIKey,
 		"--title", exportArgs["title"].(string),
 		"--branch", exportArgs["branch"].(string),

@@ -19,8 +19,7 @@ func LogLocalRun(runCache map[string]interface{}) error {
 	}
 
 	request, _ := http.NewRequest("POST", auxiliary.StateInstance.PluralithConfig.PluralithAPIEndpoint+"/v1/run/log", bytes.NewBuffer(runCacheBytes))
-	// request.Header.Add("Authorization", "Bearer "+auxiliary.StateInstance.APIKey)
-	request.Header.Add("Authorization", "Bearer 907926d7e50821952e69b69751d8ab02")
+	request.Header.Add("Authorization", "Bearer "+auxiliary.StateInstance.APIKey)
 	request.Header.Add("Content-Type", "application/json")
 
 	client := &http.Client{}
