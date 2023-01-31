@@ -1,10 +1,11 @@
 package initialization
 
 type InitData struct {
-	OrgId       string
-	ProjectId   string
-	ProjectName string
-	APIKey      string
+	OrgId                string
+	ProjectId            string
+	ProjectName          string
+	APIKey               string
+	PluralithAPIEndpoint string
 }
 
 type OrgResponse struct {

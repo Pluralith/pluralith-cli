@@ -18,9 +18,9 @@ func LogLocalRun(runCache map[string]interface{}) error {
 		return fmt.Errorf("creating run cache string failed -> %v: %w", functionName, marshalErr)
 	}
 
-	request, _ := http.NewRequest("POST", "https://api.pluralith.com/v1/run/log", bytes.NewBuffer(runCacheBytes))
-	// request, _ := http.NewRequest("POST", "http://localhost:8080/v1/run/log", bytes.NewBuffer(runCacheBytes))
-	request.Header.Add("Authorization", "Bearer "+auxiliary.StateInstance.APIKey)
+	request, _ := http.NewRequest("POST", auxiliary.StateInstance.PluralithConfig.PluralithAPIEndpoint+"/v1/run/log", bytes.NewBuffer(runCacheBytes))
+	// request.Header.Add("Authorization", "Bearer "+auxiliary.StateInstance.APIKey)
+	request.Header.Add("Authorization", "Bearer 907926d7e50821952e69b69751d8ab02")
 	request.Header.Add("Content-Type", "application/json")
 
 	client := &http.Client{}

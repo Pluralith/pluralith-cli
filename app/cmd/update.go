@@ -33,7 +33,7 @@ var updateCmd = &cobra.Command{
 		fmt.Print("Current Version: ")
 		ux.PrintFormatted(auxiliary.StateInstance.CLIVersion+"\n\n", []string{"bold", "blue"})
 
-		url := "https://api.pluralith.com/v1/dist/download/cli"
+		url := auxiliary.StateInstance.PluralithConfig.PluralithAPIEndpoint + "/v1/dist/download/cli"
 		params := map[string]string{"os": runtime.GOOS, "arch": runtime.GOARCH}
 
 		updateUrl, shouldUpdate, checkErr := install.GetGitHubRelease(url, params, auxiliary.StateInstance.CLIVersion, false)

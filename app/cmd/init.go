@@ -50,6 +50,7 @@ func init() {
 	initCmd.PersistentFlags().String("org-id", "", "Your Org Id (Can be found in your Pluralith dashboard). Pass via flag to skip user prompt and override pluralith.yml")
 	initCmd.PersistentFlags().String("project-id", "", "Your Project Id (If no project with passed Id exists, one gets created). Pass via flag to skip user prompt and override pluralith.yml")
 	initCmd.PersistentFlags().String("project-name", "", "Your Project name. Pass via flag to skip user prompt and override pluralith.yml")
+	initCmd.PersistentFlags().String("pluralith-endpoint", "", "The endpoint for your self-hosted Pluralith setup. Pass via flag to skip user prompt and override pluralith.yml")
 	initCmd.PersistentFlags().Bool("empty", false, "Creates an empty pluralith.yml config file in the current directory")
 	initCmd.PersistentFlags().Bool("no-inputs", false, "Run init assuming all necessary parameters are present (for CI)")
 }

@@ -22,7 +22,7 @@ func VerifyOrg(orgId string) (bool, error) {
 	}
 
 	// Construct key verification request
-	request, _ := http.NewRequest("GET", "https://api.pluralith.com/v1/org/get", nil)
+	request, _ := http.NewRequest("GET", auxiliary.StateInstance.PluralithConfig.PluralithAPIEndpoint+"/v1/org/get", nil)
 	request.Header.Add("Authorization", "Bearer "+auxiliary.StateInstance.APIKey)
 
 	// Add project id query string

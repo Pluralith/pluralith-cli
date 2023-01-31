@@ -14,6 +14,7 @@ var ConfigTemplate = `
 org_id: $PLR_ORG_ID
 project_id: $PLR_PROJECT_ID
 project_name: $PLR_PROJECT_NAME
+pluralith_api_endpoint: $PLR_API_ENDPOINT
 
 # config:
 #   title: null
@@ -44,6 +45,7 @@ var EmtpyConfig = `
 
 # org_id: null
 # project_id: null
+# pluralith_api_endpoint: null
 
 # config:
 #   title: null

@@ -17,6 +17,7 @@ func WriteConfig(initData InitData) error {
 	configString = strings.ReplaceAll(configString, "$PLR_ORG_ID", initData.OrgId)
 	configString = strings.ReplaceAll(configString, "$PLR_PROJECT_ID", initData.ProjectId)
 	configString = strings.ReplaceAll(configString, "$PLR_PROJECT_NAME", initData.ProjectName)
+	configString = strings.ReplaceAll(configString, "$PLR_API_ENDPOINT", initData.PluralithAPIEndpoint)
 
 	helperWriteErr := os.WriteFile(configPath, []byte(configString), 0700)
 	if helperWriteErr != nil {

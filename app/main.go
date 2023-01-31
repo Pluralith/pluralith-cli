@@ -28,9 +28,6 @@ func initApp() {
 		fmt.Println(fmt.Errorf("setting API key failed -> %v: %w", functionName, setAPIKeyErr))
 	}
 
-	// Check for and install potential graph module update
-	components.GraphModule(true)
-
 	auxiliary.StateInstance.CheckCI()
 	auxiliary.StateInstance.GetBranch()
 	auxiliary.StateInstance.CheckInfracost()
@@ -40,6 +37,9 @@ func initApp() {
 	}
 
 	auxiliary.StateInstance.GetEnvVars()
+
+	// Check for and install potential graph module update
+	components.GraphModule(true)
 }
 
 func main() {

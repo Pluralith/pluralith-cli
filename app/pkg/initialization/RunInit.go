@@ -25,6 +25,9 @@ func CompileInitData(initData InitData) InitData {
 	if initData.ProjectName == "" {
 		initData.ProjectName = auxiliary.StateInstance.PluralithConfig.ProjectName
 	}
+	if initData.PluralithAPIEndpoint == "" {
+		initData.PluralithAPIEndpoint = auxiliary.StateInstance.PluralithConfig.PluralithAPIEndpoint
+	}
 
 	return initData
 }
@@ -40,7 +43,7 @@ func RunInit(noInputs bool, initData InitData, localRun bool) (bool, InitData, e
 	ux.PrintFormatted(" Authentication\n", []string{"white", "bold"})
 	if initData.APIKey == "" && (localRun || !noInputs) {
 		ux.PrintFormatted("  ⠿", []string{"blue", "bold"})
-		fmt.Print(" Enter API Key (You can find it in the Dashboard user settings https://app.pluralith.com/#/user/settings): ")
+		fmt.Print(" Enter API Key (Find it here: https://app.pluralith.com/#/user/settings): ")
 		fmt.Scanln(&initData.APIKey) // Capture user input
 	}
 

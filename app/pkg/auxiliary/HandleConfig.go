@@ -9,11 +9,12 @@ import (
 )
 
 type PluralithConfig struct {
-	OrgId       string `yaml:"org_id"`
-	ProjectId   string `yaml:"project_id"`
-	ProjectName string `yaml:"project_name"`
-	RunId       string
-	Config      struct {
+	OrgId                string `yaml:"org_id"`
+	ProjectId            string `yaml:"project_id"`
+	ProjectName          string `yaml:"project_name"`
+	RunId                string
+	PluralithAPIEndpoint string `yaml:"pluralith_api_endpoint"`
+	Config               struct {
 		Title          string   `yaml:"title"`
 		Version        string   `yaml:"version"`
 		SyncToBackend  bool     `yaml:"sync_to_backend"`
@@ -61,6 +62,13 @@ func (S *State) GetConfig() error {
 			return fmt.Errorf("failed to parse config -> %v: %w", functionName, yamlErr)
 		}
 	}
+
+	// Check if custom endpoints given
+	if config.PluralithAPIEndpoint == "" {
+		config.PluralithAPIEndpoint = "https://api.pluralith.com"
+	}
+
+	fmt.Println("api endpoint: ", config.PluralithAPIEndpoint)
 
 	// Set config for global access
 	S.PluralithConfig = config
