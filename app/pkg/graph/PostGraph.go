@@ -12,7 +12,8 @@ import (
 func PostGraph(runType string, exportArgs map[string]interface{}) error {
 	functionName := "PostGraph"
 
-	runSpinner := ux.NewSpinner("Posting Diagram", "Diagram Posted To Pluralith Dashboard", "Posting Diagram To Pluralith Dashboard Failed", true)
+	fmt.Println()
+	runSpinner := ux.NewSpinner("Posting Diagram", "Diagram Posted", "Posting Diagram Failed", true)
 	runSpinner.Start()
 
 	// Read cache from disk
@@ -51,7 +52,7 @@ func PostGraph(runType string, exportArgs map[string]interface{}) error {
 	}
 
 	runSpinner.Success()
-	ux.PrintFormatted("\n"+"  → ", []string{"blue"})
+	ux.PrintFormatted("  → ", []string{"blue"})
 	fmt.Print("Diagram Pushed To: ")
 	ux.PrintFormatted(runCache["urls"].(map[string]interface{})["pluralithURL"].(string)+"\n", []string{"blue"})
 

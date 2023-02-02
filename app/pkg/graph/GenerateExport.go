@@ -17,6 +17,7 @@ func GenerateExport(exportArgs map[string]interface{}, costArgs map[string]inter
 
 	graphModulePath := filepath.Join(auxiliary.StateInstance.BinPath, "pluralith-cli-graphing")
 
+	fmt.Println()
 	var exportSpinner = ux.NewSpinner("Generating Export", "Export Generated", "Export Generation Failed", true)
 	exportSpinner.Start()
 
