@@ -9,7 +9,7 @@ import (
 	"pluralith/pkg/auxiliary"
 )
 
-func LogLocalRun(runCache map[string]interface{}) error {
+func LogLocalRun(runCache map[string]interface{}, exportArgs map[string]interface{}) error {
 	functionName := "LogLocalRun"
 
 	// Stringify run cache
@@ -45,7 +45,10 @@ func LogLocalRun(runCache map[string]interface{}) error {
 		return fmt.Errorf("request failed -> %v: %v", functionName, bodyObject)
 	}
 
-	runCache["urls"] = bodyObject["data"]
+	runCache["urls"] = bodyObject["data"].(map[string]interface{})["urls"]
+	exportArgs["run-id"] = bodyObject["data"].(map[string]interface{})["runId"].(string)
+	// For local runs: Also pass org id
+	exportArgs["org-id"] = bodyObject["data"].(map[string]interface{})["orgId"].(string)
 
 	return nil
 }

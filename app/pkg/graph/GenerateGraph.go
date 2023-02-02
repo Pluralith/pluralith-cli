@@ -35,7 +35,7 @@ func GenerateGraph(command string, tfArgs map[string]interface{}, costArgs map[s
 	exportArgs["cost-json-path"] = costJsonPath
 
 	// Generate diagram through graphing module
-	if diagramErr := GenerateDiagram(exportArgs, costArgs, localRun); diagramErr != nil {
+	if diagramErr := CreateDiagram(exportArgs, costArgs, localRun); diagramErr != nil {
 		return fmt.Errorf("generating diagram failed -> %v: %w", functionName, diagramErr)
 	}
 

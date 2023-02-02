@@ -36,12 +36,22 @@ var RunApplyCmd = &cobra.Command{
 		}
 
 		// - - Post Graph - -
-		if ciError := ci.PostGraph("apply", exportArgs); ciError != nil {
-			fmt.Println(ciError)
+		if postError := ci.PostGraph("apply", exportArgs); postError != nil {
+			fmt.Println(postError)
 			return
 		}
 
-		// - - Push Diagram to State Backend - -
+		fmt.Println("run id:", exportArgs["run-id"])
+
+		// - - Generate Export - -
+		if exportArgs["local-only"] == true || exportArgs["export-pdf"] == true {
+			if exportError := graph.GenerateExport(exportArgs, costArgs); exportError != nil {
+				fmt.Println(exportError)
+				return
+			}
+		}
+
+		// - - Push Export to State Backend - -
 		if exportArgs["sync-to-backend"] == true || auxiliary.StateInstance.PluralithConfig.Config.SyncToBackend {
 			if pushErr := backends.SyncToBackend(); pushErr != nil {
 				fmt.Println(pushErr)

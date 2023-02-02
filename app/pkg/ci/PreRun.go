@@ -2,7 +2,6 @@ package ci
 
 import (
 	"fmt"
-	"math/rand"
 	"pluralith/pkg/auxiliary"
 	"pluralith/pkg/cost"
 	"pluralith/pkg/graph"
@@ -32,13 +31,12 @@ func PreRun(flags *pflag.FlagSet) (bool, map[string]interface{}, map[string]inte
 	}
 
 	exportArgs := graph.ConstructExportArgs(flags)
-	exportArgs["runId"] = fmt.Sprintf("%07d", rand.Intn(10000000)) // Generate random run id
-	costArgs["show-costs"] = true                                  // Always run infracost in CI if infracost is installed
+	costArgs["show-costs"] = true // Always run infracost in CI if infracost is installed
 
 	// Set defaults for export
 	if exportArgs["title"] == "" {
-		exportArgs["title"] = "Infrastructure Diagram"     //+ exportArgs["runId"].(string)
-		exportArgs["file-name"] = "Infrastructure_Diagram" //+ exportArgs["runId"].(string)
+		exportArgs["title"] = "Infrastructure Diagram"
+		exportArgs["file-name"] = "Infrastructure_Diagram"
 	}
 
 	initValid, initData, initErr := initialization.RunInit(true, initialization.InitData{}, false)
@@ -49,9 +47,9 @@ func PreRun(flags *pflag.FlagSet) (bool, map[string]interface{}, map[string]inte
 		return false, nil, nil, nil, nil
 	}
 
-	exportArgs["orgId"] = initData.OrgId
-	exportArgs["projectId"] = initData.ProjectId
-	exportArgs["projectName"] = initData.ProjectName
+	exportArgs["org-id"] = initData.OrgId
+	exportArgs["project-id"] = initData.ProjectId
+	exportArgs["project-name"] = initData.ProjectName
 
 	return true, tfArgs, costArgs, exportArgs, nil
 }

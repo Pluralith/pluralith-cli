@@ -30,8 +30,8 @@ func PostGraph(runType string, exportArgs map[string]interface{}) error {
 	}
 
 	// Populate run cache data with additional attributes
-	runCache["id"] = exportArgs["runId"]
-	runCache["projectId"] = exportArgs["projectId"]
+	runCache["id"] = exportArgs["run-id"]
+	runCache["projectId"] = exportArgs["project-id"]
 	runCache["type"] = "plan"
 	runCache["version"] = ""
 	runCache["branch"] = "local"
@@ -44,7 +44,7 @@ func PostGraph(runType string, exportArgs map[string]interface{}) error {
 
 	runCache["config"] = config
 
-	logErr := LogLocalRun(runCache)
+	logErr := LogLocalRun(runCache, exportArgs)
 	if logErr != nil {
 		runSpinner.Fail()
 		return fmt.Errorf("posting diagram to pluralith Dashboard failed -> %v: %w", functionName, logErr)

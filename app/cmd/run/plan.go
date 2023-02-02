@@ -41,7 +41,15 @@ var RunPlanCmd = &cobra.Command{
 			return
 		}
 
-		// - - Push Diagram to State Backend - -
+		// - - Generate Export - -
+		if exportArgs["local-only"] == true || exportArgs["export-pdf"] == true {
+			if exportError := graph.GenerateExport(exportArgs, costArgs); exportError != nil {
+				fmt.Println(exportError)
+				return
+			}
+		}
+
+		// - - Push Export to State Backend - -
 		if exportArgs["sync-to-backend"] == true || auxiliary.StateInstance.PluralithConfig.Config.SyncToBackend {
 			if pushErr := backends.SyncToBackend(); pushErr != nil {
 				fmt.Println(pushErr)

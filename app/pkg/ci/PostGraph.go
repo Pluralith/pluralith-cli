@@ -39,9 +39,8 @@ func PostGraph(runType string, exportArgs map[string]interface{}) error {
 	}
 
 	// Populate run cache data with additional attributes
-	runCache["id"] = exportArgs["runId"]
-	runCache["projectId"] = auxiliary.StateInstance.PluralithConfig.ProjectId
-	runCache["orgId"] = auxiliary.StateInstance.PluralithConfig.OrgId
+	runCache["projectId"] = exportArgs["project-id"]
+	runCache["orgId"] = exportArgs["org-id"]
 	runCache["branch"] = exportArgs["branch"]
 	runCache["type"] = runType
 	runCache["version"] = auxiliary.StateInstance.PluralithConfig.Config.Version
@@ -59,7 +58,7 @@ func PostGraph(runType string, exportArgs map[string]interface{}) error {
 
 	runCache["config"] = config
 
-	logErr := LogRun(runCache)
+	logErr := LogRun(runCache, exportArgs)
 	if logErr != nil {
 		runSpinner.Fail()
 		return fmt.Errorf("posting run for PR comment failed -> %v: %w", functionName, logErr)

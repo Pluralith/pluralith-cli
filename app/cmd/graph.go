@@ -33,11 +33,18 @@ var graphCmd = &cobra.Command{
 			return
 		}
 
-		// Post diagram if local-only flag not set
-		if !exportArgs["export-pdf"].(bool) {
-			// - - Post Graph - -
+		// - - Post Graph - -
+		if !exportArgs["local-only"].(bool) {
 			if ciError := graph.PostGraph("plan", exportArgs); ciError != nil {
 				fmt.Println(ciError)
+				return
+			}
+		}
+
+		// - - Generate PDF export
+		if exportArgs["local-only"] == true || exportArgs["export-pdf"] == true {
+			if exportError := graph.GenerateExport(exportArgs, costArgs); exportError != nil {
+				fmt.Println(exportError)
 				return
 			}
 		}
@@ -46,7 +53,6 @@ var graphCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(graphCmd)
-	graphCmd.PersistentFlags().Bool("local-only", false, "Diagram will not be pushed to the Pluralith Dashboard. Instead, a PDF export of the Diagram is generated locally")
 	graphCmd.PersistentFlags().String("title", "Pluralith Diagram", "The title for your diagram, will be displayed in the PDF output")
 	graphCmd.PersistentFlags().String("author", "", "The author/creator of the diagram, will be displayed in the PDF output")
 	graphCmd.PersistentFlags().String("version", "", "The diagram version, will be displayed in the PDF output")
@@ -62,4 +68,6 @@ func init() {
 	graphCmd.PersistentFlags().String("plan-file-json", "", "Path to an execution plan json file. If passed, this will skip a plan run under the hood.")
 	graphCmd.PersistentFlags().StringArray("var-file", []string{}, "Path to a var file to pass to Terraform. Can be specified multiple times.")
 	graphCmd.PersistentFlags().StringArray("var", []string{}, "A variable to pass to Terraform. Can be specified multiple times. (Format: --var='NAME=VALUE')")
+	graphCmd.PersistentFlags().Bool("local-only", false, "Diagram will not be pushed to the Pluralith Dashboard. Instead, a PDF export of the Diagram is generated locally")
+	graphCmd.PersistentFlags().Bool("export-pdf", false, "Determines whether a PDF export of the run Diagram is generated locally")
 }

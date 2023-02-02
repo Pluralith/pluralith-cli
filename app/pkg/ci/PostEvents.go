@@ -137,7 +137,7 @@ func PostEvents(command string, tfArgs map[string]interface{}, costArgs map[stri
 
 			payload["orgId"] = auxiliary.StateInstance.PluralithConfig.OrgId
 			payload["projectId"] = auxiliary.StateInstance.PluralithConfig.ProjectId
-			payload["runId"] = exportArgs["runId"]
+			payload["runId"] = exportArgs["run-id"]
 			payload["event"] = parsedMessage
 
 			// Encode payload
