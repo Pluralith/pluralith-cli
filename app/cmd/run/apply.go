@@ -41,8 +41,6 @@ var RunApplyCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Println("run id:", exportArgs["run-id"])
-
 		// - - Generate Export - -
 		if exportArgs["local-only"] == true || exportArgs["export-pdf"] == true {
 			if exportError := graph.GenerateExport(exportArgs, costArgs); exportError != nil {
