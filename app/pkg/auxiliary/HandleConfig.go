@@ -1,6 +1,7 @@
 package auxiliary
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -13,6 +14,7 @@ type PluralithConfig struct {
 	ProjectId   string `yaml:"project_id"`
 	ProjectName string `yaml:"project_name"`
 	RunId       string
+	Diagram     interface{} `yaml:"diagram"`
 	Config      struct {
 		Title          string   `yaml:"title"`
 		Version        string   `yaml:"version"`
@@ -22,6 +24,32 @@ type PluralithConfig struct {
 		VarFiles       []string `yaml:"var_files"`
 		CostUsageFile  string   `yaml:"cost_usage_file"`
 	} `yaml:"config"`
+}
+
+func ConvertYamlToJson(i interface{}) interface{} {
+	switch x := i.(type) {
+	case map[interface{}]interface{}:
+		m2 := map[string]interface{}{}
+		for k, v := range x {
+			m2[k.(string)] = ConvertYamlToJson(v)
+		}
+		return m2
+	case []interface{}:
+		for i, v := range x {
+			x[i] = ConvertYamlToJson(v)
+		}
+	}
+	return i
+}
+
+func WriteDiagram(initData []byte) error {
+	diagramInputJsonPath := filepath.Join(StateInstance.WorkingPath, ".pluralith", "pluralith.diagram.json")
+	helperWriteErr := os.WriteFile(diagramInputJsonPath, initData, 0700)
+	if helperWriteErr != nil {
+		return fmt.Errorf("failed to create diagram config file -> %w", helperWriteErr)
+	}
+
+	return nil
 }
 
 func (S *State) GetConfig() error {
@@ -60,6 +88,14 @@ func (S *State) GetConfig() error {
 		if yamlErr != nil {
 			return fmt.Errorf("failed to parse config -> %v: %w", functionName, yamlErr)
 		}
+	}
+
+	// Convert Diagram to JSON and write to file
+	config.Diagram = ConvertYamlToJson(config.Diagram)
+	if diagram, yamlErr := json.Marshal(config.Diagram); yamlErr != nil {
+		return fmt.Errorf("failed to parse config -> %v: %w", functionName, yamlErr)
+	} else if writeErr := WriteDiagram(diagram); writeErr != nil {
+		return fmt.Errorf("failed to create diagram config -> %v: %w", functionName, writeErr)
 	}
 
 	// Set config for global access
