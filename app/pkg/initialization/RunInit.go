@@ -86,7 +86,7 @@ func RunInit(noInputs bool, initData InitData, localRun bool) (bool, InitData, e
 
 	projectValid, projectName, projectErr := VerifyProject(initData.OrgId, initData.ProjectId)
 	if projectErr != nil {
-		return false, initData, fmt.Errorf("failed to verify org id -> %v: %w", functionName, projectErr)
+		return false, initData, fmt.Errorf("failed to verify project id -> %v: %w", functionName, projectErr)
 	}
 
 	// Set name in init data if existing project is found
@@ -109,6 +109,7 @@ func RunInit(noInputs bool, initData InitData, localRun bool) (bool, InitData, e
 			} else {
 				ux.PrintFormatted("  ✘", []string{"red", "bold"})
 				fmt.Println(" No Project Name Given → Pass A Name To Create A New Project")
+				return false, initData, fmt.Errorf("no project name given, new project creation requires 'project_name' to be set in pluralith.yml")
 			}
 		}
 

@@ -56,6 +56,10 @@ func GenerateDiagram(exportArgs map[string]interface{}, costArgs map[string]inte
 		"--cost-period", costArgs["cost-period"].(string),
 	}
 
+	if auxiliary.StateInstance.PluralithConfig.Diagram != nil {
+		commandArgs = append(commandArgs, "--config-json-path", filepath.Join(auxiliary.StateInstance.WorkingPath, ".pluralith", "pluralith.diagram.json"))
+	}
+
 	// If a run id is given (only on 'pluralith run') -> pass url components to graph module
 	if exportArgs["runId"] != nil {
 		commandArgs = append(

@@ -18,7 +18,7 @@ func VerifyProject(orgId string, projectId string) (bool, string, error) {
 
 	if projectId == "" {
 		verificationSpinner.Fail("No Project ID given")
-		return false, "", nil
+		return false, "", fmt.Errorf("no project id given")
 	}
 
 	// Construct key verification request
@@ -62,9 +62,9 @@ func VerifyProject(orgId string, projectId string) (bool, string, error) {
 
 	if response.StatusCode == 401 {
 		verificationSpinner.Fail("Not Authorized To Access This Project")
-		return false, "", nil
+		return false, "", fmt.Errorf("not authorized to access this project")
 	}
 
 	verificationSpinner.Fail()
-	return false, "", nil
+	return false, "", fmt.Errorf("project verification failed")
 }
