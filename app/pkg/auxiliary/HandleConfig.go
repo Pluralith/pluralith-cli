@@ -91,11 +91,13 @@ func (S *State) GetConfig() error {
 	}
 
 	// Convert Diagram to JSON and write to file
-	config.Diagram = ConvertYamlToJson(config.Diagram)
-	if diagram, yamlErr := json.Marshal(config.Diagram); yamlErr != nil {
-		return fmt.Errorf("failed to parse config -> %v: %w", functionName, yamlErr)
-	} else if writeErr := WriteDiagram(diagram); writeErr != nil {
-		return fmt.Errorf("failed to create diagram config -> %v: %w", functionName, writeErr)
+	if config.Diagram != nil {
+		config.Diagram = ConvertYamlToJson(config.Diagram)
+		if diagram, yamlErr := json.Marshal(config.Diagram); yamlErr != nil {
+			return fmt.Errorf("failed to parse config -> %v: %w", functionName, yamlErr)
+		} else if writeErr := WriteDiagram(diagram); writeErr != nil {
+			return fmt.Errorf("failed to create diagram config -> %v: %w", functionName, writeErr)
+		}
 	}
 
 	// Set config for global access
