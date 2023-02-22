@@ -18,7 +18,7 @@ func VerifyOrg(orgId string) (bool, error) {
 
 	if orgId == "" {
 		verificationSpinner.Fail("No Org ID given")
-		return false, nil
+		return false, fmt.Errorf("no org id given")
 	}
 
 	// Construct key verification request
@@ -57,7 +57,7 @@ func VerifyOrg(orgId string) (bool, error) {
 	}
 
 	verificationSpinner.Fail()
-	return false, nil
+	return false, fmt.Errorf("no existing Org found -> create one through the Pluralith dashboard")
 }
 
 // func VerifyOrg(orgId string) (map[string]interface{}, error) {

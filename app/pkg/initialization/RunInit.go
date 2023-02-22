@@ -86,7 +86,7 @@ func RunInit(noInputs bool, initData InitData, localRun bool) (bool, InitData, e
 
 	projectValid, projectName, projectErr := VerifyProject(initData.OrgId, initData.ProjectId)
 	if projectErr != nil {
-		return false, initData, fmt.Errorf("failed to verify org id -> %v: %w", functionName, projectErr)
+		return false, initData, fmt.Errorf("failed to verify project id -> %v: %w", functionName, projectErr)
 	}
 
 	// Set name in init data if existing project is found
