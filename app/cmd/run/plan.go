@@ -22,7 +22,7 @@ var RunPlanCmd = &cobra.Command{
 		// - - Prepare for Run - -
 		preValid, tfArgs, costArgs, exportArgs, preErr := ci.PreRun(cmd.Flags())
 		if preErr != nil {
-			fmt.Println("lel", preErr)
+			fmt.Println(preErr)
 			return
 		}
 		if !preValid {

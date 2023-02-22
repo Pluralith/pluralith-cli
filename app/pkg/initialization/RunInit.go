@@ -109,6 +109,7 @@ func RunInit(noInputs bool, initData InitData, localRun bool) (bool, InitData, e
 			} else {
 				ux.PrintFormatted("  ✘", []string{"red", "bold"})
 				fmt.Println(" No Project Name Given → Pass A Name To Create A New Project")
+				return false, initData, fmt.Errorf("no project name given, new project creation requires 'project_name' to be set in pluralith.yml")
 			}
 		}
 

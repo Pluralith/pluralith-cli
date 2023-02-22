@@ -27,8 +27,8 @@ var loginCmd = &cobra.Command{
 
 		// If no API key given via flag -> Prompt user for input
 		if APIKey == "" {
-			ux.PrintFormatted("→", []string{"blue", "bold"})
-			fmt.Print("Enter API Key (You can find it in the Dashboard user settings https://app.pluralith.com/#/user/settings): ")
+			ux.PrintFormatted("→ ", []string{"blue", "bold"})
+			fmt.Print("Enter API Key (Find it here: https://app.pluralith.com/#/user/settings): ")
 
 			// Capture user input
 			fmt.Scanln(&APIKey)
