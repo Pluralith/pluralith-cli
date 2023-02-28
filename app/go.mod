@@ -16,7 +16,7 @@ require (
 	github.com/spf13/cobra v1.3.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.10.0
-	golang.org/x/text v0.4.0
+	golang.org/x/text v0.7.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
@@ -53,10 +53,10 @@ require (
 	github.com/subosito/gotenv v1.2.0 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/crypto v0.0.0-20220511200225-c6db032c6c88 // indirect
-	golang.org/x/net v0.1.0 // indirect
+	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20220909003341-f21342109be1 // indirect
-	golang.org/x/sys v0.1.0 // indirect
-	golang.org/x/term v0.1.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/term v0.5.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f // indirect
 	google.golang.org/api v0.97.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
