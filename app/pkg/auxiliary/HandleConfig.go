@@ -52,7 +52,7 @@ func WriteDiagram(initData []byte) error {
 	return nil
 }
 
-func (S *State) GetConfig() error {
+func (S *State) GetConfig(customConfig string) error {
 	functionName := "GetConfig"
 
 	// Initialize variables
@@ -64,21 +64,34 @@ func (S *State) GetConfig() error {
 	workingConfig := filepath.Join(StateInstance.WorkingPath, "pluralith.yml")
 	defaultConfig := filepath.Join(StateInstance.HomePath, "Pluralith", "pluralith.yml")
 
-	// Get default config first
-	if _, statErr := os.Stat(defaultConfig); !os.IsNotExist(statErr) {
-		// Read config file from Pluralith directory
-		configByte, configErr = os.ReadFile(defaultConfig)
+	// If user specified custom config file -> override working dir config
+	if _, statErr := os.Stat(customConfig); !os.IsNotExist(statErr) {
+		// Read config file from working directory
+		configByte, configErr = os.ReadFile(customConfig)
 		if configErr != nil {
 			return fmt.Errorf("failed to read working directory config -> %v: %w", functionName, configErr)
 		}
 	}
 
 	// If current working dir has config -> override default config
-	if _, statErr := os.Stat(workingConfig); !os.IsNotExist(statErr) {
-		// Read config file from working directory
-		configByte, configErr = os.ReadFile(workingConfig)
-		if configErr != nil {
-			return fmt.Errorf("failed to read working directory config -> %v: %w", functionName, configErr)
+	if len(configByte) > 0 {
+		if _, statErr := os.Stat(workingConfig); !os.IsNotExist(statErr) {
+			// Read config file from working directory
+			configByte, configErr = os.ReadFile(workingConfig)
+			if configErr != nil {
+				return fmt.Errorf("failed to read working directory config -> %v: %w", functionName, configErr)
+			}
+		}
+	}
+
+	// Get default config first
+	if len(configByte) > 0 {
+		if _, statErr := os.Stat(defaultConfig); !os.IsNotExist(statErr) {
+			// Read config file from Pluralith directory
+			configByte, configErr = os.ReadFile(defaultConfig)
+			if configErr != nil {
+				return fmt.Errorf("failed to read working directory config -> %v: %w", functionName, configErr)
+			}
 		}
 	}
 

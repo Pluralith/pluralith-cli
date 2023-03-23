@@ -14,7 +14,7 @@ var planCmd = &cobra.Command{
 	Long:  `Run terraform plan and show changes in Pluralith`,
 	Run: func(cmd *cobra.Command, args []string) {
 		ux.PrintFormatted("✘", []string{"red", "bold"})
-		fmt.Print(" The pluralith plan command is deprecated. Please use the pluralith graph command\n\n")
+		fmt.Print(" The Pluralith plan command is deprecated. Please use the pluralith graph command\n\n")
 	},
 }
 
