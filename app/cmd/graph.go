@@ -47,7 +47,7 @@ var graphCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(graphCmd)
 	graphCmd.PersistentFlags().Bool("local-only", false, "Diagram will not be pushed to the Pluralith Dashboard. Instead, a PDF export of the Diagram is generated locally")
-	graphCmd.PersistentFlags().String("title", "Pluralith Diagram", "The title for your diagram, will be displayed in the PDF output")
+	graphCmd.PersistentFlags().String("title", "", "The title for your diagram, will be displayed in the PDF output")
 	graphCmd.PersistentFlags().String("author", "", "The author/creator of the diagram, will be displayed in the PDF output")
 	graphCmd.PersistentFlags().String("version", "", "The diagram version, will be displayed in the PDF output")
 	graphCmd.PersistentFlags().String("out-dir", "", "The directory the diagram should be exported to")
@@ -62,4 +62,5 @@ func init() {
 	graphCmd.PersistentFlags().String("plan-file-json", "", "Path to an execution plan json file. If passed, this will skip a plan run under the hood.")
 	graphCmd.PersistentFlags().StringArray("var-file", []string{}, "Path to a var file to pass to Terraform. Can be specified multiple times.")
 	graphCmd.PersistentFlags().StringArray("var", []string{}, "A variable to pass to Terraform. Can be specified multiple times. (Format: --var='NAME=VALUE')")
+	graphCmd.PersistentFlags().String("config-file", "", "Path to a specific Pluralith yaml config")
 }

@@ -16,7 +16,7 @@ func initApp() {
 	functionName := "initApp"
 
 	dblock.LockInstance.GenerateLock()
-	auxiliary.StateInstance.CLIVersion = "0.2.1"
+	auxiliary.StateInstance.CLIVersion = "0.2.2"
 
 	if pathGenErr := auxiliary.StateInstance.GeneratePaths(); pathGenErr != nil {
 		fmt.Println(fmt.Errorf("generating application paths failed -> %v: %w", functionName, pathGenErr))
@@ -34,10 +34,6 @@ func initApp() {
 	auxiliary.StateInstance.CheckCI()
 	auxiliary.StateInstance.GetBranch()
 	auxiliary.StateInstance.CheckInfracost()
-
-	if getConfigErr := auxiliary.StateInstance.GetConfig(); getConfigErr != nil {
-		fmt.Println(fmt.Errorf("fetching pluralith config failed -> %v: %w", functionName, getConfigErr))
-	}
 
 	auxiliary.StateInstance.GetEnvVars()
 }

@@ -48,4 +48,5 @@ func init() {
 	runCmd.PersistentFlags().String("plan-file", "", "Path to an execution plan binary file. If passed, this will skip a plan run under the hood.")
 	runCmd.PersistentFlags().String("plan-file-json", "", "Path to an execution plan json file. If passed, this will skip a plan run under the hood.")
 	runCmd.PersistentFlags().String("cost-usage-file", "", "Path to an infracost usage file to be used for the cost breakdown")
+	runCmd.PersistentFlags().String("config-file", "", "Path to a specific Pluralith yaml config")
 }

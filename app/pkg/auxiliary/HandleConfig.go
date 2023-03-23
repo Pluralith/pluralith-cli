@@ -74,7 +74,7 @@ func (S *State) GetConfig(customConfig string) error {
 	}
 
 	// If current working dir has config -> override default config
-	if len(configByte) > 0 {
+	if len(configByte) == 0 {
 		if _, statErr := os.Stat(workingConfig); !os.IsNotExist(statErr) {
 			// Read config file from working directory
 			configByte, configErr = os.ReadFile(workingConfig)
@@ -85,7 +85,7 @@ func (S *State) GetConfig(customConfig string) error {
 	}
 
 	// Get default config first
-	if len(configByte) > 0 {
+	if len(configByte) == 0 {
 		if _, statErr := os.Stat(defaultConfig); !os.IsNotExist(statErr) {
 			// Read config file from Pluralith directory
 			configByte, configErr = os.ReadFile(defaultConfig)
