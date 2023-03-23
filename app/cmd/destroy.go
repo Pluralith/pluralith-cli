@@ -14,7 +14,7 @@ var destroyCmd = &cobra.Command{
 	Long:  `Run terraform destroy and show changes in Pluralith`,
 	Run: func(cmd *cobra.Command, args []string) {
 		ux.PrintFormatted("✘", []string{"red", "bold"})
-		fmt.Print(" The pluralith destroy command is deprecated. Please use the pluralith graph command\n\n")
+		fmt.Print(" The Pluralith destroy command is deprecated. Please use the pluralith graph command\n\n")
 	},
 }
 

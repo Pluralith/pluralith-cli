@@ -1,12 +1,15 @@
 package graph
 
 import (
+	"fmt"
 	"pluralith/pkg/auxiliary"
 
 	"github.com/spf13/pflag"
 )
 
 func ConstructExportArgs(flags *pflag.FlagSet) map[string]interface{} {
+	functionName := "ConstructExportArgs"
+
 	flagMap := make(map[string]interface{})
 
 	flagMap["local-only"], _ = flags.GetBool("local-only")
@@ -22,6 +25,12 @@ func ConstructExportArgs(flags *pflag.FlagSet) map[string]interface{} {
 	flagMap["sync-to-backend"], _ = flags.GetBool("sync-to-backend")
 	flagMap["post-apply"], _ = flags.GetBool("post-apply")
 	flagMap["branch"] = auxiliary.StateInstance.Branch
+
+	// Load custom config file if specified by user
+	customConfigPath, _ := flags.GetString("config-file")
+	if getConfigErr := auxiliary.StateInstance.GetConfig(customConfigPath); getConfigErr != nil {
+		fmt.Println(fmt.Errorf("fetching pluralith config failed -> %v: %w", functionName, getConfigErr))
+	}
 
 	// Get title from config if not passed as flag
 	if flagMap["title"] == "" {
