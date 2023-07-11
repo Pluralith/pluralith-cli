@@ -33,6 +33,13 @@ func GetGitHubRelease(url string, params map[string]string, currentVersionString
 	client := &http.Client{}
 	response, responseErr := client.Do(request)
 
+	if(responseErr != nil){
+		if !silent {
+			checkSpinner.Fail("Request failed")
+		}
+		return "", false, fmt.Errorf("Request failed -> %v: %w", functionName, responseErr)
+	}
+
 	// Parse request body
 	var bodyObject map[string]interface{}
 	bodyBytes, _ := io.ReadAll(response.Body)
