@@ -34,6 +34,10 @@ func PreGraph(flags *pflag.FlagSet) (bool, map[string]interface{}, map[string]in
 	// Set defaults for export
 	if exportArgs["title"] == "" {
 		exportArgs["title"] = "Pluralith Diagram"     //+ exportArgs["runId"].(string)
+	}
+
+	// Set defaults file-name for export
+	if exportArgs["file-name"] == "" {
 		exportArgs["file-name"] = "Pluralith_Diagram" //+ exportArgs["runId"].(string)
 	}
 
